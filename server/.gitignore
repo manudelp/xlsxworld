@@ -1,0 +1,18 @@
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# FastAPI related ignored files
+.env
+*.env
+*.db
+instance/
+*.sqlite3
+
+# VSCode settings (optional)
+.vscode/
+
+# OS generated files
+.DS_Store
+Thumbs.db
