@@ -8,6 +8,7 @@ export interface ToolItem {
   category: string;
   slug: string; // unique route segment
   commingSoon?: boolean;
+  isNew?: boolean;
 }
 
 // Broad coverage of common XLSX-related actions
@@ -22,6 +23,7 @@ export const toolItems: ToolItem[] = [
       "Instantly preview every sheet, headers, and sample rows without opening Excel.",
     icon: "👀",
     category: "Inspect",
+    isNew: true,
   },
 
   // Merge / Split

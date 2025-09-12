@@ -119,7 +119,18 @@ export default function InspectSheets() {
 
   return (
     <div className="space-y-8">
-      <div>
+      <div
+        onDragOver={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+        onDrop={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const file = e.dataTransfer.files?.[0];
+          if (file) onFile(file);
+        }}
+      >
         <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition">
           <input
             type="file"
