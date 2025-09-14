@@ -21,7 +21,7 @@ export default function Tools() {
   );
 
   return (
-    <div className="flex flex-col items-center relative px-[48px] pb-[96px] mx-auto flex-wrap min-h-[200px]">
+    <div className="flex flex-col items-center relative px-4 sm:px-[48px] pb-[96px] mx-auto flex-wrap min-h-[200px]">
       <ToolsFilter
         categories={categories}
         selected={selectedCategory}
