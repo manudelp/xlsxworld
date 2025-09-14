@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.7
 # --- Builder ---
-FROM node:20-alpine AS deps
+FROM node:ltm-alpine AS deps
 WORKDIR /app
 COPY package.json ./
 COPY package-lock.json* ./
@@ -11,7 +11,7 @@ RUN if [ -f package-lock.json ]; then npm ci; \
     elif [ -f pnpm-lock.yaml ]; then corepack enable && pnpm install --frozen-lockfile; \
     else npm install; fi
 
-FROM node:20-alpine AS builder
+FROM node:ltm-alpine AS builder
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 COPY --from=deps /app/node_modules ./node_modules
@@ -20,7 +20,7 @@ COPY . .
 RUN npm run build
 
 # --- Runtime ---
-FROM node:20-alpine AS runner
+FROM node:ltm-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
