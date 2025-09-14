@@ -1,0 +1,13 @@
+**/.git
+**/.gitignore
+**/.DS_Store
+**/node_modules
+**/dist
+**/build
+**/.next/cache
+**/.venv
+**/__pycache__
+**/*.py[cod]
+**/*.log
+client/.next
+client/.turbo
