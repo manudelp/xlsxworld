@@ -1,121 +1,71 @@
 "use client";
-import React, { useCallback, useState } from "react";
-
-interface ParsedSheet {
-  name: string;
-  rows: (string | number | boolean | null)[][];
-}
-
-interface XLSXModuleLike {
-  read(
-    data: ArrayBuffer,
-    opts: { type: string }
-  ): { SheetNames: string[]; Sheets: Record<string, unknown> };
-  utils: {
-    sheet_to_json(
-      sheet: unknown,
-      opts: { header: number; raw: boolean }
-    ): unknown[];
-  };
-}
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  uploadForPreview,
+  fetchSheetPage,
+  exportCsvUrl,
+  exportJsonUrl,
+  WorkbookPreview,
+  SheetPage,
+} from "@/lib/tools/inspect";
 
 export default function InspectSheets() {
-  const [sheets, setSheets] = useState<ParsedSheet[]>([]);
+  const [preview, setPreview] = useState<WorkbookPreview | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [activeSheet, setActiveSheet] = useState(0);
-  const [limit, setLimit] = useState<number>(25); // -1 means all
-  const limitOptions = [25, 50, 100, -1];
+  const [activeSheetIdx, setActiveSheetIdx] = useState(0);
+  const [page, setPage] = useState<SheetPage | null>(null);
+  const [pageLoading, setPageLoading] = useState(false);
+  const [limit, setLimit] = useState(100);
+  const [offset, setOffset] = useState(0);
+  const limitOptions = [25, 50, 100, 250, 500];
+
+  const currentSheetName = preview?.sheets[activeSheetIdx]?.name;
+  const token = preview?.token;
+
+  const loadPage = useCallback(
+    async (tok: string, sheet: string, newOffset: number, newLimit: number) => {
+      setPageLoading(true);
+      try {
+        const p = await fetchSheetPage(tok, sheet, newOffset, newLimit);
+        setPage(p);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Failed to fetch page");
+      } finally {
+        setPageLoading(false);
+      }
+    },
+    []
+  );
+
+  useEffect(() => {
+    if (token && currentSheetName) {
+      loadPage(token, currentSheetName, offset, limit);
+    }
+  }, [token, currentSheetName, offset, limit, loadPage]);
 
   const onFile = useCallback(async (file: File) => {
     setError(null);
-    setSheets([]);
+    setPreview(null);
+    setPage(null);
     setLoading(true);
+    setOffset(0);
     try {
-      // Dynamic import with simple ESM/CJS interop handling.
-      const imported = (await import("xlsx")) as unknown;
-      function isWrapped(m: unknown): m is { default: XLSXModuleLike } {
-        if (typeof m !== "object" || m === null) return false;
-        return Object.prototype.hasOwnProperty.call(m, "default");
-      }
-      const XLSX: XLSXModuleLike = isWrapped(imported)
-        ? imported.default
-        : (imported as XLSXModuleLike);
-      const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data, { type: "array" });
-      const parsed: ParsedSheet[] = workbook.SheetNames.map((name: string) => {
-        const sheet = workbook.Sheets[name];
-        const json = XLSX.utils.sheet_to_json(sheet, {
-          header: 1,
-          raw: true,
-        }) as (string | number | boolean | null)[][];
-        return { name, rows: json };
-      });
-      setSheets(parsed);
-      setActiveSheet(0);
+      const p = await uploadForPreview(file, 25);
+      setPreview(p);
+      setActiveSheetIdx(0);
     } catch (e) {
-      const message = e instanceof Error ? e.message : "Failed to parse file";
-      setError(message);
+      setError(e instanceof Error ? e.message : "Upload failed");
     } finally {
       setLoading(false);
     }
   }, []);
 
-  const currentSheet = sheets[activeSheet];
-
-  function visibleRows(): (string | number | boolean | null)[][] {
-    if (!currentSheet) return [];
-    if (limit === -1) return currentSheet.rows;
-    return currentSheet.rows.slice(0, limit);
-  }
-
-  function headerRow(): (string | number | boolean | null)[] | undefined {
-    return currentSheet?.rows[0];
-  }
-
-  function dataRows(): (string | number | boolean | null)[][] {
-    const all = visibleRows();
-    if (all.length <= 1) return [];
-    return all.slice(1);
-  }
-
-  function exportJSON() {
-    if (!currentSheet) return;
-    const blob = new Blob([JSON.stringify(currentSheet.rows, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${currentSheet.name}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-
-  function exportCSV() {
-    if (!currentSheet) return;
-    const csv = currentSheet.rows
-      .map((row) =>
-        row
-          .map((cell) => {
-            if (cell === null || cell === undefined) return "";
-            const s = String(cell);
-            if (/[",\n]/.test(s)) {
-              return '"' + s.replace(/"/g, '""') + '"';
-            }
-            return s;
-          })
-          .join(",")
-      )
-      .join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${currentSheet.name}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
+  const headerRow = page?.header ?? [];
+  const dataRows = page?.rows ?? [];
+  const totalRows = page?.total_rows ?? 0;
+  const showingFrom = Math.min(offset + 1, totalRows || 0);
+  const showingTo = Math.min(offset + dataRows.length, totalRows || 0);
 
   return (
     <div className="space-y-8">
@@ -128,13 +78,13 @@ export default function InspectSheets() {
           e.preventDefault();
           e.stopPropagation();
           const file = e.dataTransfer.files?.[0];
-          if (file) onFile(file);
+            if (file) onFile(file);
         }}
       >
         <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition">
           <input
             type="file"
-            accept=".xls,.xlsx,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
+            accept=".xls,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
             className="hidden"
             onChange={(e) => {
               const file = e.target.files?.[0];
@@ -147,97 +97,117 @@ export default function InspectSheets() {
         </label>
       </div>
       {loading && (
-        <div className="text-sm text-gray-500">Parsing workbook...</div>
+        <div className="text-sm text-gray-500">Uploading & parsing workbook...</div>
       )}
       {error && <div className="text-sm text-red-600">{error}</div>}
-      {sheets.length > 0 && currentSheet && (
+      {preview && (
         <div className="space-y-6">
-          {/* Sheet Tabs */}
           <div className="flex flex-wrap gap-2">
-            {sheets.map((s, i) => (
+            {preview.sheets.map((s, i) => (
               <button
                 key={s.name + i}
-                onClick={() => setActiveSheet(i)}
+                onClick={() => {
+                  setActiveSheetIdx(i);
+                  setOffset(0);
+                }}
                 className={`px-3 py-1 rounded-full text-sm border transition shadow-sm ${
-                  i === activeSheet
+                  i === activeSheetIdx
                     ? "bg-[#292931] text-white border-[#292931]"
                     : "bg-white border-gray-300 hover:border-[#292931]"
                 }`}
               >
                 {s.name}
                 <span className="ml-1 text-[10px] text-gray-500">
-                  {s.rows.length}
+                  {s.total_rows}
                 </span>
               </button>
             ))}
           </div>
-
-          {/* Controls */}
           <div className="flex flex-wrap items-center gap-4 text-sm">
             <div className="flex items-center gap-2">
-              <span className="text-gray-600">Rows:</span>
+              <span className="text-gray-600">Limit:</span>
               <div className="flex gap-1">
                 {limitOptions.map((opt) => (
                   <button
                     key={opt}
-                    onClick={() => setLimit(opt)}
+                    onClick={() => {
+                      setLimit(opt);
+                      setOffset(0);
+                    }}
                     className={`px-2 py-1 rounded border text-xs ${
                       limit === opt
                         ? "bg-[#292931] text-white border-[#292931]"
                         : "bg-white border-gray-300 hover:border-[#292931]"
                     }`}
-                    title={opt === -1 ? "Show all rows" : `Show first ${opt}`}
                   >
-                    {opt === -1 ? "All" : opt}
+                    {opt}
                   </button>
                 ))}
               </div>
             </div>
             <div className="flex items-center gap-2">
               <button
-                onClick={exportCSV}
-                className="px-3 py-1 rounded border bg-white hover:bg-gray-50 text-xs"
+                disabled={!token || !currentSheetName}
+                onClick={() =>
+                  token && currentSheetName && window.open(exportCsvUrl(token, currentSheetName), "_blank")
+                }
+                className="px-3 py-1 rounded border bg-white hover:bg-gray-50 text-xs disabled:opacity-40"
               >
                 Export CSV
               </button>
               <button
-                onClick={exportJSON}
-                className="px-3 py-1 rounded border bg-white hover:bg-gray-50 text-xs"
+                disabled={!token || !currentSheetName}
+                onClick={() =>
+                  token && currentSheetName && window.open(exportJsonUrl(token, currentSheetName), "_blank")
+                }
+                className="px-3 py-1 rounded border bg-white hover:bg-gray-50 text-xs disabled:opacity-40"
               >
                 Export JSON
               </button>
             </div>
-            <div className="text-xs text-gray-500">
-              Showing{" "}
-              {limit === -1 ||
-                (currentSheet.rows.length < limit
-                  ? currentSheet.rows.length
-                  : limit)}{" "}
-              of {currentSheet.rows.length} rows
-            </div>
+            {page && (
+              <div className="flex items-center gap-2 text-xs">
+                <button
+                  disabled={offset === 0 || pageLoading}
+                  onClick={() => setOffset(Math.max(0, offset - limit))}
+                  className="px-2 py-1 border rounded disabled:opacity-40"
+                >
+                  Prev
+                </button>
+                <button
+                  disabled={page.done || pageLoading}
+                  onClick={() => setOffset(offset + limit)}
+                  className="px-2 py-1 border rounded disabled:opacity-40"
+                >
+                  Next
+                </button>
+                <span className="text-gray-500">
+                  {showingFrom}-{showingTo} of {totalRows}
+                </span>
+              </div>
+            )}
           </div>
-
-          {/* Table */}
           <div className="border rounded-lg overflow-hidden">
             <div className="bg-gray-100 px-4 py-2 font-medium flex justify-between items-center text-sm">
-              <span>{currentSheet.name}</span>
-              <span className="text-xs text-gray-500">
-                {currentSheet.rows.length} total rows
-              </span>
+              <span>{currentSheetName}</span>
+              <span className="text-xs text-gray-500">{totalRows} total rows</span>
             </div>
-            <div className="overflow-auto max-h-[560px]">
+            <div className="overflow-auto max-h-[560px] relative">
+              {pageLoading && (
+                <div className="absolute inset-0 bg-white/60 flex items-center justify-center text-xs text-gray-600">
+                  Loading rows...
+                </div>
+              )}
               <table className="text-xs md:text-sm min-w-full border-collapse relative">
-                {headerRow() && (
+                {headerRow.length > 0 && (
                   <thead className="bg-[#f5f5f7] text-gray-700 sticky top-0 z-10">
                     <tr>
-                      {headerRow()!.map((cell, i) => (
+                      {headerRow.map((cell, i) => (
                         <th
                           key={i}
                           className="border px-2 py-1 text-left font-semibold whitespace-pre bg-[#f5f5f7]"
                         >
-                          {cell === null ||
-                          cell === undefined ||
-                          cell === "" ? (
+                          {cell === null || cell === undefined || cell === "" ? (
                             <span className="text-gray-300">·</span>
                           ) : (
                             String(cell)
@@ -248,7 +218,7 @@ export default function InspectSheets() {
                   </thead>
                 )}
                 <tbody>
-                  {dataRows().map((row, rIdx) => (
+                  {dataRows.map((row, rIdx) => (
                     <tr
                       key={rIdx}
                       className={rIdx % 2 ? "bg-white" : "bg-gray-50"}
@@ -258,9 +228,7 @@ export default function InspectSheets() {
                           key={cIdx}
                           className="border px-2 py-1 align-top max-w-[260px] whitespace-pre-wrap font-mono text-[11px] md:text-xs"
                         >
-                          {cell === null ||
-                          cell === undefined ||
-                          cell === "" ? (
+                          {cell === null || cell === undefined || cell === "" ? (
                             <span className="text-gray-300">·</span>
                           ) : (
                             String(cell)
