@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Header from "../components/ui/Header";
 import Footer from "../components/ui/Footer";
@@ -8,6 +8,11 @@ export const metadata: Metadata = {
   description:
     "Easily manipulate and edit Excel files with iLoveXLSX. Our intuitive platform allows you to import, export, and transform spreadsheets with powerful tools designed for both beginners and professionals. Streamline your workflow, automate repetitive tasks, and unlock advanced features to make working with Excel files faster and more efficient.",
   applicationName: "iLoveXLSX",
+  // Base URL used for generating absolute metadata asset URLs (Open Graph, Twitter, etc.)
+  // Falls back to production domain if NEXT_PUBLIC_SITE_URL is not provided.
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL || "https://ilovexlsx.com"
+  ),
   keywords: [
     "excel",
     "xlsx",
@@ -16,9 +21,9 @@ export const metadata: Metadata = {
     "edit excel online",
     "excel automation",
     "csv to xlsx",
-    "xlsx utilities"
+    "xlsx utilities",
   ],
-  themeColor: "#ffffff",
+  // themeColor moved to viewport export per Next.js guidance.
   openGraph: {
     title: "iLoveXLSX | Excel files made easy",
     description:
@@ -30,8 +35,8 @@ export const metadata: Metadata = {
         url: "/ilovexlsx_full.png",
         width: 1200,
         height: 630,
-        alt: "iLoveXLSX banner"
-      }
+        alt: "iLoveXLSX banner",
+      },
     ],
     locale: "en_US",
     type: "website",
@@ -39,25 +44,37 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "iLoveXLSX | Excel files made easy",
-    description: "Convert, inspect and manipulate XLSX files online with iLoveXLSX tools.",
+    description:
+      "Convert, inspect and manipulate XLSX files online with iLoveXLSX tools.",
     images: ["/ilovexlsx_full.png"],
-  },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    viewportFit: "cover",
   },
   icons: {
     icon: [
       { url: "/favicon.ico", type: "image/x-icon" },
-      { url: "/assets/img/favicon/favicon-32x32.png", type: "image/png", sizes: "32x32" },
-      { url: "/assets/img/favicon/favicon-16x16.png", type: "image/png", sizes: "16x16" },
+      {
+        url: "/assets/img/favicon/favicon-32x32.png",
+        type: "image/png",
+        sizes: "32x32",
+      },
+      {
+        url: "/assets/img/favicon/favicon-16x16.png",
+        type: "image/png",
+        sizes: "16x16",
+      },
     ],
     apple: [
       { url: "/assets/img/favicon/apple-touch-icon.png", sizes: "180x180" },
     ],
   },
   manifest: "/assets/img/favicon/site.webmanifest",
+};
+
+// New viewport export (Next.js 15+): previously inside metadata.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({

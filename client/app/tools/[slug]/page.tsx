@@ -7,8 +7,15 @@ const specialComponents: Record<string, React.ReactNode> = {
   "inspect-sheets": <InspectSheets />,
 };
 
-export default function ToolPage({ params }: { params: { slug: string } }) {
-  const tool = toolItems.find((t) => t.slug === params.slug);
+// In Next.js 15 dynamic routes, `params` is now an async object (Promise-like).
+// The component must be async and we must await it before accessing properties.
+export default async function ToolPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const tool = toolItems.find((t) => t.slug === slug);
   if (!tool) return notFound();
 
   return (
