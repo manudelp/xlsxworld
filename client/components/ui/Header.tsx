@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
- 
+
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -30,14 +30,14 @@ export default function Header() {
       {/* Logo */}
       <Link
         href="/"
-        className="flex items-center gap-2 flex-1 md:justify-start justify-center"
+        className="flex items-center gap-2 flex-1 md:justify-start justify-center h-[30px]"
       >
         <Image
           src="/ilovexlsx.png"
           alt="Logo"
-          width={160}
+          width={120}
           height={30}
-          className="object-contain w-fit h-[30px]"
+          style={{ width: "auto", height: "auto" }}
         />
       </Link>
 
