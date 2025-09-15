@@ -19,40 +19,12 @@ export default function InspectSheets() {
   const [limit, setLimit] = useState(100);
   const [offset, setOffset] = useState(0);
   const scrollRef = useRef<HTMLDivElement | null>(null);
-  const [atFarLeft, setAtFarLeft] = useState(true);
-  const [atFarRight, setAtFarRight] = useState(true);
-  const [hasOverflow, setHasOverflow] = useState(false);
   const limitOptions = [25, 50, 100, 250, 500];
 
   const headerRow = page?.header ?? [];
   const dataRows = page?.rows ?? [];
 
-  const updateScrollState = useCallback(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const { scrollLeft, scrollWidth, clientWidth } = el;
-    const maxScrollLeft = Math.max(0, scrollWidth - clientWidth);
-    const overflow = maxScrollLeft > 0;
-    setHasOverflow(overflow);
-    if (!overflow) {
-      setAtFarLeft(true);
-      setAtFarRight(true);
-      return;
-    }
-    const tolerance = 2;
-    setAtFarLeft(scrollLeft <= tolerance);
-    setAtFarRight(scrollLeft >= maxScrollLeft - tolerance);
-  }, []);
-
-  useEffect(() => {
-    updateScrollState();
-  }, [page, headerRow.length, updateScrollState]);
-
-  useEffect(() => {
-    const handler = () => updateScrollState();
-    window.addEventListener("resize", handler);
-    return () => window.removeEventListener("resize", handler);
-  }, [updateScrollState]);
+  // (Removed atFar state and scroll edge detection per user request)
 
   const currentSheetName = preview?.sheets[activeSheetIdx]?.name;
   const token = preview?.token;
@@ -169,7 +141,7 @@ export default function InspectSheets() {
                       setLimit(opt);
                       setOffset(0);
                     }}
-                    className={`px-2 py-1 rounded border text-xs ${
+                    className={`cursor-pointer px-2 py-1 rounded border text-xs ${
                       limit === opt
                         ? "bg-[#292931] text-white border-[#292931]"
                         : "bg-white border-gray-300 hover:border-[#292931]"
@@ -188,7 +160,7 @@ export default function InspectSheets() {
                   currentSheetName &&
                   window.open(exportCsvUrl(token, currentSheetName), "_blank")
                 }
-                className="px-3 py-1 rounded border bg-white hover:bg-gray-50 text-xs disabled:opacity-40"
+                className="cursor-pointer px-3 py-1 rounded border bg-white hover:bg-gray-50 text-xs disabled:opacity-40"
               >
                 Export CSV
               </button>
@@ -199,7 +171,7 @@ export default function InspectSheets() {
                   currentSheetName &&
                   window.open(exportJsonUrl(token, currentSheetName), "_blank")
                 }
-                className="px-3 py-1 rounded border bg-white hover:bg-gray-50 text-xs disabled:opacity-40"
+                className="cursor-pointer px-3 py-1 rounded border bg-white hover:bg-gray-50 text-xs disabled:opacity-40"
               >
                 Export JSON
               </button>
@@ -209,14 +181,14 @@ export default function InspectSheets() {
                 <button
                   disabled={offset === 0 || pageLoading}
                   onClick={() => setOffset(Math.max(0, offset - limit))}
-                  className="px-2 py-1 border rounded disabled:opacity-40"
+                  className="cursor-pointer px-2 py-1 border rounded disabled:opacity-40"
                 >
                   Prev
                 </button>
                 <button
                   disabled={page.done || pageLoading}
                   onClick={() => setOffset(offset + limit)}
-                  className="px-2 py-1 border rounded disabled:opacity-40"
+                  className="cursor-pointer px-2 py-1 border rounded disabled:opacity-40"
                 >
                   Next
                 </button>
@@ -236,7 +208,6 @@ export default function InspectSheets() {
             <div
               ref={scrollRef}
               className="overflow-auto max-h-[560px] relative"
-              onScroll={() => updateScrollState()}
             >
               {pageLoading && (
                 <div className="absolute inset-0 bg-white/60 flex items-center justify-center text-xs text-gray-600">
@@ -331,13 +302,7 @@ export default function InspectSheets() {
                 </table>
               </div>
             </div>
-            {/* Static overlays (not inside scroll so they don't shift) */}
-            {hasOverflow && !atFarLeft && (
-              <div className="pointer-events-none absolute top-[40px] bottom-0 left-[48px] w-10 bg-gradient-to-r from-white to-transparent z-30" />
-            )}
-            {hasOverflow && !atFarRight && (
-              <div className="pointer-events-none absolute top-[40px] bottom-0 right-3 w-10 bg-gradient-to-l from-white to-transparent z-30" />
-            )}
+            {/* Removed gradient overlays */}
           </div>
         </div>
       )}
