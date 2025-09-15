@@ -1,7 +1,7 @@
 "use client";
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
  
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -33,7 +33,7 @@ export default function Header() {
         className="flex items-center gap-2 flex-1 md:justify-start justify-center"
       >
         <Image
-          src="/ilovexlsx.svg"
+          src="/ilovexlsx.png"
           alt="Logo"
           width={160}
           height={30}
@@ -87,7 +87,7 @@ export default function Header() {
           >
             <div className="flex items-center justify-between mb-4">
               <Image
-                src="/ilovexlsx.svg"
+                src="/ilovexlsx.png"
                 alt="Logo"
                 width={160}
                 height={30}
