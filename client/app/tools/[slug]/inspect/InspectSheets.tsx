@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   uploadForPreview,
   fetchSheetPage,
@@ -18,7 +18,41 @@ export default function InspectSheets() {
   const [pageLoading, setPageLoading] = useState(false);
   const [limit, setLimit] = useState(100);
   const [offset, setOffset] = useState(0);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const [atFarLeft, setAtFarLeft] = useState(true);
+  const [atFarRight, setAtFarRight] = useState(true);
+  const [hasOverflow, setHasOverflow] = useState(false);
   const limitOptions = [25, 50, 100, 250, 500];
+
+  const headerRow = page?.header ?? [];
+  const dataRows = page?.rows ?? [];
+
+  const updateScrollState = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const { scrollLeft, scrollWidth, clientWidth } = el;
+    const maxScrollLeft = Math.max(0, scrollWidth - clientWidth);
+    const overflow = maxScrollLeft > 0;
+    setHasOverflow(overflow);
+    if (!overflow) {
+      setAtFarLeft(true);
+      setAtFarRight(true);
+      return;
+    }
+    const tolerance = 2;
+    setAtFarLeft(scrollLeft <= tolerance);
+    setAtFarRight(scrollLeft >= maxScrollLeft - tolerance);
+  }, []);
+
+  useEffect(() => {
+    updateScrollState();
+  }, [page, headerRow.length, updateScrollState]);
+
+  useEffect(() => {
+    const handler = () => updateScrollState();
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  }, [updateScrollState]);
 
   const currentSheetName = preview?.sheets[activeSheetIdx]?.name;
   const token = preview?.token;
@@ -61,8 +95,7 @@ export default function InspectSheets() {
     }
   }, []);
 
-  const headerRow = page?.header ?? [];
-  const dataRows = page?.rows ?? [];
+  // moved earlier
   const totalRows = page?.total_rows ?? 0;
   const showingFrom = Math.min(offset + 1, totalRows || 0);
   const showingTo = Math.min(offset + dataRows.length, totalRows || 0);
@@ -78,7 +111,7 @@ export default function InspectSheets() {
           e.preventDefault();
           e.stopPropagation();
           const file = e.dataTransfer.files?.[0];
-            if (file) onFile(file);
+          if (file) onFile(file);
         }}
       >
         <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition">
@@ -97,7 +130,9 @@ export default function InspectSheets() {
         </label>
       </div>
       {loading && (
-        <div className="text-sm text-gray-500">Uploading & parsing workbook...</div>
+        <div className="text-sm text-gray-500">
+          Uploading & parsing workbook...
+        </div>
       )}
       {error && <div className="text-sm text-red-600">{error}</div>}
       {preview && (
@@ -149,7 +184,9 @@ export default function InspectSheets() {
               <button
                 disabled={!token || !currentSheetName}
                 onClick={() =>
-                  token && currentSheetName && window.open(exportCsvUrl(token, currentSheetName), "_blank")
+                  token &&
+                  currentSheetName &&
+                  window.open(exportCsvUrl(token, currentSheetName), "_blank")
                 }
                 className="px-3 py-1 rounded border bg-white hover:bg-gray-50 text-xs disabled:opacity-40"
               >
@@ -158,7 +195,9 @@ export default function InspectSheets() {
               <button
                 disabled={!token || !currentSheetName}
                 onClick={() =>
-                  token && currentSheetName && window.open(exportJsonUrl(token, currentSheetName), "_blank")
+                  token &&
+                  currentSheetName &&
+                  window.open(exportJsonUrl(token, currentSheetName), "_blank")
                 }
                 className="px-3 py-1 rounded border bg-white hover:bg-gray-50 text-xs disabled:opacity-40"
               >
@@ -187,62 +226,123 @@ export default function InspectSheets() {
               </div>
             )}
           </div>
-          <div className="border rounded-lg overflow-hidden">
+          <div className="overflow-hidden relative">
             <div className="bg-gray-100 px-4 py-2 font-medium flex justify-between items-center text-sm">
               <span>{currentSheetName}</span>
-              <span className="text-xs text-gray-500">{totalRows} total rows</span>
+              <span className="text-xs text-gray-500">
+                {totalRows} total rows
+              </span>
             </div>
-            <div className="overflow-auto max-h-[560px] relative">
+            <div
+              ref={scrollRef}
+              className="overflow-auto max-h-[560px] relative"
+              onScroll={() => updateScrollState()}
+            >
               {pageLoading && (
                 <div className="absolute inset-0 bg-white/60 flex items-center justify-center text-xs text-gray-600">
                   Loading rows...
                 </div>
               )}
-              <table className="text-xs md:text-sm min-w-full border-collapse relative">
-                {headerRow.length > 0 && (
-                  <thead className="bg-[#f5f5f7] text-gray-700 sticky top-0 z-10">
+              <div className="relative">
+                <table className="min-w-full border-collapse text-xs md:text-sm bg-white rounded-lg shadow-sm">
+                  <thead className="sticky top-0 z-40 bg-gray-50 shadow-sm">
                     <tr>
-                      {headerRow.map((cell, i) => (
-                        <th
-                          key={i}
-                          className="border px-2 py-1 text-left font-semibold whitespace-pre bg-[#f5f5f7]"
-                        >
-                          {cell === null || cell === undefined || cell === "" ? (
-                            <span className="text-gray-300">·</span>
-                          ) : (
-                            String(cell)
-                          )}
+                      {/* Top-left empty cell for row/col headers */}
+                      <th
+                        className="px-3 py-2 bg-[#217346] font-bold text-white text-center sticky left-0 z-50 border-r border-[#1a5835]/60 shadow-md"
+                        style={{ width: 48 }}
+                      ></th>
+                      {/* Column headers: A, B, ..., Z, AA, AB, ... styled like Excel */}
+                      {headerRow.map((_, i) => {
+                        // Excel-style column name (A, B, ..., Z, AA, AB, ...)
+                        const toColName = (n: number) => {
+                          let s = "";
+                          n++;
+                          while (n > 0) {
+                            const mod = (n - 1) % 26;
+                            s = String.fromCharCode(65 + mod) + s;
+                            n = Math.floor((n - 1) / 26);
+                          }
+                          return s;
+                        };
+                        return (
+                          <th
+                            key={i}
+                            className="px-3 py-2 bg-[#217346] font-bold text-white text-center z-40"
+                            style={{ minWidth: 80 }}
+                          >
+                            {toColName(i)}
+                          </th>
+                        );
+                      })}
+                    </tr>
+                    {headerRow.length > 0 && (
+                      <tr>
+                        <th className="px-3 py-2 bg-[#217346] text-center font-bold text-white sticky left-0 z-50 border-r border-[#1a5835]/60 shadow-md">
+                          1
                         </th>
-                      ))}
-                    </tr>
+                        {headerRow.map((cell, i) => (
+                          <th
+                            key={i}
+                            className="border-b px-3 py-2 bg-white text-center font-semibold text-black whitespace-pre"
+                          >
+                            {cell === null ||
+                            cell === undefined ||
+                            cell === "" ? (
+                              <span className="text-gray-300">–</span>
+                            ) : (
+                              String(cell)
+                            )}
+                          </th>
+                        ))}
+                      </tr>
+                    )}
                   </thead>
-                )}
-                <tbody>
-                  {dataRows.map((row, rIdx) => (
-                    <tr
-                      key={rIdx}
-                      className={rIdx % 2 ? "bg-white" : "bg-gray-50"}
-                    >
-                      {row.map((cell, cIdx) => (
+                  <tbody>
+                    {dataRows.map((row, rIdx) => (
+                      <tr
+                        key={rIdx}
+                        className={rIdx % 2 ? "bg-white" : "bg-gray-100"}
+                      >
+                        {/* Row header: 1, 2, 3, ... styled like Excel (count header as 1) */}
                         <td
-                          key={cIdx}
-                          className="border px-2 py-1 align-top max-w-[260px] whitespace-pre-wrap font-mono text-[11px] md:text-xs"
+                          className="px-3 py-2 align-top font-bold text-white bg-[#217346] text-center sticky left-0 z-10 border-r border-[#1a5835]/60 shadow-sm"
+                          style={{ width: 48 }}
                         >
-                          {cell === null || cell === undefined || cell === "" ? (
-                            <span className="text-gray-300">·</span>
-                          ) : (
-                            String(cell)
-                          )}
+                          {rIdx + 2 + offset}
                         </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                        {row.map((cell, cIdx) => (
+                          <td
+                            key={cIdx}
+                            className="px-3 py-2 align-top max-w-[220px] whitespace-pre-wrap font-mono text-[11px] md:text-xs text-gray-800 border-b border-gray-400"
+                          >
+                            {cell === null ||
+                            cell === undefined ||
+                            cell === "" ? (
+                              <span className="text-gray-300">–</span>
+                            ) : (
+                              String(cell)
+                            )}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
+            {/* Static overlays (not inside scroll so they don't shift) */}
+            {hasOverflow && !atFarLeft && (
+              <div className="pointer-events-none absolute top-[40px] bottom-0 left-[48px] w-10 bg-gradient-to-r from-white to-transparent z-30" />
+            )}
+            {hasOverflow && !atFarRight && (
+              <div className="pointer-events-none absolute top-[40px] bottom-0 right-3 w-10 bg-gradient-to-l from-white to-transparent z-30" />
+            )}
           </div>
         </div>
       )}
     </div>
   );
 }
+
+// scroll state updater & effects
