@@ -23,13 +23,17 @@ export default function Tool({
 }: ToolProps) {
   return (
     <div
-      className="bg-white border border-[#d6d6df] hover:border-black rounded-[16px] m-0 relative overflow-hidden z-[1] transition duration-500 scale-100"
+      className={`bg-white border border-[#d6d6df] rounded-[16px] m-0 relative overflow-hidden z-[1] transition duration-500 scale-100 ${
+        commingSoon
+          ? "opacity-50"
+          : "hover:border-black hover:shadow-lg hover:scale-[1.02]"
+      }`}
       data-category={category}
     >
       <Link
-        href={href}
+        href={commingSoon ? "#" : href}
         title={title}
-        className="block p-4"
+        className={`block p-4 ${commingSoon ? "cursor-not-allowed" : ""}`}
         tabIndex={commingSoon ? -1 : undefined}
         aria-disabled={commingSoon ? "true" : undefined}
       >

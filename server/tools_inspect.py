@@ -3,7 +3,7 @@ from fastapi import APIRouter, UploadFile, File, HTTPException, Query
 from pydantic import BaseModel
 from typing import List, Any, Dict, Tuple
 from openpyxl import load_workbook
-from io import BytesIO
+from io import BytesIO, StringIO
 import secrets
 import time
 
@@ -173,15 +173,22 @@ async def export_csv(token: str, sheet: str):
     ws = wb[sheet]
 
     def gen():
-        output = BytesIO()
+        # csv.writer writes text, so use a text buffer and encode to bytes per chunk
+        output = StringIO()
         writer = csv.writer(output)
         for r in ws.iter_rows(values_only=True):
             writer.writerow(["" if c is None else c for c in r])
-            yield output.getvalue()
+            data = output.getvalue()
+            if data:
+                yield data.encode("utf-8")
             output.seek(0)
             output.truncate(0)
 
-    return StreamingResponse(gen(), media_type="text/csv", headers={"Content-Disposition": f"attachment; filename={sheet}.csv"})
+    return StreamingResponse(
+        gen(),
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": f"attachment; filename={sheet}.csv"},
+    )
 
 @router.get("/export/json")
 async def export_json(token: str, sheet: str):

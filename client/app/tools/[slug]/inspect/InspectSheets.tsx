@@ -20,6 +20,49 @@ export default function InspectSheets() {
   const [offset, setOffset] = useState(0);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const limitOptions = [25, 50, 100, 250, 500];
+  // Enhanced sizing options
+  const [sizingMode, setSizingMode] = useState<"compact" | "comfortable">(
+    "comfortable"
+  );
+  const [columnWidth, setColumnWidth] = useState(120);
+  const [wrapText, setWrapText] = useState(false);
+
+  // persist preferences in localStorage
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("inspect_prefs");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed?.columnWidth)
+          setColumnWidth(Number(parsed.columnWidth) || 120);
+        if (parsed?.sizingMode) setSizingMode(parsed.sizingMode);
+        if (typeof parsed?.wrapText === "boolean") setWrapText(parsed.wrapText);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        "inspect_prefs",
+        JSON.stringify({ columnWidth, sizingMode, wrapText })
+      );
+    } catch {
+      // ignore
+    }
+  }, [columnWidth, sizingMode, wrapText]);
+
+  // Sizing configurations
+  const sizingConfig = {
+    compact: { colWidth: 80, rowHeight: 28, padding: "px-2 py-1" },
+    comfortable: { colWidth: 120, rowHeight: 36, padding: "px-3 py-2" },
+    // removed auto-fit mode
+  };
+
+  const currentConfig = sizingConfig[sizingMode];
+  // no drag-to-resize behavior — badge displays current width only
 
   const headerRow = page?.header ?? [];
   const dataRows = page?.rows ?? [];
@@ -153,6 +196,79 @@ export default function InspectSheets() {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <span className="text-gray-600">Table density:</span>
+              <div className="flex gap-1">
+                {(["compact", "comfortable"] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    onClick={() => setSizingMode(mode)}
+                    className={`cursor-pointer px-3 py-1 rounded border text-xs transition shadow-sm ${
+                      sizingMode === mode
+                        ? "bg-[#292931] text-white border-[#292931]"
+                        : "bg-white border-gray-300 hover:border-[#292931]"
+                    }`}
+                    title={
+                      mode === "compact"
+                        ? "Compact view - smaller cells"
+                        : "Comfortable view - medium cells"
+                    }
+                  >
+                    {mode === "compact" ? "Compact" : "Comfortable"}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-gray-600">Column width:</span>
+              <div className="flex gap-1">
+                {[60, 80, 100, 120, 150, 200, 250].map((width) => (
+                  <button
+                    key={width}
+                    onClick={() => setColumnWidth(width)}
+                    className={`cursor-pointer px-2 py-1 rounded border text-xs ${
+                      columnWidth === width
+                        ? "bg-[#292931] text-white border-[#292931]"
+                        : "bg-white border-gray-300 hover:border-[#292931]"
+                    }`}
+                  >
+                    {width}px
+                  </button>
+                ))}
+                <input
+                  type="number"
+                  aria-label="Column width"
+                  min={10}
+                  value={columnWidth}
+                  onChange={(e) => {
+                    const v = Number(e.target.value);
+                    // clamp to sensible minimum
+                    setColumnWidth(
+                      Number.isFinite(v) ? Math.max(10, Math.round(v)) : 10
+                    );
+                  }}
+                  className="w-20 px-2 py-1 border rounded text-xs"
+                />
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-gray-600">Text display:</span>
+              <button
+                onClick={() => setWrapText(!wrapText)}
+                className={`cursor-pointer px-3 py-1 rounded border text-xs transition shadow-sm ${
+                  wrapText
+                    ? "bg-[#292931] text-white border-[#292931]"
+                    : "bg-white border-gray-300 hover:border-[#292931]"
+                }`}
+                title={
+                  wrapText
+                    ? "Text wraps to fit cell width"
+                    : "Text truncated with ellipsis"
+                }
+              >
+                {wrapText ? "Wrap text" : "Ellipsis"}
+              </button>
+            </div>
+            <div className="flex items-center gap-2">
               <button
                 disabled={!token || !currentSheetName}
                 onClick={() =>
@@ -198,12 +314,23 @@ export default function InspectSheets() {
               </div>
             )}
           </div>
-          <div className="overflow-hidden relative">
-            <div className="bg-gray-100 px-4 py-2 font-medium flex justify-between items-center text-sm">
-              <span>{currentSheetName}</span>
-              <span className="text-xs text-gray-500">
-                {totalRows} total rows
-              </span>
+          <div className="overflow-hidden relative rounded-lg border border-gray-200 shadow-lg">
+            <div className="bg-gradient-to-r from-gray-100 to-gray-200 px-4 py-3 font-semibold flex justify-between items-center text-sm border-b border-gray-300">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
+                <span className="text-gray-700">{currentSheetName}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div
+                  title={`Column width: ${columnWidth}px`}
+                  className="text-xs text-gray-600 bg-white px-2 py-1 rounded-full select-none"
+                >
+                  {columnWidth}px
+                </div>
+                <span className="text-xs text-gray-600 bg-white px-2 py-1 rounded-full">
+                  {totalRows.toLocaleString()} rows
+                </span>
+              </div>
             </div>
             <div
               ref={scrollRef}
@@ -214,14 +341,48 @@ export default function InspectSheets() {
                   Loading rows...
                 </div>
               )}
-              <div className="relative">
-                <table className="min-w-full border-collapse text-xs md:text-sm bg-white rounded-lg shadow-sm">
-                  <thead className="sticky top-0 z-40 bg-gray-50 shadow-sm">
-                    <tr>
+              <div className="relative min-w-0">
+                <table
+                  className={`border-collapse text-xs md:text-sm bg-white rounded-lg shadow-lg border border-gray-200 ${
+                    wrapText ? "" : "table-fixed"
+                  }`}
+                  style={{
+                    borderSpacing: 0,
+                    // When using fixed column widths (ellipsis or fixed density), make the table width
+                    // fit its columns so the <col> pixel widths are honored and horizontal scrolling appears.
+                    width: wrapText ? undefined : "max-content",
+                    // allow the surrounding container to still constrain height/scroll
+                    maxWidth: "100%",
+                  }}
+                >
+                  {/* Set column widths when using fixed sizing */}
+                  <colgroup>
+                    {/* Row-number column */}
+                    <col style={{ width: 56 }} />
+                    {/* Data columns */}
+                    {headerRow.map((_, i) => {
+                      // Calculate column width based on mode and settings
+                      // Always return a concrete pixel width on the <col> so browsers (Chrome) honor it.
+                      const getColumnWidth = () => {
+                        // When using fixed sizing modes, use the explicit `columnWidth` value
+                        // for the pixel width. In 'auto' density we still honor the user's
+                        // selected explicit column width as the exact width to use.
+                        const w = columnWidth;
+                        return { width: `${w}px` };
+                      };
+
+                      return <col key={i} style={getColumnWidth()} />;
+                    })}
+                  </colgroup>
+                  <thead className="sticky top-0 z-40 bg-gradient-to-b from-gray-50 to-gray-100 border-b-2 border-gray-300">
+                    <tr className="bg-gradient-to-r from-emerald-600 to-emerald-700">
                       {/* Top-left empty cell for row/col headers */}
                       <th
-                        className="px-3 py-2 bg-[#217346] font-bold text-white text-center sticky left-0 z-50 border-r border-[#1a5835]/60 shadow-md"
-                        style={{ width: 48 }}
+                        className="px-3 py-2 bg-gradient-to-br from-emerald-600 to-emerald-700 font-bold text-white text-center sticky left-0 z-50 border-r border-emerald-800 shadow-lg"
+                        style={{
+                          width: 56,
+                          height: currentConfig.rowHeight,
+                        }}
                       ></th>
                       {/* Column headers: A, B, ..., Z, AA, AB, ... styled like Excel */}
                       {headerRow.map((_, i) => {
@@ -239,8 +400,14 @@ export default function InspectSheets() {
                         return (
                           <th
                             key={i}
-                            className="px-3 py-2 bg-[#217346] font-bold text-white text-center z-40"
-                            style={{ minWidth: 80 }}
+                            className="px-3 py-2 bg-gradient-to-br from-emerald-600 to-emerald-700 font-bold text-white text-center z-40 border-r border-emerald-500/30 hover:bg-emerald-500 transition-colors"
+                            style={{
+                              minWidth: wrapText
+                                ? `${columnWidth}px`
+                                : undefined,
+                              width: !wrapText ? `${columnWidth}px` : undefined,
+                              height: currentConfig.rowHeight,
+                            }}
                           >
                             {toColName(i)}
                           </th>
@@ -248,21 +415,59 @@ export default function InspectSheets() {
                       })}
                     </tr>
                     {headerRow.length > 0 && (
-                      <tr>
-                        <th className="px-3 py-2 bg-[#217346] text-center font-bold text-white sticky left-0 z-50 border-r border-[#1a5835]/60 shadow-md">
+                      <tr className="bg-white border-b border-gray-300">
+                        <th
+                          className={`${currentConfig.padding} bg-gradient-to-br from-emerald-600 to-emerald-700 text-center font-bold text-white sticky left-0 z-50 border-r border-emerald-800 shadow-sm`}
+                          style={{
+                            height: currentConfig.rowHeight,
+                            minHeight: wrapText ? 32 : undefined,
+                          }}
+                        >
                           1
                         </th>
                         {headerRow.map((cell, i) => (
                           <th
                             key={i}
-                            className="border-b px-3 py-2 bg-white text-center font-semibold text-black whitespace-pre"
+                            className={`border-r border-gray-200 ${currentConfig.padding} bg-gradient-to-b from-gray-50 to-white text-center font-semibold text-gray-800 hover:bg-gray-100 transition-colors`}
+                            style={{
+                              height: wrapText
+                                ? "auto"
+                                : currentConfig.rowHeight,
+                              minHeight: wrapText ? 32 : undefined,
+                            }}
                           >
                             {cell === null ||
                             cell === undefined ||
                             cell === "" ? (
-                              <span className="text-gray-300">–</span>
+                              <span className="text-gray-400 italic">
+                                Empty
+                              </span>
                             ) : (
-                              String(cell)
+                              // inner wrapper: block-level with constrained width so truncate works in Chrome
+                              <div
+                                className={
+                                  wrapText
+                                    ? "whitespace-normal break-words"
+                                    : "block truncate"
+                                }
+                                style={
+                                  !wrapText
+                                    ? {
+                                        maxWidth: `${columnWidth}px`,
+                                        display: "block",
+                                        overflow: "hidden",
+                                        whiteSpace: "nowrap",
+                                        textOverflow: "ellipsis",
+                                      }
+                                    : {
+                                        display: "block",
+                                        maxWidth: `${columnWidth}px`,
+                                      }
+                                }
+                                title={!wrapText ? String(cell) : undefined}
+                              >
+                                {String(cell)}
+                              </div>
                             )}
                           </th>
                         ))}
@@ -273,26 +478,63 @@ export default function InspectSheets() {
                     {dataRows.map((row, rIdx) => (
                       <tr
                         key={rIdx}
-                        className={rIdx % 2 ? "bg-white" : "bg-gray-100"}
+                        className={`border-b border-gray-200 transition-colors hover:bg-blue-50 ${
+                          rIdx % 2 ? "bg-white" : "bg-gray-50/30"
+                        }`}
                       >
                         {/* Row header: 1, 2, 3, ... styled like Excel (count header as 1) */}
                         <td
-                          className="px-3 py-2 align-top font-bold text-white bg-[#217346] text-center sticky left-0 z-10 border-r border-[#1a5835]/60 shadow-sm"
-                          style={{ width: 48 }}
+                          className={`${currentConfig.padding} align-top font-bold text-white bg-gradient-to-br from-emerald-600 to-emerald-700 text-center sticky left-0 z-10 border-r border-emerald-800 shadow-sm hover:from-emerald-500 hover:to-emerald-600 transition-colors`}
+                          style={{
+                            width: 56,
+                            height: currentConfig.rowHeight,
+                            minHeight: wrapText ? 32 : undefined,
+                          }}
                         >
                           {rIdx + 2 + offset}
                         </td>
                         {row.map((cell, cIdx) => (
                           <td
                             key={cIdx}
-                            className="px-3 py-2 align-top max-w-[220px] whitespace-pre-wrap font-mono text-[11px] md:text-xs text-gray-800 border-b border-gray-400"
+                            className={`${currentConfig.padding} align-top font-mono text-[11px] md:text-xs text-gray-700 border-r border-gray-200 hover:bg-blue-100 transition-colors`}
+                            style={{
+                              height: wrapText
+                                ? "auto"
+                                : currentConfig.rowHeight,
+                              minHeight: wrapText ? 28 : undefined,
+                            }}
                           >
                             {cell === null ||
                             cell === undefined ||
                             cell === "" ? (
-                              <span className="text-gray-300">–</span>
+                              <span className="text-gray-400 italic">
+                                Empty
+                              </span>
                             ) : (
-                              String(cell)
+                              <div
+                                className={
+                                  wrapText
+                                    ? "whitespace-normal break-words"
+                                    : "block truncate select-text"
+                                }
+                                style={
+                                  !wrapText
+                                    ? {
+                                        maxWidth: `${columnWidth}px`,
+                                        display: "block",
+                                        overflow: "hidden",
+                                        whiteSpace: "nowrap",
+                                        textOverflow: "ellipsis",
+                                      }
+                                    : {
+                                        display: "block",
+                                        maxWidth: `${columnWidth}px`,
+                                      }
+                                }
+                                title={!wrapText ? String(cell) : undefined}
+                              >
+                                {String(cell)}
+                              </div>
                             )}
                           </td>
                         ))}
