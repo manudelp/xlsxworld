@@ -1,4 +1,3 @@
-# 💚 iLoveXLSX 💚
+# XLSX World
 
 Online XLSX tools.
-Inspired by [iLovePDF](https://www.ilovepdf.com/)
