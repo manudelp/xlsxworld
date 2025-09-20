@@ -33,11 +33,11 @@ export default function Header() {
         className="flex items-center gap-2 flex-1 md:justify-start justify-center h-[30px]"
       >
         <Image
-          src="/ilovexlsx.png"
+          src="/logo.svg"
           alt="Logo"
-          width={120}
-          height={30}
-          style={{ width: "auto", height: "auto" }}
+          width={160}
+          height={80}
+          style={{ width: "auto", maxWidth: "160px", height: "auto", maxHeight: "80px" }}
         />
       </Link>
 

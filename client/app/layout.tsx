@@ -4,14 +4,12 @@ import Header from "../components/ui/Header";
 import Footer from "../components/ui/Footer";
 
 export const metadata: Metadata = {
-  title: "iLoveXLSX | Excel files made easy",
+  title: "XLSX World | Excel files made easy",
   description:
-    "Easily manipulate and edit Excel files with iLoveXLSX. Our intuitive platform allows you to import, export, and transform spreadsheets with powerful tools designed for both beginners and professionals. Streamline your workflow, automate repetitive tasks, and unlock advanced features to make working with Excel files faster and more efficient.",
-  applicationName: "iLoveXLSX",
-  // Base URL used for generating absolute metadata asset URLs (Open Graph, Twitter, etc.)
-  // Falls back to production domain if NEXT_PUBLIC_SITE_URL is not provided.
+    "Easily manipulate and edit Excel files with XLSX World. Our intuitive platform allows you to import, export, and transform spreadsheets with powerful tools designed for both beginners and professionals. Streamline your workflow, automate repetitive tasks, and unlock advanced features to make working with Excel files faster and more efficient.",
+  applicationName: "XLSX World",
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL || "https://ilovexlsx.com"
+    process.env.NEXT_PUBLIC_SITE_URL || "https://xlsx.world"
   ),
   keywords: [
     "excel",
@@ -23,30 +21,20 @@ export const metadata: Metadata = {
     "csv to xlsx",
     "xlsx utilities",
   ],
-  // themeColor moved to viewport export per Next.js guidance.
   openGraph: {
-    title: "iLoveXLSX | Excel files made easy",
+    title: "XLSX World | Excel files made easy",
     description:
       "Manipulate, convert, inspect and process Excel (XLSX) files easily online with powerful, fast tools.",
-    url: "https://ilovexlsx.com/",
-    siteName: "iLoveXLSX",
-    images: [
-      {
-        url: "/ilovexlsx_full.png",
-        width: 1200,
-        height: 630,
-        alt: "iLoveXLSX banner",
-      },
-    ],
+    url: "https://xlsxworld.com/",
+    siteName: "XLSX World",
     locale: "en_US",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "iLoveXLSX | Excel files made easy",
+    title: "XLSX World | Excel files made easy",
     description:
-      "Convert, inspect and manipulate XLSX files online with iLoveXLSX tools.",
-    images: ["/ilovexlsx_full.png"],
+      "Convert, inspect and manipulate XLSX files online with XLSX World tools.",
   },
   icons: {
     icon: [
@@ -69,7 +57,6 @@ export const metadata: Metadata = {
   manifest: "/assets/img/favicon/site.webmanifest",
 };
 
-// New viewport export (Next.js 15+): previously inside metadata.
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
@@ -84,6 +71,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        {/* Import Inter font from Google Fonts */}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap"
+          rel="stylesheet"
+        />
+        <style>{`
+          body {
+            font-family: 'Inter', sans-serif;
+          }
+        `}</style>
+      </head>
       <body>
         <Header />
         <main className="pt-[60px] min-h-screen">{children}</main>
