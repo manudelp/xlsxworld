@@ -72,11 +72,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* Import Inter font from Google Fonts */}
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap"
-          rel="stylesheet"
-        />
         <style>{`
           body {
             font-family: 'Inter', sans-serif;
