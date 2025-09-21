@@ -2,9 +2,9 @@
 FROM postgres:lts-alpine
 
 # Set environment variables for default user, password, and database
-ENV POSTGRES_USER=manu
-ENV POSTGRES_PASSWORD=manu
-ENV POSTGRES_DB=xlsxworld
+ENV POSTGRES_USER=root
+ENV POSTGRES_PASSWORD=root
+ENV POSTGRES_DB=mydatabase
 
 # Expose PostgreSQL port
 EXPOSE 5432

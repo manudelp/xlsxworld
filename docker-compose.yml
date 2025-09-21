@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   database:
     build:
@@ -34,7 +32,7 @@ services:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-xlsxworld_user}:${POSTGRES_PASSWORD:-secure_password_here}@xlsxworld-database:5432/${POSTGRES_DB:-xlsxworld}
       - PYTHONPATH=/app
       - ENVIRONMENT=${ENVIRONMENT:-production}
-      - CORS_ORIGINS=${CORS_ORIGINS:-https://api.xlsxworld.com}
+      - CORS_ORIGINS=${CORS_ORIGINS:-https://api.xlsx.world}
     expose:
       - "8000"
     depends_on:
