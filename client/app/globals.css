@@ -1,41 +1,8 @@
 @import "tailwindcss";
 
-@font-face {
-  font-family: "Graphik";
-  src: url("/font/Graphik/Graphik-Regular.woff2") format("woff2");
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Graphik";
-  src: url("/font/Graphik/Graphik-Medium.woff2") format("woff2");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Graphik";
-  src: url("/font/Graphik/Graphik-Semibold.woff2") format("woff2");
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Graphik";
-  src: url("/font/Graphik/Graphik-Bold.woff2") format("woff2");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  --font-graphik: "Graphik", sans-serif;
 }
 
 @theme inline {
@@ -50,6 +17,49 @@
   }
 }
 
+@font-face {
+  font-family: 'Alan Sans';
+  src: url('/assets/font/Alan_Sans/static/AlanSans-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Alan Sans';
+  src: url('/assets/font/Alan_Sans/static/AlanSans-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Alan Sans';
+  src: url('/assets/font/Alan_Sans/static/AlanSans-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Alan Sans';
+  src: url('/assets/font/Alan_Sans/static/AlanSans-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Alan Sans';
+  src: url('/assets/font/Alan_Sans/static/AlanSans-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Alan Sans';
+  src: url('/assets/font/Alan_Sans/static/AlanSans-ExtraBold.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Alan Sans';
+  src: url('/assets/font/Alan_Sans/static/AlanSans-Black.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+}
+
 body {
-  font-family: var(--font-graphik);
+  font-family: 'Alan Sans', sans-serif;
 }

@@ -32,13 +32,11 @@ export default function Header() {
         href="/"
         className="flex items-center gap-2 flex-1 md:justify-start justify-center h-[30px]"
       >
-        <Image
-          src="/logo.svg"
-          alt="Logo"
-          width={160}
-          height={80}
-          style={{ width: "auto", maxWidth: "160px", height: "auto", maxHeight: "80px" }}
-        />
+        <h2 className="text-xl font-semibold flex items-center gap-1">
+          XLSX
+          <Image src="/icon.svg" alt="World Icon" width={32} height={32} style={{ display: "inline", verticalAlign: "middle" }} />
+          World
+        </h2>
       </Link>
 
       {/* Example Icon (Mobile Only) */}
