@@ -1,10 +1,15 @@
-name: Docker Images
+name: Docker Images & Deploy
 
 on:
-    push:
-        branches: [ test ]
-    pull_request:
-        branches: [ test ]
+  push:
+    branches: [ main, test ]
+  pull_request:
+    branches: [ test ]
+  workflow_dispatch:
+
+concurrency:
+  group: xlsxworld-${{ github.ref }}-deploy
+  cancel-in-progress: true
 
 env:
   REGISTRY: ghcr.io
@@ -70,4 +75,58 @@ jobs:
           push: ${{ github.event_name == 'push' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+  deploy-backend-db:
+    name: Deploy Backend + DB (self-hosted)
+    # This job runs directly on the server's self-hosted runner
+    runs-on: self-hosted
+    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create .env for docker compose
+        run: |
+          set -euo pipefail
+          cat > .env << 'EOF'
+          POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+          ENVIRONMENT=${{ secrets.ENVIRONMENT }}
+          CORS_ORIGINS=${{ secrets.CORS_ORIGINS }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          JWT_EXP_MIN=${{ secrets.JWT_EXP_MIN }}
+          EOF
+          echo "Generated .env (values hidden)"
+
+      - name: Ensure external docker network exists
+        run: |
+          docker network create app-network || true
+
+      - name: Ensure shared certbot volumes exist (optional)
+        run: |
+          docker volume create letsencrypt || true
+          docker volume create certbot-webroot || true
+
+      - name: Build and start backend + database
+        env:
+          DOCKER_BUILDKIT: 1
+        run: |
+          docker compose build --pull
+          docker compose up -d
+
+      - name: Show status and wait for health
+        run: |
+          set -e
+          docker compose ps
+          # Wait briefly for healthchecks
+          for i in $(seq 1 10); do
+            if docker compose exec -T xlsxworld-backend curl -fsS http://localhost:8000/health; then
+              echo "Backend healthy"; break
+            fi
+            echo "Waiting for backend to be healthy... ($i/10)"; sleep 3
+          done
+          # Print last logs for visibility
+          docker logs --tail 100 xlsxworld-backend || true
 

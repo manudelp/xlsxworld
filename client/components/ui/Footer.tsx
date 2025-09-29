@@ -22,7 +22,7 @@ export default function Footer() {
           </Link>
         </div>
         <div className="text-center md:text-right">
-          © iLoveXLSX {new Date().getFullYear()}
+          © XLSX World {new Date().getFullYear()}
         </div>
       </div>
     </footer>

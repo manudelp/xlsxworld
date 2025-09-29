@@ -33,6 +33,8 @@ services:
       - PYTHONPATH=/app
       - ENVIRONMENT=${ENVIRONMENT:-production}
       - CORS_ORIGINS=${CORS_ORIGINS:-https://api.xlsx.world}
+      - JWT_SECRET=${JWT_SECRET:-change-me}
+      - JWT_EXP_MIN=${JWT_EXP_MIN:-60}
     expose:
       - "8000"
     depends_on:
