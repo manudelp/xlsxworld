@@ -3,8 +3,11 @@ from typing import Union
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from . import schemas  # type: ignore
-from . import tools_inspect  # type: ignore
+# When running via `uvicorn main:app` from the /app working dir, this module is
+# a top-level script, so relative imports (from . import ...) won't work.
+# Use absolute imports instead.
+import schemas  # type: ignore
+import tools_inspect  # type: ignore
 
 app = FastAPI(title="ilovexlsx API", version="0.1.0")
 
