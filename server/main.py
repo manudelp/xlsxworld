@@ -20,34 +20,19 @@ app.add_middleware(
 )
 
 
-@app.get("/", tags=["root"])
+@app.get("/", tags=["root"]) 
 def read_root():
     return {"message": "ilovexlsx backend running"}
 
 
-@app.get("/health", tags=["meta"])
+@app.get("/health", tags=["meta"]) 
 def health():
     return {"status": "ok"}
 
 
-@app.get("/items/{item_id}", tags=["example"])
+@app.get("/items/{item_id}", tags=["example"]) 
 def read_item(item_id: int, q: Union[str, None] = None):
     return {"item_id": item_id, "q": q}
 
 
 app.include_router(tools_inspect.router)
-
-# Conditionally include auth routes only when DB/JWT are configured
-DATABASE_URL = os.getenv("DATABASE_URL")
-JWT_SECRET = os.getenv("JWT_SECRET")
-if DATABASE_URL and JWT_SECRET:
-    from . import auth as auth_router  # type: ignore
-    app.include_router(auth_router.router)
-else:
-    # Expose a hint endpoint for diagnostics
-    @app.get("/auth-disabled")
-    def auth_disabled():  # pragma: no cover - informational
-        return {
-            "auth": "disabled",
-            "reason": "DATABASE_URL or JWT_SECRET not set",
-        }

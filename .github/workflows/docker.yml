@@ -1,10 +1,10 @@
-name: Docker Images & Deploy
+name: XLSX World Server Images & Deploy
 
 on:
   push:
-    branches: [ main, test ]
+    branches: [main, test]
   pull_request:
-    branches: [ test ]
+    branches: [test]
   workflow_dispatch:
 
 concurrency:
@@ -45,39 +45,8 @@ jobs:
           push: ${{ github.event_name == 'push' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-
-  build-web:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Login to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract metadata (tags, labels)
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/ilovexlsx-web
-
-      - name: Build and push
-        uses: docker/build-push-action@v6
-        with:
-          context: ./client
-          push: ${{ github.event_name == 'push' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-
-  deploy-backend-db:
-    name: Deploy Backend + DB (self-hosted)
+  deploy-backend:
+    name: Deploy Backend (self-hosted, server-only)
     # This job runs directly on the server's self-hosted runner
     runs-on: self-hosted
     if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
@@ -86,35 +55,31 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Create .env for docker compose
+      - name: Create .env for docker compose (server-only)
         run: |
           set -euo pipefail
           cat > .env << 'EOF'
-          POSTGRES_USER=${{ secrets.POSTGRES_USER }}
-          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_DB=${{ secrets.POSTGRES_DB }}
           ENVIRONMENT=${{ secrets.ENVIRONMENT }}
           CORS_ORIGINS=${{ secrets.CORS_ORIGINS }}
-          JWT_SECRET=${{ secrets.JWT_SECRET }}
-          JWT_EXP_MIN=${{ secrets.JWT_EXP_MIN }}
           EOF
-          echo "Generated .env (values hidden)"
+          echo "Generated .env (server-only; values hidden)"
 
       - name: Ensure external docker network exists
         run: |
           docker network create app-network || true
 
+      # Optional: shared certbot volumes, keep if used by your central nginx
       - name: Ensure shared certbot volumes exist (optional)
         run: |
           docker volume create letsencrypt || true
           docker volume create certbot-webroot || true
 
-      - name: Build and start backend + database
+      - name: Build and start backend only
         env:
           DOCKER_BUILDKIT: 1
         run: |
           docker compose build --pull
-          docker compose up -d
+          docker compose up -d backend
 
       - name: Show status and wait for health
         run: |
@@ -129,4 +94,3 @@ jobs:
           done
           # Print last logs for visibility
           docker logs --tail 100 xlsxworld-backend || true
-
