@@ -11,6 +11,8 @@ Este documento describe cómo desplegar XLSXWorld en el servidor Ubuntu con la i
 
 ## Pasos de Despliegue
 
+> Nota: Puedes desplegar únicamente el backend (pausando la base de datos) y habilitar la DB más tarde con perfiles de Compose.
+
 ### 1. Preparar el Proyecto en el Servidor
 
 ```bash
@@ -43,7 +45,7 @@ POSTGRES_USER=xlsxworld_user
 POSTGRES_PASSWORD=your_very_secure_password_here
 POSTGRES_DB=xlsxworld
 
-# Application Configuration  
+# Application Configuration
 ENVIRONMENT=production
 CORS_ORIGINS=https://api.xlsxworld.com,https://xlsxworld.com
 ```
@@ -102,11 +104,14 @@ docker network ls | grep app-network
 # Si no existe, crearla:
 # docker network create app-network
 
-# Construir y desplegar los contenedores
-docker-compose up -d
+# Opción A) Sólo backend (sin base de datos)
+docker compose up -d backend
+
+# Opción B) Backend + base de datos (habilitar perfil 'db')
+docker compose --profile db up -d
 
 # Verificar que los contenedores estén corriendo
-docker-compose ps
+docker compose ps
 ```
 
 ### 6. Verificar el Despliegue
@@ -116,8 +121,8 @@ docker-compose ps
 docker ps | grep xlsxworld
 
 # Verificar logs
-docker-compose logs -f backend
-docker-compose logs -f database
+docker compose logs -f backend
+docker compose --profile db logs -f database
 
 # Probar la API
 curl -I https://api.xlsxworld.com/health
@@ -178,22 +183,22 @@ xlsxworld/
 
 ```bash
 # Ver estado
-docker-compose ps
+docker compose ps
 
 # Ver logs en tiempo real
-docker-compose logs -f backend
-docker-compose logs -f database
+docker compose logs -f backend
+docker compose --profile db logs -f database
 
 # Reiniciar servicios
-docker-compose restart backend
-docker-compose restart database
+docker compose restart backend
+docker compose --profile db restart database
 
 # Detener y eliminar contenedores
-docker-compose down
+docker compose down
 
 # Reconstruir imágenes
-docker-compose build --no-cache
-docker-compose up -d
+docker compose build --no-cache
+docker compose up -d
 ```
 
 ### Base de Datos
@@ -246,7 +251,7 @@ docker exec xlsxworld-backend env | grep DATABASE
 docker exec xlsxworld-database pg_isready -U xlsxworld_user
 
 # Verificar logs de la base de datos
-docker-compose logs database
+docker compose --profile db logs database
 ```
 
 ### Problema: Error 502 Bad Gateway
@@ -256,7 +261,7 @@ docker-compose logs database
 docker exec xlsxworld-backend curl -f http://localhost:8000/health
 
 # Verificar logs del backend
-docker-compose logs backend
+docker compose logs backend
 
 # Verificar configuración nginx
 docker exec server-nginx nginx -t
@@ -290,8 +295,8 @@ docker exec xlsxworld-database pg_dump -U xlsxworld_user xlsxworld > backup_befo
 git pull origin main
 
 # Reconstruir y redesplegar
-docker-compose build --no-cache
-docker-compose up -d
+docker compose build --no-cache
+docker compose up -d
 
 # Verificar que todo funcione
 curl https://api.xlsxworld.com/health

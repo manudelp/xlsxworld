@@ -34,7 +34,13 @@ export default function Header() {
       >
         <h2 className="text-xl font-semibold flex items-center gap-1">
           XLSX
-          <Image src="/icon.svg" alt="World Icon" width={32} height={32} style={{ display: "inline", verticalAlign: "middle" }} />
+          <Image
+            src="/icon.svg"
+            alt="World Icon"
+            width={32}
+            height={32}
+            style={{ display: "inline", verticalAlign: "middle" }}
+          />
           World
         </h2>
       </Link>
@@ -60,18 +66,8 @@ export default function Header() {
         </button>
       </div>
 
-      {/* Desktop Nav */}
-      <div className="hidden md:flex items-center gap-4">
-        <a href="#" className="text-sm font-semibold">
-          Login
-        </a>
-        <a
-          href="signup"
-          className="px-3 py-2 bg-lime-600 hover:bg-lime-700 text-white rounded-lg text-sm font-semibold"
-        >
-          Sign Up
-        </a>
-      </div>
+      {/* Desktop Nav (auth temporarily removed) */}
+      <div className="hidden md:flex items-center gap-4"></div>
 
       {/* Mobile Menu */}
       {menuOpen && (
@@ -108,20 +104,7 @@ export default function Header() {
                 </svg>
               </button>
             </div>
-            <a
-              href="#"
-              className="text-base font-semibold text-center bg-gray-100 rounded-lg py-2"
-              onClick={() => setMenuOpen(false)}
-            >
-              Login
-            </a>
-            <a
-              href="#"
-              className="px-3 py-2 bg-lime-600 hover:bg-lime-700 text-white rounded-lg text-base font-semibold text-center"
-              onClick={() => setMenuOpen(false)}
-            >
-              Sign Up
-            </a>
+            {/* Auth links removed while disabled */}
           </nav>
         </div>
       )}

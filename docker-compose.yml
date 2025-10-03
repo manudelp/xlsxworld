@@ -4,6 +4,8 @@ services:
       context: ./database
       dockerfile: Dockerfile
     container_name: xlsxworld-database
+    profiles:
+      - db
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-xlsxworld_user}
@@ -17,7 +19,7 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-xlsxworld_user} -d ${POSTGRES_DB:-xlsxworld}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-xlsxworld_user} -d ${POSTGRES_DB:-xlsxworld}" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -29,7 +31,8 @@ services:
     container_name: xlsxworld-backend
     restart: unless-stopped
     environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-xlsxworld_user}:${POSTGRES_PASSWORD:-secure_password_here}@xlsxworld-database:5432/${POSTGRES_DB:-xlsxworld}
+      # Optional: enable when running with database profile
+      # DATABASE_URL=postgresql://${POSTGRES_USER:-xlsxworld_user}:${POSTGRES_PASSWORD:-secure_password_here}@xlsxworld-database:5432/${POSTGRES_DB:-xlsxworld}
       - PYTHONPATH=/app
       - ENVIRONMENT=${ENVIRONMENT:-production}
       - CORS_ORIGINS=${CORS_ORIGINS:-https://api.xlsx.world}
@@ -37,19 +40,17 @@ services:
       - JWT_EXP_MIN=${JWT_EXP_MIN:-60}
     expose:
       - "8000"
-    depends_on:
-      database:
-        condition: service_healthy
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
 
 volumes:
   xlsxworld_postgres_data:
+
 
 networks:
   app-network:

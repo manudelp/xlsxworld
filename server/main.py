@@ -36,5 +36,18 @@ def read_item(item_id: int, q: Union[str, None] = None):
 
 
 app.include_router(tools_inspect.router)
-from . import auth as auth_router  # type: ignore
-app.include_router(auth_router.router)
+
+# Conditionally include auth routes only when DB/JWT are configured
+DATABASE_URL = os.getenv("DATABASE_URL")
+JWT_SECRET = os.getenv("JWT_SECRET")
+if DATABASE_URL and JWT_SECRET:
+    from . import auth as auth_router  # type: ignore
+    app.include_router(auth_router.router)
+else:
+    # Expose a hint endpoint for diagnostics
+    @app.get("/auth-disabled")
+    def auth_disabled():  # pragma: no cover - informational
+        return {
+            "auth": "disabled",
+            "reason": "DATABASE_URL or JWT_SECRET not set",
+        }
