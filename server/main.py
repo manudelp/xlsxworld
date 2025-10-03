@@ -2,7 +2,6 @@ from typing import Union
 
 import os
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 # When running via `uvicorn main:app` from the /app working dir, this module is
 # a top-level script, so relative imports (from . import ...) won't work.
 # Use absolute imports instead.
@@ -11,16 +10,8 @@ import tools_inspect  # type: ignore
 
 app = FastAPI(title="ilovexlsx API", version="0.1.0")
 
-# CORS from env or wildcard for dev
-cors_origins = os.getenv("CORS_ORIGINS", "*")
-origins = [o.strip() for o in cors_origins.split(",") if o.strip()]
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# CORS is handled by Nginx in production. Do not enable FastAPI CORS here to
+# avoid duplicate Access-Control-Allow-Origin headers.
 
 
 @app.get("/", tags=["root"]) 
