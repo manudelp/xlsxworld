@@ -8,15 +8,14 @@ from fastapi import FastAPI
 import schemas  # type: ignore
 import tools_inspect  # type: ignore
 
-app = FastAPI(title="ilovexlsx API", version="0.1.0")
+app = FastAPI(title="XLSX World API", version="0.1.0")
 
 # CORS is handled by Nginx in production. Do not enable FastAPI CORS here to
 # avoid duplicate Access-Control-Allow-Origin headers.
 
-
 @app.get("/", tags=["root"]) 
 def read_root():
-    return {"message": "ilovexlsx backend running"}
+    return {"message": "XLSX World backend running"}
 
 
 @app.get("/health", tags=["meta"]) 
