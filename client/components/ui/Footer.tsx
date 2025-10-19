@@ -20,6 +20,12 @@ export default function Footer() {
           <Link href="/contact" className="hover:underline">
             Contact
           </Link>
+          <Link
+            href="https://link.clashroyale.com/invite/clan/es/?platform=android&tag=RUPQ8RQR&token=x8e92r9f"
+            className="hover:underline"
+          >
+            Clash Royale Clan
+          </Link>
         </div>
         <div className="text-center md:text-right">
           © XLSX World {new Date().getFullYear()}
