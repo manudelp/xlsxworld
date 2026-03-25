@@ -44,7 +44,17 @@ export default function Tool({
           {heading}
         </h3>
         <div>
-          <p className="text-sm text-gray-600">{description}</p>
+          <p
+            className="text-sm text-gray-600"
+            style={{
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+            }}
+          >
+            {description}
+          </p>
         </div>
         {isNew && (
           <span className="absolute top-3 right-3 bg-green-200 text-green-800 text-xs font-medium px-2 py-0.5 rounded">

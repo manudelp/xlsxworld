@@ -1,10 +1,22 @@
 import { notFound } from "next/navigation";
 import { toolItems } from "@/components/utility/toolsData";
 import InspectSheets from "./inspect/InspectSheets";
+import ConvertXlsxToCsv from "./convert/ConvertXlsxToCsv";
+import ConvertCsvToXlsx from "./convert/ConvertCsvToXlsx";
+import MergeSheets from "./merge/MergeSheets";
+import SplitSheet from "./split/SplitSheet";
+import AppendWorkbooks from "./merge/AppendWorkbooks";
+import SplitWorkbook from "./split/SplitWorkbook";
 
 // Map certain slugs to special components
 const specialComponents: Record<string, React.ReactNode> = {
   "inspect-sheets": <InspectSheets />,
+  "xlsx-to-csv": <ConvertXlsxToCsv />,
+  "csv-to-xlsx": <ConvertCsvToXlsx />,
+  "merge-sheets": <MergeSheets />,
+  "append-workbooks": <AppendWorkbooks />,
+  "split-sheet": <SplitSheet />,
+  "split-workbook": <SplitWorkbook />,
 };
 
 // In Next.js 15 dynamic routes, `params` is now an async object (Promise-like).
