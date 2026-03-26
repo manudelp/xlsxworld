@@ -16,7 +16,7 @@
   "lint-staged": {
     "client/**/*.{js,jsx,ts,tsx,json,css,md}": [
       "prettier --write",
-      "eslint --fix"
+      "npm --prefix client run lint --silent -- --fix"
     ]
   }
 }
