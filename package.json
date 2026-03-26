@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "prepare": "husky install",
+    "build": "npm --prefix client run build",
+    "dev": "npm --prefix client run dev",
     "verify:build": "npm --prefix client run build",
     "verify:ci": "npm --prefix client run type-check && npm --prefix client run lint && npm --prefix client run build",
     "format": "prettier --write \"client/**/*.{ts,tsx,js,jsx,json,css,md}\""
