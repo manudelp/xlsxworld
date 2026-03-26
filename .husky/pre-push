@@ -1,0 +1,5 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Run full verification (type-check, lint, build) before pushing
+npm run verify:ci

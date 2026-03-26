@@ -1,0 +1,22 @@
+{
+  "name": "xlsxworld",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "prepare": "husky install",
+    "verify:build": "npm --prefix client run build",
+    "verify:ci": "npm --prefix client run type-check && npm --prefix client run lint && npm --prefix client run build",
+    "format": "prettier --write \"client/**/*.{ts,tsx,js,jsx,json,css,md}\""
+  },
+  "devDependencies": {
+    "husky": "^8.0.0",
+    "lint-staged": "^13.0.0",
+    "prettier": "^3.0.0"
+  },
+  "lint-staged": {
+    "client/**/*.{js,jsx,ts,tsx,json,css,md}": [
+      "prettier --write",
+      "eslint --fix"
+    ]
+  }
+}

@@ -1,6 +1,8 @@
 export interface ApiError { detail: string }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8000';
+// For production on Vercel the client calls the Next.js server-side proxy at `/api`.
+// For local development you can set `NEXT_PUBLIC_API_BASE` to your local backend.
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? '/api/';
 
 async function handle<T>(res: Response): Promise<T> {
   if (!res.ok) {

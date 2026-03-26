@@ -1,0 +1,6 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Ensure the client build passes before allowing commit
+# Format and lint only staged files, then run the full build verification
+npx lint-staged && npm run verify:build
