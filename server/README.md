@@ -26,6 +26,13 @@ Required variables:
 Optional:
 - `CORS_ORIGINS` (used by docker-compose as service env placeholder)
 
+Local dev:
+- To avoid hardcoding origins in source, you can create a `.env` in the
+	`server/` folder with `CORS_ORIGINS` set to a comma-separated list of
+	allowed origins (for example `http://localhost:3000`). The server loads
+	`server/.env` automatically during startup. Do NOT commit `.env` — it is
+	excluded by `server/.gitignore`.
+
 ## Installation
 
 ```bash
