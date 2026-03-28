@@ -1,6 +1,7 @@
 "use client";
 import React, { useCallback, useState } from "react";
 import { splitSheet } from "@/lib/tools/split";
+import FileUploadDropzone from "@/components/utility/FileUploadDropzone";
 
 export default function SplitSheet() {
   const [file, setFile] = useState<File | null>(null);
@@ -56,31 +57,14 @@ export default function SplitSheet() {
 
   return (
     <div className="space-y-6">
-      <div
-        onDragOver={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-        }}
-        onDrop={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          const selected = e.dataTransfer.files?.[0];
+      <FileUploadDropzone
+        accept=".xlsx"
+        message="Drop or select an Excel file to split a sheet into chunks"
+        onFiles={(files) => {
+          const selected = files[0];
           if (selected) onFile(selected);
         }}
-      >
-        <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition">
-          <input
-            type="file"
-            accept=".xlsx"
-            className="hidden"
-            onChange={(e) => {
-              const selected = e.target.files?.[0];
-              if (selected) onFile(selected);
-            }}
-          />
-          <span className="text-sm text-gray-600">Drop or select an XLSX file to inspect</span>
-        </label>
-      </div>
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <label className="text-sm text-gray-700">
@@ -116,7 +100,8 @@ export default function SplitSheet() {
       {error && <div className="text-sm text-red-600">{error}</div>}
 
       <div className="text-xs text-gray-500">
-        Output workbook contains split chunks as separate sheets named `part_1`, `part_2`, etc.
+        Output workbook contains split chunks as separate sheets named `part_1`,
+        `part_2`, etc.
       </div>
     </div>
   );

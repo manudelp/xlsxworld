@@ -1,6 +1,7 @@
 "use client";
 import React, { useCallback, useState } from "react";
 import { splitWorkbook } from "@/lib/tools/split";
+import FileUploadDropzone from "@/components/utility/FileUploadDropzone";
 
 export default function SplitWorkbook() {
   const [file, setFile] = useState<File | null>(null);
@@ -41,31 +42,14 @@ export default function SplitWorkbook() {
 
   return (
     <div className="space-y-6">
-      <div
-        onDragOver={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-        }}
-        onDrop={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          const selected = e.dataTransfer.files?.[0];
+      <FileUploadDropzone
+        accept=".xlsx"
+        message="Drop or select an Excel file to split its sheets into separate workbooks"
+        onFiles={(files) => {
+          const selected = files[0];
           if (selected) onFile(selected);
         }}
-      >
-        <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition">
-          <input
-            type="file"
-            accept=".xlsx"
-            className="hidden"
-            onChange={(e) => {
-              const selected = e.target.files?.[0];
-              if (selected) onFile(selected);
-            }}
-          />
-          <span className="text-sm text-gray-600">Drop or select an XLSX file to inspect</span>
-        </label>
-      </div>
+      />
 
       <button
         onClick={handleSplit}

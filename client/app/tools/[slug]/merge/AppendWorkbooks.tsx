@@ -1,6 +1,7 @@
 "use client";
 import React, { useCallback, useState } from "react";
 import { appendWorkbooks } from "@/lib/tools/merge";
+import FileUploadDropzone from "@/components/utility/FileUploadDropzone";
 
 export default function AppendWorkbooks() {
   const [files, setFiles] = useState<File[]>([]);
@@ -45,29 +46,12 @@ export default function AppendWorkbooks() {
 
   return (
     <div className="space-y-6">
-      <div
-        onDragOver={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-        }}
-        onDrop={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          const selected = e.dataTransfer.files;
-          onFiles(selected);
-        }}
-      >
-        <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition">
-          <input
-            type="file"
-            accept=".xlsx"
-            multiple
-            className="hidden"
-            onChange={(e) => onFiles(e.target.files)}
-          />
-          <span className="text-sm text-gray-600">Drop or select an XLSX file to inspect</span>
-        </label>
-      </div>
+      <FileUploadDropzone
+        accept=".xlsx"
+        multiple
+        message="Drop or select XLSX files to append"
+        onFiles={onFiles}
+      />
 
       {files.length > 0 && (
         <div className="text-sm text-gray-600">
@@ -95,7 +79,8 @@ export default function AppendWorkbooks() {
       {error && <div className="text-sm text-red-600">{error}</div>}
 
       <div className="text-xs text-gray-500">
-        All selected workbooks are appended vertically in the output sheet, headers consolidated.
+        All selected workbooks are appended vertically in the output sheet,
+        headers consolidated.
       </div>
     </div>
   );

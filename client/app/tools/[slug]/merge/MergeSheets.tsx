@@ -1,6 +1,7 @@
 "use client";
 import React, { useCallback, useState } from "react";
 import { mergeSheets } from "@/lib/tools/merge";
+import FileUploadDropzone from "@/components/utility/FileUploadDropzone";
 
 export default function MergeSheets() {
   const [file, setFile] = useState<File | null>(null);
@@ -24,7 +25,14 @@ export default function MergeSheets() {
     setLoading(true);
 
     try {
-      const buffer = await mergeSheets(file, sheetNames.split(",").map((s) => s.trim()).filter(Boolean), outputSheet);
+      const buffer = await mergeSheets(
+        file,
+        sheetNames
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean),
+        outputSheet,
+      );
       const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
@@ -46,31 +54,14 @@ export default function MergeSheets() {
 
   return (
     <div className="space-y-6">
-      <div
-        onDragOver={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-        }}
-        onDrop={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          const selected = e.dataTransfer.files?.[0];
+      <FileUploadDropzone
+        accept=".xlsx"
+        message="Drop or select an Excel file to merge its sheets"
+        onFiles={(files) => {
+          const selected = files[0];
           if (selected) onFile(selected);
         }}
-      >
-        <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition">
-          <input
-            type="file"
-            accept=".xlsx"
-            className="hidden"
-            onChange={(e) => {
-              const selected = e.target.files?.[0];
-              if (selected) onFile(selected);
-            }}
-          />
-          <span className="text-sm text-gray-600">Drop or select an XLSX file to inspect</span>
-        </label>
-      </div>
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <label className="text-sm text-gray-700">
@@ -104,7 +95,8 @@ export default function MergeSheets() {
       {error && <div className="text-sm text-red-600">{error}</div>}
 
       <div className="text-xs text-gray-500">
-        Tip: If the sheet name list is empty, all sheets are combined in workbook order.
+        Tip: If the sheet name list is empty, all sheets are combined in
+        workbook order.
       </div>
     </div>
   );
