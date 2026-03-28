@@ -1,555 +1,890 @@
 "use client";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+
+import { useEffect, useMemo, useRef, useState } from "react";
+import { BarChart3, Funnel } from "lucide-react";
 import {
-  uploadForPreview,
   fetchSheetPage,
-  exportCsvUrl,
-  exportJsonUrl,
-  WorkbookPreview,
-  SheetPage,
+  uploadForPreview,
+  type Cell,
+  type Row,
+  type WorkbookPreview,
 } from "@/lib/tools/inspect";
+import BackToTopButton from "@/components/utility/BackToTopButton";
+import FileUploadDropzone from "@/components/utility/FileUploadDropzone";
+
+type SortDirection = "asc" | "desc";
+const PAGE_SIZE = 500;
 
 export default function InspectSheets() {
   const [preview, setPreview] = useState<WorkbookPreview | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [activeSheetIndex, setActiveSheetIndex] = useState(0);
+  const [fileName, setFileName] = useState<string>("");
   const [loading, setLoading] = useState(false);
-  const [activeSheetIdx, setActiveSheetIdx] = useState(0);
-  const [page, setPage] = useState<SheetPage | null>(null);
-  const [pageLoading, setPageLoading] = useState(false);
-  const [limit, setLimit] = useState(100);
-  const [offset, setOffset] = useState(0);
-  const scrollRef = useRef<HTMLDivElement | null>(null);
-  const limitOptions = [25, 50, 100, 250, 500];
-  // Enhanced sizing options
-  const [sizingMode, setSizingMode] = useState<"compact" | "comfortable">(
-    "comfortable"
-  );
-  const [columnWidth, setColumnWidth] = useState(120);
-  const [wrapText, setWrapText] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [globalQuery, setGlobalQuery] = useState("");
+  const [columnFilterIndex, setColumnFilterIndex] = useState(0);
+  const [columnFilterQuery, setColumnFilterQuery] = useState("");
+  const [sortColumnIndex, setSortColumnIndex] = useState<number | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [showFiltersMenu, setShowFiltersMenu] = useState(false);
+  const [showStatsMenu, setShowStatsMenu] = useState(false);
+  const [pagedRows, setPagedRows] = useState<Row[]>([]);
+  const [pagedHeader, setPagedHeader] = useState<Cell[] | null>(null);
+  const [pagedDone, setPagedDone] = useState(false);
+  const [pagedTotalRows, setPagedTotalRows] = useState<number | null>(null);
+  const [pagingLoading, setPagingLoading] = useState(false);
+  const [loadingAllRows, setLoadingAllRows] = useState(false);
+  const [hasLoadedPageData, setHasLoadedPageData] = useState(false);
+  const filtersMenuContainerRef = useRef<HTMLDivElement | null>(null);
+  const statsMenuContainerRef = useRef<HTMLDivElement | null>(null);
 
-  // persist preferences in localStorage
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem("inspect_prefs");
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (parsed?.columnWidth)
-          setColumnWidth(Number(parsed.columnWidth) || 120);
-        if (parsed?.sizingMode) setSizingMode(parsed.sizingMode);
-        if (typeof parsed?.wrapText === "boolean") setWrapText(parsed.wrapText);
-      }
-    } catch {
-      // ignore
-    }
-  }, []);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(
-        "inspect_prefs",
-        JSON.stringify({ columnWidth, sizingMode, wrapText })
-      );
-    } catch {
-      // ignore
-    }
-  }, [columnWidth, sizingMode, wrapText]);
-
-  // Sizing configurations
-  const sizingConfig = {
-    compact: { colWidth: 80, rowHeight: 28, padding: "px-2 py-1" },
-    comfortable: { colWidth: 120, rowHeight: 36, padding: "px-3 py-2" },
-    // removed auto-fit mode
-  };
-
-  const currentConfig = sizingConfig[sizingMode];
-  // no drag-to-resize behavior — badge displays current width only
-
-  const headerRow = page?.header ?? [];
-  const dataRows = page?.rows ?? [];
-
-  // (Removed atFar state and scroll edge detection per user request)
-
-  const currentSheetName = preview?.sheets[activeSheetIdx]?.name;
-  const token = preview?.token;
-
-  const loadPage = useCallback(
-    async (tok: string, sheet: string, newOffset: number, newLimit: number) => {
-      setPageLoading(true);
-      try {
-        const p = await fetchSheetPage(tok, sheet, newOffset, newLimit);
-        setPage(p);
-      } catch (e) {
-        setError(e instanceof Error ? e.message : "Failed to fetch page");
-      } finally {
-        setPageLoading(false);
-      }
-    },
-    []
-  );
-
-  useEffect(() => {
-    if (token && currentSheetName) {
-      loadPage(token, currentSheetName, offset, limit);
-    }
-  }, [token, currentSheetName, offset, limit, loadPage]);
-
-  const onFile = useCallback(async (file: File) => {
+  const onFile = async (file: File) => {
     setError(null);
-    setPreview(null);
-    setPage(null);
+    setFileName(file.name);
     setLoading(true);
-    setOffset(0);
+
     try {
-      const p = await uploadForPreview(file, 25);
-      setPreview(p);
-      setActiveSheetIdx(0);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Upload failed");
+      const workbook = await uploadForPreview(file);
+      setPreview(workbook);
+      setActiveSheetIndex(0);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      setError(message);
+      setPreview(null);
     } finally {
       setLoading(false);
     }
+  };
+
+  const formatCell = (value: unknown) => {
+    if (value === null || value === undefined || value === "") return "-";
+    if (typeof value === "boolean") return value ? "TRUE" : "FALSE";
+    return String(value);
+  };
+
+  const activeSheet = preview?.sheets[activeSheetIndex] ?? null;
+  const token = preview?.token ?? null;
+
+  useEffect(() => {
+    setGlobalQuery("");
+    setColumnFilterQuery("");
+    setSortColumnIndex(null);
+    setSortDirection("desc");
+    setColumnFilterIndex(0);
+    setShowFiltersMenu(false);
+    setShowStatsMenu(false);
+    setPagedRows([]);
+    setPagedHeader(null);
+    setPagedDone(false);
+    setPagedTotalRows(null);
+    setPagingLoading(false);
+    setLoadingAllRows(false);
+    setHasLoadedPageData(false);
+  }, [activeSheetIndex]);
+
+  const loadPage = async (append: boolean) => {
+    if (!token || !activeSheet || pagingLoading) return;
+
+    setPagingLoading(true);
+    try {
+      const offset = append ? pagedRows.length : 0;
+      const page = await fetchSheetPage(
+        token,
+        activeSheet.name,
+        offset,
+        PAGE_SIZE,
+      );
+
+      setPagedHeader(page.header ?? null);
+      setPagedRows((prev) => (append ? [...prev, ...page.rows] : page.rows));
+      setPagedDone(page.done);
+      setPagedTotalRows(page.total_rows);
+      setHasLoadedPageData(true);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      setError(message);
+    } finally {
+      setPagingLoading(false);
+    }
+  };
+
+  const loadAllRows = async () => {
+    if (!token || !activeSheet || loadingAllRows) return;
+
+    setLoadingAllRows(true);
+    try {
+      let nextOffset = pagedRows.length;
+      let done = pagedDone;
+      let guard = 0;
+
+      while (!done && guard < 200) {
+        const page = await fetchSheetPage(
+          token,
+          activeSheet.name,
+          nextOffset,
+          PAGE_SIZE,
+        );
+        setPagedHeader(page.header ?? null);
+        setPagedRows((prev) => [...prev, ...page.rows]);
+        setPagedDone(page.done);
+        setPagedTotalRows(page.total_rows);
+        setHasLoadedPageData(true);
+
+        nextOffset += page.rows.length;
+        done = page.done;
+        guard += 1;
+
+        if (page.rows.length === 0) {
+          break;
+        }
+      }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      setError(message);
+    } finally {
+      setLoadingAllRows(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!token || !activeSheet) return;
+    void loadPage(false);
+    // Only refresh when sheet/token changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, activeSheet?.name]);
+
+  useEffect(() => {
+    const onPointerDown = (event: MouseEvent | TouchEvent) => {
+      const target = event.target as Node | null;
+      if (!target) return;
+
+      const clickedInsideFilters =
+        filtersMenuContainerRef.current?.contains(target) ?? false;
+      const clickedInsideStats =
+        statsMenuContainerRef.current?.contains(target) ?? false;
+
+      if (!clickedInsideFilters) {
+        setShowFiltersMenu(false);
+      }
+      if (!clickedInsideStats) {
+        setShowStatsMenu(false);
+      }
+    };
+
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("touchstart", onPointerDown);
+
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("touchstart", onPointerDown);
+    };
   }, []);
 
-  // moved earlier
-  const totalRows = page?.total_rows ?? 0;
-  const showingFrom = Math.min(offset + 1, totalRows || 0);
-  const showingTo = Math.min(offset + dataRows.length, totalRows || 0);
+  const tableModel = useMemo(() => {
+    if (!activeSheet) {
+      return {
+        headers: [] as string[],
+        rows: [] as (string | number | boolean | null)[][],
+        totalColumns: 0,
+        sampleSize: 0,
+        nullRates: [] as number[],
+        inferredTypes: [] as string[],
+        duplicateRows: 0,
+        emptyRows: 0,
+      };
+    }
+
+    const sourceRows = hasLoadedPageData ? pagedRows : activeSheet.sample;
+    const sourceHeader =
+      pagedHeader && pagedHeader.length > 0 ? pagedHeader : activeSheet.headers;
+
+    const totalColumns = Math.max(
+      sourceHeader.length,
+      ...sourceRows.map((r) => r.length),
+      0,
+    );
+
+    const headers = Array.from({ length: totalColumns }, (_, i) => {
+      const raw = sourceHeader[i];
+      const value = formatCell(raw);
+      return value === "-" ? `Column ${i + 1}` : value;
+    });
+
+    const normalizedRows = sourceRows.map((row) =>
+      Array.from({ length: totalColumns }, (_, colIdx) => row[colIdx] ?? null),
+    );
+
+    const query = globalQuery.trim().toLowerCase();
+    const colQuery = columnFilterQuery.trim().toLowerCase();
+
+    let filteredRows = normalizedRows.filter((row) => {
+      const globalMatch =
+        query.length === 0 ||
+        row.some((cell) => formatCell(cell).toLowerCase().includes(query));
+
+      const columnMatch =
+        colQuery.length === 0 ||
+        formatCell(row[columnFilterIndex]).toLowerCase().includes(colQuery);
+
+      return globalMatch && columnMatch;
+    });
+
+    if (sortColumnIndex !== null) {
+      filteredRows = [...filteredRows].sort((a, b) => {
+        const left = a[sortColumnIndex];
+        const right = b[sortColumnIndex];
+
+        const leftEmpty = left === null || left === undefined || left === "";
+        const rightEmpty =
+          right === null || right === undefined || right === "";
+
+        if (leftEmpty && rightEmpty) return 0;
+        if (leftEmpty) return 1;
+        if (rightEmpty) return -1;
+
+        let result = 0;
+        if (typeof left === "number" && typeof right === "number") {
+          result = left - right;
+        } else {
+          result = String(left).localeCompare(String(right), undefined, {
+            numeric: true,
+            sensitivity: "base",
+          });
+        }
+
+        return sortDirection === "asc" ? result : -result;
+      });
+    }
+
+    const sampleSize = normalizedRows.length;
+
+    const nullRates = Array.from({ length: totalColumns }, (_, colIdx) => {
+      if (sampleSize === 0) return 0;
+      let emptyCount = 0;
+      for (const row of normalizedRows) {
+        const cell = row[colIdx];
+        if (cell === null || cell === undefined || cell === "") emptyCount += 1;
+      }
+      return (emptyCount / sampleSize) * 100;
+    });
+
+    const inferredTypes = Array.from({ length: totalColumns }, (_, colIdx) => {
+      const found = new Set<string>();
+      for (const row of normalizedRows) {
+        const cell = row[colIdx];
+        if (cell === null || cell === undefined || cell === "") continue;
+        if (typeof cell === "number") {
+          found.add("number");
+        } else if (typeof cell === "boolean") {
+          found.add("boolean");
+        } else if (
+          typeof cell === "string" &&
+          /^\d{4}-\d{2}-\d{2}(?:[ T]\d{2}:\d{2}(?::\d{2})?)?$/.test(cell.trim())
+        ) {
+          found.add("date");
+        } else {
+          found.add("text");
+        }
+      }
+
+      if (found.size === 0) return "empty";
+      if (found.size === 1) return Array.from(found)[0];
+      return "mixed";
+    });
+
+    let duplicateRows = 0;
+    const seen = new Set<string>();
+    for (const row of normalizedRows) {
+      const key = JSON.stringify(row);
+      if (seen.has(key)) duplicateRows += 1;
+      else seen.add(key);
+    }
+
+    let emptyRows = 0;
+    for (const row of normalizedRows) {
+      const allEmpty = row.every(
+        (cell) => cell === null || cell === undefined || cell === "",
+      );
+      if (allEmpty) emptyRows += 1;
+    }
+
+    return {
+      headers,
+      rows: filteredRows,
+      totalColumns,
+      sampleSize,
+      nullRates,
+      inferredTypes,
+      duplicateRows,
+      emptyRows,
+    };
+  }, [
+    activeSheet,
+    columnFilterIndex,
+    columnFilterQuery,
+    globalQuery,
+    hasLoadedPageData,
+    pagedHeader,
+    pagedRows,
+    sortColumnIndex,
+    sortDirection,
+  ]);
+
+  const loadedRowsCount = hasLoadedPageData
+    ? pagedRows.length
+    : (activeSheet?.sample.length ?? 0);
+  const totalDataRows =
+    pagedTotalRows === null ? null : Math.max(0, pagedTotalRows - 1);
+
+  const toggleSort = (index: number) => {
+    if (sortColumnIndex !== index) {
+      setSortColumnIndex(index);
+      setSortDirection("desc");
+      return;
+    }
+
+    if (sortDirection === "desc") {
+      setSortDirection("asc");
+      return;
+    }
+
+    setSortColumnIndex(null);
+    setSortDirection("desc");
+  };
 
   return (
-    <div className="space-y-8">
-      <div
-        onDragOver={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-        }}
-        onDrop={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          const file = e.dataTransfer.files?.[0];
+    <div className="space-y-4">
+      <FileUploadDropzone
+        accept=".xls,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
+        message="Drop or select an Excel file to inspect its content"
+        onFiles={(files) => {
+          const file = files[0];
           if (file) onFile(file);
         }}
-      >
-        <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition">
-          <input
-            type="file"
-            accept=".xls,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
-            className="hidden"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) onFile(file);
-            }}
-          />
-          <span className="text-sm text-gray-600">
-            Drop or select an XLSX file to inspect
-          </span>
-        </label>
-      </div>
+      />
+
       {loading && (
-        <div className="text-sm text-gray-500">
-          Uploading & parsing workbook...
+        <div className="text-sm" style={{ color: "var(--muted-2)" }}>
+          Uploading and parsing workbook...
         </div>
       )}
+
       {error && <div className="text-sm text-red-600">{error}</div>}
+
       {preview && (
-        <div className="space-y-6">
-          <div className="flex flex-wrap gap-2">
-            {preview.sheets.map((s, i) => (
-              <button
-                key={s.name + i}
-                onClick={() => {
-                  setActiveSheetIdx(i);
-                  setOffset(0);
-                }}
-                className={`px-3 py-1 rounded-full text-sm border transition shadow-sm ${
-                  i === activeSheetIdx
-                    ? "bg-[#292931] text-white border-[#292931]"
-                    : "bg-white border-gray-300 hover:border-[#292931]"
-                }`}
-              >
-                {s.name}
-                <span className="ml-1 text-[10px] text-gray-500">
-                  {s.total_rows}
-                </span>
-              </button>
-            ))}
+        <div className="space-y-4">
+          <div>
+            <h3 className="font-semibold">Workbook Preview</h3>
+            <p className="text-sm" style={{ color: "var(--muted-2)" }}>
+              {fileName || "Uploaded workbook"} • {preview.sheet_count} sheet
+              {preview.sheet_count === 1 ? "" : "s"}
+            </p>
           </div>
-          <div className="flex flex-wrap items-center gap-4 text-sm">
-            <div className="flex items-center gap-2">
-              <span className="text-gray-600">Limit:</span>
-              <div className="flex gap-1">
-                {limitOptions.map((opt) => (
-                  <button
-                    key={opt}
-                    onClick={() => {
-                      setLimit(opt);
-                      setOffset(0);
-                    }}
-                    className={`cursor-pointer px-2 py-1 rounded border text-xs ${
-                      limit === opt
-                        ? "bg-[#292931] text-white border-[#292931]"
-                        : "bg-white border-gray-300 hover:border-[#292931]"
-                    }`}
-                  >
-                    {opt}
-                  </button>
-                ))}
+
+          <div
+            className="rounded-lg border p-4"
+            style={{
+              borderColor: "var(--border)",
+              backgroundColor: "var(--surface)",
+            }}
+          >
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <h4 className="font-medium">Sheets</h4>
+              <div className="text-xs" style={{ color: "var(--muted-2)" }}>
+                Select a tab to preview one sheet at a time
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-gray-600">Table density:</span>
-              <div className="flex gap-1">
-                {(["compact", "comfortable"] as const).map((mode) => (
+
+            <div className="mb-4">
+              <div className="flex flex-wrap gap-2">
+                {preview.sheets.map((sheet, index) => {
+                  const isActive = index === activeSheetIndex;
+                  return (
+                    <button
+                      key={`${sheet.name}-${index}`}
+                      type="button"
+                      onClick={() => setActiveSheetIndex(index)}
+                      className="cursor-pointer rounded-full border px-3 py-1 text-sm transition"
+                      style={{
+                        borderColor: "var(--tag-border)",
+                        backgroundColor: isActive
+                          ? "var(--tag-selected-bg)"
+                          : "var(--tag-bg)",
+                        color: isActive
+                          ? "var(--tag-selected-text)"
+                          : "var(--tag-text)",
+                      }}
+                    >
+                      {sheet.name}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {activeSheet ? (
+              <>
+                <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                  <h4 className="font-medium">{activeSheet.name}</h4>
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="text-xs"
+                      style={{ color: "var(--muted-2)" }}
+                    >
+                      {activeSheet.total_rows} total rows •{" "}
+                      {activeSheet.headers.length} columns
+                    </div>
+
+                    <div className="relative" ref={filtersMenuContainerRef}>
+                      <button
+                        type="button"
+                        aria-label="Toggle filters menu"
+                        onClick={() => {
+                          setShowFiltersMenu((prev) => !prev);
+                          setShowStatsMenu(false);
+                        }}
+                        className="cursor-pointer rounded-md border px-2 py-1 text-sm"
+                        style={{
+                          borderColor: "var(--tag-border)",
+                          backgroundColor: "var(--tag-bg)",
+                          color: "var(--tag-text)",
+                        }}
+                        title="Filters"
+                      >
+                        <Funnel size={16} aria-hidden="true" />
+                      </button>
+
+                      {showFiltersMenu && (
+                        <div
+                          className="absolute right-0 z-20 mt-2 w-72 rounded-lg border p-3"
+                          style={{
+                            borderColor: "var(--border)",
+                            backgroundColor: "var(--surface-2)",
+                          }}
+                        >
+                          <div className="mb-2 text-sm font-medium">
+                            Filters
+                          </div>
+
+                          <label
+                            className="mb-2 block text-sm"
+                            style={{ color: "var(--muted)" }}
+                          >
+                            Search in preview
+                            <input
+                              type="text"
+                              value={globalQuery}
+                              onChange={(e) => setGlobalQuery(e.target.value)}
+                              placeholder="Find any value"
+                              className="mt-1 w-full rounded border px-3 py-2 text-sm"
+                              style={{
+                                borderColor: "var(--border)",
+                                backgroundColor: "var(--surface)",
+                                color: "var(--foreground)",
+                              }}
+                            />
+                          </label>
+
+                          <label
+                            className="mb-2 block text-sm"
+                            style={{ color: "var(--muted)" }}
+                          >
+                            Filter column
+                            <select
+                              value={columnFilterIndex}
+                              onChange={(e) =>
+                                setColumnFilterIndex(Number(e.target.value))
+                              }
+                              className="mt-1 w-full rounded border px-3 py-2 text-sm"
+                              style={{
+                                borderColor: "var(--border)",
+                                backgroundColor: "var(--surface)",
+                                color: "var(--foreground)",
+                              }}
+                            >
+                              {tableModel.headers.map((header, idx) => (
+                                <option key={idx} value={idx}>
+                                  {header}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+
+                          <label
+                            className="block text-sm"
+                            style={{ color: "var(--muted)" }}
+                          >
+                            Filter value
+                            <input
+                              type="text"
+                              value={columnFilterQuery}
+                              onChange={(e) =>
+                                setColumnFilterQuery(e.target.value)
+                              }
+                              placeholder="Contains..."
+                              className="mt-1 w-full rounded border px-3 py-2 text-sm"
+                              style={{
+                                borderColor: "var(--border)",
+                                backgroundColor: "var(--surface)",
+                                color: "var(--foreground)",
+                              }}
+                            />
+                          </label>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="relative" ref={statsMenuContainerRef}>
+                      <button
+                        type="button"
+                        aria-label="Toggle statistics menu"
+                        onClick={() => {
+                          setShowStatsMenu((prev) => !prev);
+                          setShowFiltersMenu(false);
+                        }}
+                        className="cursor-pointer rounded-md border px-2 py-1 text-sm"
+                        style={{
+                          borderColor: "var(--tag-border)",
+                          backgroundColor: "var(--tag-bg)",
+                          color: "var(--tag-text)",
+                        }}
+                        title="Statistics"
+                      >
+                        <BarChart3 size={16} aria-hidden="true" />
+                      </button>
+
+                      {showStatsMenu && (
+                        <div
+                          className="absolute right-0 z-20 mt-2 w-[42rem] max-w-[calc(100vw-2rem)] rounded-lg border p-3"
+                          style={{
+                            borderColor: "var(--border)",
+                            backgroundColor: "var(--surface-2)",
+                          }}
+                        >
+                          <div className="mb-3 text-sm font-medium">
+                            Preview Insights
+                          </div>
+
+                          <div className="mb-3 grid grid-cols-1 gap-3 md:grid-cols-2">
+                            <div
+                              className="rounded-md border p-2"
+                              style={{
+                                borderColor: "var(--border)",
+                                backgroundColor: "var(--surface)",
+                              }}
+                            >
+                              <div
+                                className="mb-2 text-xs font-medium"
+                                style={{ color: "var(--muted)" }}
+                              >
+                                Overview
+                              </div>
+                              <div
+                                className="grid grid-cols-2 gap-2 text-xs"
+                                style={{ color: "var(--muted-2)" }}
+                              >
+                                <div
+                                  className="rounded border px-2 py-1"
+                                  style={{
+                                    borderColor: "var(--border)",
+                                    backgroundColor: "var(--surface-2)",
+                                  }}
+                                >
+                                  <div>Sample Rows</div>
+                                  <div
+                                    className="text-sm font-medium"
+                                    style={{ color: "var(--foreground)" }}
+                                  >
+                                    {tableModel.sampleSize}
+                                  </div>
+                                </div>
+                                <div
+                                  className="rounded border px-2 py-1"
+                                  style={{
+                                    borderColor: "var(--border)",
+                                    backgroundColor: "var(--surface-2)",
+                                  }}
+                                >
+                                  <div>Filtered Rows</div>
+                                  <div
+                                    className="text-sm font-medium"
+                                    style={{ color: "var(--foreground)" }}
+                                  >
+                                    {tableModel.rows.length}
+                                  </div>
+                                </div>
+                                <div
+                                  className="rounded border px-2 py-1"
+                                  style={{
+                                    borderColor: "var(--border)",
+                                    backgroundColor: "var(--surface-2)",
+                                  }}
+                                >
+                                  <div>Columns</div>
+                                  <div
+                                    className="text-sm font-medium"
+                                    style={{ color: "var(--foreground)" }}
+                                  >
+                                    {tableModel.totalColumns}
+                                  </div>
+                                </div>
+                                <div
+                                  className="rounded border px-2 py-1"
+                                  style={{
+                                    borderColor: "var(--border)",
+                                    backgroundColor: "var(--surface-2)",
+                                  }}
+                                >
+                                  <div>Sorted By</div>
+                                  <div
+                                    className="text-sm font-medium"
+                                    style={{ color: "var(--foreground)" }}
+                                  >
+                                    {sortColumnIndex === null
+                                      ? "None"
+                                      : `${tableModel.headers[sortColumnIndex]} (${sortDirection})`}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div
+                              className="rounded-md border p-2"
+                              style={{
+                                borderColor: "var(--border)",
+                                backgroundColor: "var(--surface)",
+                              }}
+                            >
+                              <div
+                                className="mb-2 text-xs font-medium"
+                                style={{ color: "var(--muted)" }}
+                              >
+                                Quality Checks
+                              </div>
+                              <div
+                                className="space-y-1 text-xs"
+                                style={{ color: "var(--muted-2)" }}
+                              >
+                                <div className="flex items-center justify-between">
+                                  <span>Duplicate rows</span>
+                                  <span style={{ color: "var(--foreground)" }}>
+                                    {tableModel.duplicateRows}
+                                  </span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <span>Completely empty rows</span>
+                                  <span style={{ color: "var(--foreground)" }}>
+                                    {tableModel.emptyRows}
+                                  </span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <span>High-null columns (&gt;50%)</span>
+                                  <span style={{ color: "var(--foreground)" }}>
+                                    {
+                                      tableModel.nullRates.filter((r) => r > 50)
+                                        .length
+                                    }
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {tableModel.totalColumns > 0 && (
+                            <div
+                              className="rounded-md border p-2"
+                              style={{
+                                borderColor: "var(--border)",
+                                backgroundColor: "var(--surface)",
+                              }}
+                            >
+                              <div
+                                className="mb-2 text-xs font-medium"
+                                style={{ color: "var(--muted)" }}
+                              >
+                                Column Breakdown
+                              </div>
+                              <div
+                                className="grid grid-cols-1 gap-1 text-xs md:grid-cols-2"
+                                style={{ color: "var(--muted-2)" }}
+                              >
+                                {tableModel.headers.map((header, idx) => (
+                                  <div
+                                    key={`insight-${idx}`}
+                                    className="grid grid-cols-[1fr_auto_auto] items-center gap-2 rounded border px-2 py-1"
+                                    style={{
+                                      borderColor: "var(--border)",
+                                      backgroundColor: "var(--surface-2)",
+                                    }}
+                                  >
+                                    <span
+                                      className="truncate"
+                                      title={header}
+                                      style={{ color: "var(--foreground)" }}
+                                    >
+                                      {header}
+                                    </span>
+                                    <span
+                                      className="rounded-full border px-2 py-0.5"
+                                      style={{
+                                        borderColor: "var(--tag-border)",
+                                        backgroundColor: "var(--tag-bg)",
+                                        color: "var(--tag-text)",
+                                      }}
+                                    >
+                                      {tableModel.inferredTypes[idx]}
+                                    </span>
+                                    <span>
+                                      {tableModel.nullRates[idx].toFixed(0)}%
+                                      null
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  className="rounded-lg border"
+                  style={{ borderColor: "var(--border)" }}
+                >
+                  <table className="w-full table-fixed text-left text-sm">
+                    <thead style={{ backgroundColor: "var(--surface-2)" }}>
+                      <tr>
+                        {tableModel.totalColumns > 0 ? (
+                          tableModel.headers.map((header, headerIndex) => (
+                            <th
+                              key={headerIndex}
+                              className="px-3 py-2 font-medium break-words"
+                              style={{ color: "var(--muted)" }}
+                            >
+                              <button
+                                type="button"
+                                onClick={() => toggleSort(headerIndex)}
+                                className="cursor-pointer w-full text-left"
+                                style={{ color: "inherit" }}
+                              >
+                                {header}
+                                {sortColumnIndex === headerIndex &&
+                                  (sortDirection === "asc" ? " ↑" : " ↓")}
+                              </button>
+                            </th>
+                          ))
+                        ) : (
+                          <th
+                            className="px-3 py-2 font-medium"
+                            style={{ color: "var(--muted)" }}
+                          >
+                            No header row detected
+                          </th>
+                        )}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {tableModel.rows.length > 0 ? (
+                        tableModel.rows.map((row, rowIndex) => (
+                          <tr
+                            key={rowIndex}
+                            className="border-t"
+                            style={{ borderColor: "var(--border)" }}
+                          >
+                            {Array.from(
+                              { length: tableModel.totalColumns },
+                              (_, colIndex) => colIndex,
+                            ).map((colIndex) => (
+                              <td
+                                key={colIndex}
+                                className="px-3 py-2 align-top break-words"
+                              >
+                                {formatCell(row[colIndex])}
+                              </td>
+                            ))}
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td
+                            className="px-3 py-3 text-sm"
+                            style={{ color: "var(--muted-2)" }}
+                          >
+                            No rows match your current search/filter.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="mt-3 flex flex-wrap items-center gap-2">
                   <button
-                    key={mode}
-                    onClick={() => setSizingMode(mode)}
-                    className={`cursor-pointer px-3 py-1 rounded border text-xs transition shadow-sm ${
-                      sizingMode === mode
-                        ? "bg-[#292931] text-white border-[#292931]"
-                        : "bg-white border-gray-300 hover:border-[#292931]"
-                    }`}
-                    title={
-                      mode === "compact"
-                        ? "Compact view - smaller cells"
-                        : "Comfortable view - medium cells"
+                    type="button"
+                    onClick={() => void loadPage(true)}
+                    disabled={
+                      pagingLoading ||
+                      loadingAllRows ||
+                      pagedDone ||
+                      !hasLoadedPageData
                     }
+                    className="cursor-pointer rounded-md border px-3 py-1.5 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+                    style={{
+                      borderColor: "var(--tag-border)",
+                      backgroundColor: "var(--tag-bg)",
+                      color: "var(--tag-text)",
+                    }}
                   >
-                    {mode === "compact" ? "Compact" : "Comfortable"}
+                    {pagingLoading
+                      ? "Loading..."
+                      : pagedDone
+                        ? "All rows loaded"
+                        : `Load ${PAGE_SIZE} more`}
                   </button>
-                ))}
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-gray-600">Column width:</span>
-              <div className="flex gap-1">
-                {[60, 80, 100, 120, 150, 200, 250].map((width) => (
+
                   <button
-                    key={width}
-                    onClick={() => setColumnWidth(width)}
-                    className={`cursor-pointer px-2 py-1 rounded border text-xs ${
-                      columnWidth === width
-                        ? "bg-[#292931] text-white border-[#292931]"
-                        : "bg-white border-gray-300 hover:border-[#292931]"
-                    }`}
+                    type="button"
+                    onClick={() => void loadAllRows()}
+                    disabled={
+                      pagingLoading ||
+                      loadingAllRows ||
+                      pagedDone ||
+                      !hasLoadedPageData
+                    }
+                    className="cursor-pointer rounded-md border px-3 py-1.5 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+                    style={{
+                      borderColor: "var(--tag-border)",
+                      backgroundColor: "var(--tag-bg)",
+                      color: "var(--tag-text)",
+                    }}
                   >
-                    {width}px
+                    {loadingAllRows ? "Loading all..." : "Load all rows"}
                   </button>
-                ))}
-                <input
-                  type="number"
-                  aria-label="Column width"
-                  min={10}
-                  value={columnWidth}
-                  onChange={(e) => {
-                    const v = Number(e.target.value);
-                    // clamp to sensible minimum
-                    setColumnWidth(
-                      Number.isFinite(v) ? Math.max(10, Math.round(v)) : 10
-                    );
-                  }}
-                  className="w-20 px-2 py-1 border rounded text-xs"
-                />
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-gray-600">Text display:</span>
-              <button
-                onClick={() => setWrapText(!wrapText)}
-                className={`cursor-pointer px-3 py-1 rounded border text-xs transition shadow-sm ${
-                  wrapText
-                    ? "bg-[#292931] text-white border-[#292931]"
-                    : "bg-white border-gray-300 hover:border-[#292931]"
-                }`}
-                title={
-                  wrapText
-                    ? "Text wraps to fit cell width"
-                    : "Text truncated with ellipsis"
-                }
-              >
-                {wrapText ? "Wrap text" : "Ellipsis"}
-              </button>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                disabled={!token || !currentSheetName}
-                onClick={() =>
-                  token &&
-                  currentSheetName &&
-                  window.open(exportCsvUrl(token, currentSheetName), "_blank")
-                }
-                className="cursor-pointer px-3 py-1 rounded border bg-white hover:bg-gray-50 text-xs disabled:opacity-40"
-              >
-                Export CSV
-              </button>
-              <button
-                disabled={!token || !currentSheetName}
-                onClick={() =>
-                  token &&
-                  currentSheetName &&
-                  window.open(exportJsonUrl(token, currentSheetName), "_blank")
-                }
-                className="cursor-pointer px-3 py-1 rounded border bg-white hover:bg-gray-50 text-xs disabled:opacity-40"
-              >
-                Export JSON
-              </button>
-            </div>
-            {page && (
-              <div className="flex items-center gap-2 text-xs">
-                <button
-                  disabled={offset === 0 || pageLoading}
-                  onClick={() => setOffset(Math.max(0, offset - limit))}
-                  className="cursor-pointer px-2 py-1 border rounded disabled:opacity-40"
-                >
-                  Prev
-                </button>
-                <button
-                  disabled={page.done || pageLoading}
-                  onClick={() => setOffset(offset + limit)}
-                  className="cursor-pointer px-2 py-1 border rounded disabled:opacity-40"
-                >
-                  Next
-                </button>
-                <span className="text-gray-500">
-                  {showingFrom}-{showingTo} of {totalRows}
-                </span>
-              </div>
+
+                  <span className="text-xs" style={{ color: "var(--muted-2)" }}>
+                    Showing {loadedRowsCount}
+                    {totalDataRows !== null ? ` of ${totalDataRows}` : ""} rows
+                    in this sheet.
+                  </span>
+                </div>
+
+                <p className="mt-2 text-xs" style={{ color: "var(--muted-2)" }}>
+                  Search, filter, and sort apply to the currently loaded rows
+                  for this sheet.
+                </p>
+              </>
+            ) : (
+              <p className="text-sm" style={{ color: "var(--muted-2)" }}>
+                No sheets available in this workbook preview.
+              </p>
             )}
           </div>
-          <div className="overflow-hidden relative rounded-lg border border-gray-200 shadow-lg">
-            <div className="bg-gradient-to-r from-gray-100 to-gray-200 px-4 py-3 font-semibold flex justify-between items-center text-sm border-b border-gray-300">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
-                <span className="text-gray-700">{currentSheetName}</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <div
-                  title={`Column width: ${columnWidth}px`}
-                  className="text-xs text-gray-600 bg-white px-2 py-1 rounded-full select-none"
-                >
-                  {columnWidth}px
-                </div>
-                <span className="text-xs text-gray-600 bg-white px-2 py-1 rounded-full">
-                  {totalRows.toLocaleString()} rows
-                </span>
-              </div>
-            </div>
-            <div
-              ref={scrollRef}
-              className="overflow-auto max-h-[560px] relative"
-            >
-              {pageLoading && (
-                <div className="absolute inset-0 bg-white/60 flex items-center justify-center text-xs text-gray-600">
-                  Loading rows...
-                </div>
-              )}
-              <div className="relative min-w-0">
-                <table
-                  className={`border-collapse text-xs md:text-sm bg-white rounded-lg shadow-lg border border-gray-200 ${
-                    wrapText ? "" : "table-fixed"
-                  }`}
-                  style={{
-                    borderSpacing: 0,
-                    // When using fixed column widths (ellipsis or fixed density), make the table width
-                    // fit its columns so the <col> pixel widths are honored and horizontal scrolling appears.
-                    width: wrapText ? undefined : "max-content",
-                    // allow the surrounding container to still constrain height/scroll
-                    maxWidth: "100%",
-                  }}
-                >
-                  {/* Set column widths when using fixed sizing */}
-                  <colgroup>
-                    {/* Row-number column */}
-                    <col style={{ width: 56 }} />
-                    {/* Data columns */}
-                    {headerRow.map((_, i) => {
-                      // Calculate column width based on mode and settings
-                      // Always return a concrete pixel width on the <col> so browsers (Chrome) honor it.
-                      const getColumnWidth = () => {
-                        // When using fixed sizing modes, use the explicit `columnWidth` value
-                        // for the pixel width. In 'auto' density we still honor the user's
-                        // selected explicit column width as the exact width to use.
-                        const w = columnWidth;
-                        return { width: `${w}px` };
-                      };
-
-                      return <col key={i} style={getColumnWidth()} />;
-                    })}
-                  </colgroup>
-                  <thead className="sticky top-0 z-40 bg-gradient-to-b from-gray-50 to-gray-100 border-b-2 border-gray-300">
-                    <tr className="bg-gradient-to-r from-emerald-600 to-emerald-700">
-                      {/* Top-left empty cell for row/col headers */}
-                      <th
-                        className="px-3 py-2 bg-gradient-to-br from-emerald-600 to-emerald-700 font-bold text-white text-center sticky left-0 z-50 border-r border-emerald-800 shadow-lg"
-                        style={{
-                          width: 56,
-                          height: currentConfig.rowHeight,
-                        }}
-                      ></th>
-                      {/* Column headers: A, B, ..., Z, AA, AB, ... styled like Excel */}
-                      {headerRow.map((_, i) => {
-                        // Excel-style column name (A, B, ..., Z, AA, AB, ...)
-                        const toColName = (n: number) => {
-                          let s = "";
-                          n++;
-                          while (n > 0) {
-                            const mod = (n - 1) % 26;
-                            s = String.fromCharCode(65 + mod) + s;
-                            n = Math.floor((n - 1) / 26);
-                          }
-                          return s;
-                        };
-                        return (
-                          <th
-                            key={i}
-                            className="px-3 py-2 bg-gradient-to-br from-emerald-600 to-emerald-700 font-bold text-white text-center z-40 border-r border-emerald-500/30 hover:bg-emerald-500 transition-colors"
-                            style={{
-                              minWidth: wrapText
-                                ? `${columnWidth}px`
-                                : undefined,
-                              width: !wrapText ? `${columnWidth}px` : undefined,
-                              height: currentConfig.rowHeight,
-                            }}
-                          >
-                            {toColName(i)}
-                          </th>
-                        );
-                      })}
-                    </tr>
-                    {headerRow.length > 0 && (
-                      <tr className="bg-white border-b border-gray-300">
-                        <th
-                          className={`${currentConfig.padding} bg-gradient-to-br from-emerald-600 to-emerald-700 text-center font-bold text-white sticky left-0 z-50 border-r border-emerald-800 shadow-sm`}
-                          style={{
-                            height: currentConfig.rowHeight,
-                            minHeight: wrapText ? 32 : undefined,
-                          }}
-                        >
-                          1
-                        </th>
-                        {headerRow.map((cell, i) => (
-                          <th
-                            key={i}
-                            className={`border-r border-gray-200 ${currentConfig.padding} bg-gradient-to-b from-gray-50 to-white text-center font-semibold text-gray-800 hover:bg-gray-100 transition-colors`}
-                            style={{
-                              height: wrapText
-                                ? "auto"
-                                : currentConfig.rowHeight,
-                              minHeight: wrapText ? 32 : undefined,
-                            }}
-                          >
-                            {cell === null ||
-                            cell === undefined ||
-                            cell === "" ? (
-                              <span className="text-gray-400 italic">
-                                Empty
-                              </span>
-                            ) : (
-                              // inner wrapper: block-level with constrained width so truncate works in Chrome
-                              <div
-                                className={
-                                  wrapText
-                                    ? "whitespace-normal break-words"
-                                    : "block truncate"
-                                }
-                                style={
-                                  !wrapText
-                                    ? {
-                                        maxWidth: `${columnWidth}px`,
-                                        display: "block",
-                                        overflow: "hidden",
-                                        whiteSpace: "nowrap",
-                                        textOverflow: "ellipsis",
-                                      }
-                                    : {
-                                        display: "block",
-                                        maxWidth: `${columnWidth}px`,
-                                      }
-                                }
-                                title={!wrapText ? String(cell) : undefined}
-                              >
-                                {String(cell)}
-                              </div>
-                            )}
-                          </th>
-                        ))}
-                      </tr>
-                    )}
-                  </thead>
-                  <tbody>
-                    {dataRows.map((row, rIdx) => (
-                      <tr
-                        key={rIdx}
-                        className={`border-b border-gray-200 transition-colors hover:bg-blue-50 ${
-                          rIdx % 2 ? "bg-white" : "bg-gray-50/30"
-                        }`}
-                      >
-                        {/* Row header: 1, 2, 3, ... styled like Excel (count header as 1) */}
-                        <td
-                          className={`${currentConfig.padding} align-top font-bold text-white bg-gradient-to-br from-emerald-600 to-emerald-700 text-center sticky left-0 z-10 border-r border-emerald-800 shadow-sm hover:from-emerald-500 hover:to-emerald-600 transition-colors`}
-                          style={{
-                            width: 56,
-                            height: currentConfig.rowHeight,
-                            minHeight: wrapText ? 32 : undefined,
-                          }}
-                        >
-                          {rIdx + 2 + offset}
-                        </td>
-                        {row.map((cell, cIdx) => (
-                          <td
-                            key={cIdx}
-                            className={`${currentConfig.padding} align-top font-mono text-[11px] md:text-xs text-gray-700 border-r border-gray-200 hover:bg-blue-100 transition-colors`}
-                            style={{
-                              height: wrapText
-                                ? "auto"
-                                : currentConfig.rowHeight,
-                              minHeight: wrapText ? 28 : undefined,
-                            }}
-                          >
-                            {cell === null ||
-                            cell === undefined ||
-                            cell === "" ? (
-                              <span className="text-gray-400 italic">
-                                Empty
-                              </span>
-                            ) : (
-                              <div
-                                className={
-                                  wrapText
-                                    ? "whitespace-normal break-words"
-                                    : "block truncate select-text"
-                                }
-                                style={
-                                  !wrapText
-                                    ? {
-                                        maxWidth: `${columnWidth}px`,
-                                        display: "block",
-                                        overflow: "hidden",
-                                        whiteSpace: "nowrap",
-                                        textOverflow: "ellipsis",
-                                      }
-                                    : {
-                                        display: "block",
-                                        maxWidth: `${columnWidth}px`,
-                                      }
-                                }
-                                title={!wrapText ? String(cell) : undefined}
-                              >
-                                {String(cell)}
-                              </div>
-                            )}
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            {/* Removed gradient overlays */}
-          </div>
         </div>
       )}
+
+      <BackToTopButton />
     </div>
   );
 }
-
-// scroll state updater & effects
