@@ -23,12 +23,15 @@ export default function Tool({
 }: ToolProps) {
   return (
     <div
-      className={`bg-white border border-[#d6d6df] rounded-[16px] m-0 relative overflow-hidden z-[1] transition duration-500 scale-100 ${
-        commingSoon
-          ? "opacity-50"
-          : "hover:border-black hover:shadow-lg hover:scale-[1.02]"
+      className={`rounded-[16px] m-0 relative overflow-hidden z-[1] transition duration-500 scale-100 ${
+        commingSoon ? "opacity-50" : "hover:shadow-lg hover:scale-[1.02]"
       }`}
       data-category={category}
+      style={{
+        backgroundColor: "var(--surface)",
+        border: "1px solid var(--border)",
+        color: "var(--foreground)",
+      }}
     >
       <Link
         href={commingSoon ? "#" : href}
@@ -45,24 +48,38 @@ export default function Tool({
         </h3>
         <div>
           <p
-            className="text-sm text-gray-600"
+            className="text-sm"
             style={{
               display: "-webkit-box",
               WebkitLineClamp: 2,
               WebkitBoxOrient: "vertical",
               overflow: "hidden",
+              color: "var(--muted)",
             }}
           >
             {description}
           </p>
         </div>
         {isNew && (
-          <span className="absolute top-3 right-3 bg-green-200 text-green-800 text-xs font-medium px-2 py-0.5 rounded">
+          <span
+            className="absolute top-3 right-3 text-xs font-medium px-2 py-0.5 rounded"
+            style={{
+              backgroundColor: "var(--tag-selected-bg)",
+              color: "var(--tag-selected-text)",
+            }}
+          >
             New
           </span>
         )}
         {commingSoon && (
-          <span className="absolute top-3 right-3 bg-blue-200 text-blue-800 text-xs font-medium px-2 py-0.5 rounded">
+          <span
+            className="absolute top-3 right-3 text-xs font-medium px-2 py-0.5 rounded"
+            style={{
+              backgroundColor: "var(--tag-bg)",
+              color: "var(--tag-text)",
+              border: "1px solid var(--tag-border)",
+            }}
+          >
             Coming soon
           </span>
         )}

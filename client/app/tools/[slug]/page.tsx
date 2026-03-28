@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { toolItems } from "@/components/utility/toolsData";
-import InspectSheets from "./inspect/InspectSheets";
+import InspectSheets from "@/app/tools/[slug]/inspect/InspectSheets";
 import ConvertXlsxToCsv from "./convert/ConvertXlsxToCsv";
 import ConvertCsvToXlsx from "./convert/ConvertCsvToXlsx";
 import MergeSheets from "./merge/MergeSheets";
@@ -19,8 +19,6 @@ const specialComponents: Record<string, React.ReactNode> = {
   "split-workbook": <SplitWorkbook />,
 };
 
-// In Next.js 15 dynamic routes, `params` is now an async object (Promise-like).
-// The component must be async and we must await it before accessing properties.
 export default async function ToolPage({
   params,
 }: {
@@ -38,11 +36,20 @@ export default async function ToolPage({
         </span>{" "}
         {tool.heading}
       </h1>
-      <p className="text-gray-600 mb-8 max-w-2xl">{tool.description}</p>
-      <div className="border-t pt-8">
-        {specialComponents[tool.slug] || (
-          <div className="text-sm text-gray-500">Tool UI coming soon.</div>
-        )}
+      <p className="mb-8 max-w-2xl" style={{ color: "var(--muted)" }}>
+        {tool.description}
+      </p>
+      <div
+        className="border-t pt-8"
+        style={{ borderTopColor: "var(--border)" }}
+      >
+        <div>
+          {specialComponents[tool.slug] || (
+            <div className="text-sm" style={{ color: "var(--muted-2)" }}>
+              Tool UI coming soon.
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

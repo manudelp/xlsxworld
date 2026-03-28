@@ -9,7 +9,7 @@ export default function Tools() {
 
   const categories = useMemo(
     () => ["All", ...Array.from(new Set(toolItems.map((t) => t.category)))],
-    []
+    [],
   );
 
   const filteredTools = useMemo(
@@ -17,7 +17,7 @@ export default function Tools() {
       selectedCategory === "All"
         ? toolItems
         : toolItems.filter((t) => t.category === selectedCategory),
-    [selectedCategory]
+    [selectedCategory],
   );
 
   return (
@@ -34,7 +34,10 @@ export default function Tools() {
           <Tool key={tool.title} {...tool} />
         ))}
         {filteredTools.length === 0 && (
-          <div className="col-span-full text-center text-sm text-gray-500 py-8">
+          <div
+            className="col-span-full text-center text-sm py-8"
+            style={{ color: "var(--muted)" }}
+          >
             No tools in this category.
           </div>
         )}

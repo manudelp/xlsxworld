@@ -7,7 +7,14 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <header className="bg-white w-full h-[60px] z-50 fixed right-0 left-0 top-0 border-b border-[#d6d6df] px-2 sm:px-6 flex items-center justify-between">
+    <header
+      className="w-full h-[60px] z-50 fixed right-0 left-0 top-0 px-2 sm:px-6 flex items-center justify-between"
+      style={{
+        backgroundColor: "var(--background)",
+        color: "var(--foreground)",
+        borderBottom: "1px solid var(--border)",
+      }}
+    >
       {/* Mobile Hamburger */}
       <button
         className="md:hidden mr-2 p-2 rounded hover:bg-gray-100 focus:outline-none"
@@ -72,12 +79,16 @@ export default function Header() {
       {/* Mobile Menu */}
       {menuOpen && (
         <div
-          className="fixed inset-0 bg-black/40 z-50 md:hidden"
+          className="fixed inset-0 bg-slate-900/45 z-50 md:hidden"
           onClick={() => setMenuOpen(false)}
         >
           <nav
-            className="absolute top-0 left-0 w-full h-auto bg-white shadow-lg flex flex-col p-6 gap-4"
+            className="absolute top-0 left-0 w-full h-auto shadow-lg flex flex-col p-6 gap-4"
             onClick={(e) => e.stopPropagation()}
+            style={{
+              backgroundColor: "var(--background)",
+              color: "var(--foreground)",
+            }}
           >
             <div className="flex items-center justify-between mb-4">
               <Image

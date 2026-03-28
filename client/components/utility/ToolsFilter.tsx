@@ -26,11 +26,14 @@ export default function ToolsFilter({
         <button
           key={cat}
           onClick={() => onSelect(cat)}
-          className={`tag h-[34px] text-[16px] leading-[26px] font-medium px-4 py-1 flex items-center cursor-pointer border rounded-full transition-all duration-200 ease-in-out  ${
-            selected === cat
-              ? "bg-[#292931] text-white border-[#d6d6df] hover:border-[#d6d6df]"
-              : "bg-white border-[#d6d6df] hover:border-black"
-          }`}
+          className={`tag h-[34px] text-[16px] leading-[26px] font-medium px-4 py-1 flex items-center cursor-pointer border rounded-full transition-all duration-200 ease-in-out hover:opacity-95`}
+          style={{
+            backgroundColor:
+              selected === cat ? "var(--tag-selected-bg)" : "var(--tag-bg)",
+            color:
+              selected === cat ? "var(--tag-selected-text)" : "var(--tag-text)",
+            borderColor: "var(--tag-border)",
+          }}
         >
           {cat}
         </button>

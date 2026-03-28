@@ -1,65 +1,188 @@
 @import "tailwindcss";
 
 :root {
+  /* world palette (primary: rgb(95, 157, 51)) */
+  --world-50: #f4f9ee;
+  --world-100: #e8f3dc;
+  --world-200: #d0e7bc;
+  --world-300: #b8db9d;
+  --world-400: #8fc465;
+  --world-500: #5f9d33;
+  --world-600: #558d2e;
+  --world-700: #477827;
+  --world-800: #39601f;
+  --world-900: #2a4918;
+  --world-950: #16260c;
+
+  /* semantic palette */
+  --primary: var(--world-500);
+  --primary-hover: var(--world-600);
+  --primary-active: var(--world-700);
+  --primary-soft: var(--world-100);
+  --primary-contrast: #ffffff;
+
+  --secondary: #1f6f8b;
+  --secondary-soft: #e5f2f7;
+  --accent: #c26b2f;
+  --accent-soft: #f9ede4;
+
+  --success: #2e8f4e;
+  --warning: #b67a1f;
+  --danger: #b43838;
+  --info: #2f6cb8;
+
   --background: #ffffff;
+  --surface: #f7f8fa;
+  --surface-2: #ffffff;
   --foreground: #171717;
+  --border: #d6d6df;
+  --muted: #6b7280; /* roughly Tailwind's gray-600 */
+  --muted-2: #6b7280; /* slightly different token if needed */
+  /* tag / filter tokens */
+  --tag-bg: #ffffff;
+  --tag-text: #171717;
+  --tag-border: var(--border);
+  --tag-selected-bg: var(--primary);
+  --tag-selected-text: var(--primary-contrast);
 }
 
 @theme inline {
+  --color-world-50: var(--world-50);
+  --color-world-100: var(--world-100);
+  --color-world-200: var(--world-200);
+  --color-world-300: var(--world-300);
+  --color-world-400: var(--world-400);
+  --color-world-500: var(--world-500);
+  --color-world-600: var(--world-600);
+  --color-world-700: var(--world-700);
+  --color-world-800: var(--world-800);
+  --color-world-900: var(--world-900);
+  --color-world-950: var(--world-950);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-active: var(--primary-active);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-foreground: var(--primary-contrast);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-soft: var(--secondary-soft);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* dark semantic remap */
+    --primary: var(--world-400);
+    --primary-hover: var(--world-300);
+    --primary-active: var(--world-200);
+    --primary-soft: rgba(143, 196, 101, 0.16);
+    --primary-contrast: #102008;
+
+    --secondary: #76b8d2;
+    --secondary-soft: rgba(118, 184, 210, 0.18);
+    --accent: #e39a5f;
+    --accent-soft: rgba(227, 154, 95, 0.18);
+
+    --success: #54b874;
+    --warning: #e0b15e;
+    --danger: #e17676;
+    --info: #7eaee6;
+
+    --background: #1f2329;
+    --surface: #262b32;
+    --surface-2: #2a3038;
+    --foreground: #e4e7eb;
+    --border: #3a414a;
+    --muted: #a8b0bb; /* lighter muted for dark backgrounds */
+    --muted-2: #a8b0bb;
+    /* tag / filter tokens (dark) */
+    --tag-bg: #2a3038;
+    --tag-text: #e4e7eb;
+    --tag-border: var(--border);
+    --tag-selected-bg: var(--primary);
+    --tag-selected-text: var(--primary-contrast);
   }
 }
 
 @font-face {
-  font-family: 'Alan Sans';
-  src: url('/assets/font/Alan_Sans/static/AlanSans-Regular.ttf') format('truetype');
+  font-family: "Alan Sans";
+  src: url("/assets/font/Alan_Sans/static/AlanSans-Regular.ttf")
+    format("truetype");
   font-weight: 400;
   font-style: normal;
 }
 @font-face {
-  font-family: 'Alan Sans';
-  src: url('/assets/font/Alan_Sans/static/AlanSans-Light.ttf') format('truetype');
+  font-family: "Alan Sans";
+  src: url("/assets/font/Alan_Sans/static/AlanSans-Light.ttf")
+    format("truetype");
   font-weight: 300;
   font-style: normal;
 }
 @font-face {
-  font-family: 'Alan Sans';
-  src: url('/assets/font/Alan_Sans/static/AlanSans-Medium.ttf') format('truetype');
+  font-family: "Alan Sans";
+  src: url("/assets/font/Alan_Sans/static/AlanSans-Medium.ttf")
+    format("truetype");
   font-weight: 500;
   font-style: normal;
 }
 @font-face {
-  font-family: 'Alan Sans';
-  src: url('/assets/font/Alan_Sans/static/AlanSans-SemiBold.ttf') format('truetype');
+  font-family: "Alan Sans";
+  src: url("/assets/font/Alan_Sans/static/AlanSans-SemiBold.ttf")
+    format("truetype");
   font-weight: 600;
   font-style: normal;
 }
 @font-face {
-  font-family: 'Alan Sans';
-  src: url('/assets/font/Alan_Sans/static/AlanSans-Bold.ttf') format('truetype');
+  font-family: "Alan Sans";
+  src: url("/assets/font/Alan_Sans/static/AlanSans-Bold.ttf") format("truetype");
   font-weight: 700;
   font-style: normal;
 }
 @font-face {
-  font-family: 'Alan Sans';
-  src: url('/assets/font/Alan_Sans/static/AlanSans-ExtraBold.ttf') format('truetype');
+  font-family: "Alan Sans";
+  src: url("/assets/font/Alan_Sans/static/AlanSans-ExtraBold.ttf")
+    format("truetype");
   font-weight: 800;
   font-style: normal;
 }
 @font-face {
-  font-family: 'Alan Sans';
-  src: url('/assets/font/Alan_Sans/static/AlanSans-Black.ttf') format('truetype');
+  font-family: "Alan Sans";
+  src: url("/assets/font/Alan_Sans/static/AlanSans-Black.ttf")
+    format("truetype");
   font-weight: 900;
   font-style: normal;
 }
 
 body {
-  font-family: 'Alan Sans', sans-serif;
+  font-family: "Alan Sans", sans-serif;
+  background-color: var(--background);
+  color: var(--foreground);
+  transition:
+    background-color 200ms ease,
+    color 200ms ease;
+}
+
+/* sensible button hover defaults that respect dark mode */
+button:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+@media (prefers-color-scheme: dark) {
+  button:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+  }
 }
