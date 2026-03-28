@@ -38,7 +38,7 @@ class SheetPage(BaseModel):
 
 @router.post("/preview", response_model=WorkbookPreview)
 async def preview_workbook(
-    file: UploadFile = File(..., description="XLSX file to inspect"),
+    file: UploadFile = File(..., description="Excel file to inspect"),
     sample_rows: int = Query(25, ge=1, le=500),
 ):
     if not file.filename.lower().endswith((".xlsx", ".xlsm", ".xltx", ".xltm")):
@@ -70,6 +70,7 @@ async def preview_workbook(
 
     sheets: List[SheetPreview] = []
     for ws in wb.worksheets:
+
         rows_iter = ws.iter_rows(values_only=True)
         try:
             header = next(rows_iter)
