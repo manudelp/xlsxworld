@@ -30,31 +30,9 @@ export interface SheetPage {
 export async function uploadForPreview(file: File, sampleRows = 25): Promise<WorkbookPreview> {
   const fd = new FormData();
   fd.append('file', file);
-  return api.postForm<WorkbookPreview>('/api/inspect/preview', fd, { sample_rows: sampleRows });
+  return api.postForm<WorkbookPreview>('/api/tools/inspect/preview', fd, { sample_rows: sampleRows });
 }
 
 export async function fetchSheetPage(token: string, sheet: string, offset: number, limit: number): Promise<SheetPage> {
-  return api.get<SheetPage>('/api/inspect/sheet', { token, sheet, offset, limit });
-}
-
-export function exportCsvUrl(token: string, sheet: string): string {
-  return `${process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8000'}/api/inspect/export/csv?token=${encodeURIComponent(token)}&sheet=${encodeURIComponent(sheet)}`;
-}
-
-export function exportCsvZipUrl(token: string): string {
-  return `${process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8000'}/api/inspect/export/csv-zip?token=${encodeURIComponent(token)}`;
-}
-
-export function exportCsvZipSelectedUrl(token: string, sheets: string[]): string {
-  const base = `${process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8000'}/api/inspect/export/csv-zip-selected`;
-  const params = new URLSearchParams();
-  params.set('token', token);
-  sheets.forEach((sheet) => {
-    params.append('sheets', sheet);
-  });
-  return `${base}?${params.toString()}`;
-}
-
-export function exportJsonUrl(token: string, sheet: string): string {
-  return `${process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8000'}/api/inspect/export/json?token=${encodeURIComponent(token)}&sheet=${encodeURIComponent(sheet)}`;
+  return api.get<SheetPage>('/api/tools/inspect/sheet', { token, sheet, offset, limit });
 }

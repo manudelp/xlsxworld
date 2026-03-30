@@ -2,11 +2,13 @@
 import React, { useCallback, useMemo, useState } from "react";
 import {
   uploadForPreview,
+  WorkbookPreview,
+} from "@/lib/tools/inspect";
+import {
   exportCsvUrl,
   exportCsvZipUrl,
   exportCsvZipSelectedUrl,
-  WorkbookPreview,
-} from "@/lib/tools/inspect";
+} from "@/lib/tools/convert";
 import FileUploadDropzone from "@/components/utility/FileUploadDropzone";
 
 export default function ConvertXlsxToCsv() {
@@ -75,8 +77,8 @@ export default function ConvertXlsxToCsv() {
   return (
     <div className="space-y-4">
       <FileUploadDropzone
-        accept=".xls,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
-        message="Drop or select an XLSX file to convert to CSV"
+        accept=".xls,.xlsx,.xlsm,.xlsb,.xltx,.xltm,.xlam,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.binary.macroEnabled.12,application/vnd.ms-excel.sheet.macroEnabled.12"
+        message="Drop or select an Excel file (.xlsx, .xls, .xlsb, etc.) to convert to CSV"
         className="flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition"
         style={{
           borderColor: error ? "var(--danger)" : "var(--border)",

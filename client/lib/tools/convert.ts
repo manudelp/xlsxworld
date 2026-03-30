@@ -28,3 +28,25 @@ export async function csvToXlsx(
 
   return response.arrayBuffer();
 }
+
+export function exportCsvUrl(token: string, sheet: string): string {
+  const params = new URLSearchParams();
+  params.set("token", token);
+  params.set("sheet", sheet);
+  return `${API_BASE}/api/convert/xlsx-to-csv/export/csv?${params.toString()}`;
+}
+
+export function exportCsvZipUrl(token: string): string {
+  const params = new URLSearchParams();
+  params.set("token", token);
+  return `${API_BASE}/api/convert/xlsx-to-csv/export/csv-zip?${params.toString()}`;
+}
+
+export function exportCsvZipSelectedUrl(token: string, sheets: string[]): string {
+  const params = new URLSearchParams();
+  params.set("token", token);
+  sheets.forEach((sheet) => {
+    params.append("sheets", sheet);
+  });
+  return `${API_BASE}/api/convert/xlsx-to-csv/export/csv-zip-selected?${params.toString()}`;
+}
