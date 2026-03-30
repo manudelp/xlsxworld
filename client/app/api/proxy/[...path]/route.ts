@@ -1,10 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 
-const BACKEND = process.env.API_BASE;
-
-if (!BACKEND) {
-  console.warn("API_BASE is not set — proxy requests will fail without it.");
-}
+const BACKEND =
+  process.env.API_BASE ?? process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
 
 async function proxy(
   req: NextRequest,
@@ -22,12 +19,13 @@ async function proxy(
     headers[key] = value;
   });
 
-  const init: RequestInit = {
+  const init: RequestInit & { duplex?: "half" } = {
     method: req.method,
     headers,
     // body: only pass body for non-GET/HEAD
     body: ["GET", "HEAD"].includes(req.method) ? undefined : req.body,
     redirect: "follow",
+    duplex: "half",
   };
 
   const res = await fetch(dest, init);
