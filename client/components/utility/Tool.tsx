@@ -23,8 +23,8 @@ export default function Tool({
 }: ToolProps) {
   return (
     <div
-      className={`rounded-[16px] m-0 relative overflow-hidden z-[1] transition duration-500 scale-100 ${
-        commingSoon ? "opacity-50" : "hover:shadow-lg hover:scale-[1.02]"
+      className={`rounded-[16px] m-0 relative overflow-hidden z-[1] transition ${
+        commingSoon ? "opacity-50" : "hover:ring-1 hover:ring-primary/50 hover:shadow-lg"
       }`}
       data-category={category}
       style={{
