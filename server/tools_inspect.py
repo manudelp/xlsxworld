@@ -236,6 +236,95 @@ async def export_csv(token: str, sheet: str):
         headers={"Content-Disposition": f"attachment; filename={sheet}.csv"},
     )
 
+
+@router.get("/export/csv-zip")
+async def export_csv_zip(token: str):
+    from fastapi.responses import StreamingResponse
+    import csv
+    import re
+    import zipfile
+
+    wb = _load_workbook_from_token(token)
+
+    zipped = BytesIO()
+    used_names: set[str] = set()
+
+    def build_unique_name(raw_name: str) -> str:
+        safe = re.sub(r"[^A-Za-z0-9._-]+", "_", raw_name).strip("._")
+        if not safe:
+            safe = "sheet"
+        candidate = safe
+        i = 2
+        while f"{candidate}.csv" in used_names:
+            candidate = f"{safe}_{i}"
+            i += 1
+        filename = f"{candidate}.csv"
+        used_names.add(filename)
+        return filename
+
+    with zipfile.ZipFile(zipped, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
+        for ws in wb.worksheets:
+            output = StringIO()
+            writer = csv.writer(output)
+            for r in ws.iter_rows(values_only=True):
+                writer.writerow(["" if c is None else c for c in r])
+            zf.writestr(build_unique_name(ws.title), output.getvalue().encode("utf-8"))
+
+    zipped.seek(0)
+    return StreamingResponse(
+        iter([zipped.getvalue()]),
+        media_type="application/zip",
+        headers={"Content-Disposition": "attachment; filename=all-sheets-csv.zip"},
+    )
+
+
+@router.get("/export/csv-zip-selected")
+async def export_csv_zip_selected(token: str, sheets: List[str] = Query(...)):
+    from fastapi.responses import StreamingResponse
+    import csv
+    import re
+    import zipfile
+
+    if not sheets:
+        raise HTTPException(status_code=400, detail="Select at least one sheet")
+
+    wb = _load_workbook_from_token(token)
+    missing = [name for name in sheets if name not in wb.sheetnames]
+    if missing:
+        raise HTTPException(status_code=404, detail=f"Sheet not found: {missing[0]}")
+
+    zipped = BytesIO()
+    used_names: set[str] = set()
+
+    def build_unique_name(raw_name: str) -> str:
+        safe = re.sub(r"[^A-Za-z0-9._-]+", "_", raw_name).strip("._")
+        if not safe:
+            safe = "sheet"
+        candidate = safe
+        i = 2
+        while f"{candidate}.csv" in used_names:
+            candidate = f"{safe}_{i}"
+            i += 1
+        filename = f"{candidate}.csv"
+        used_names.add(filename)
+        return filename
+
+    with zipfile.ZipFile(zipped, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
+        for sheet_name in sheets:
+            ws = wb[sheet_name]
+            output = StringIO()
+            writer = csv.writer(output)
+            for r in ws.iter_rows(values_only=True):
+                writer.writerow(["" if c is None else c for c in r])
+            zf.writestr(build_unique_name(ws.title), output.getvalue().encode("utf-8"))
+
+    zipped.seek(0)
+    return StreamingResponse(
+        iter([zipped.getvalue()]),
+        media_type="application/zip",
+        headers={"Content-Disposition": "attachment; filename=selected-sheets-csv.zip"},
+    )
+
 @router.get("/export/json")
 async def export_json(token: str, sheet: str):
     from fastapi.responses import StreamingResponse

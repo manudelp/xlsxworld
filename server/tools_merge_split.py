@@ -2,6 +2,7 @@ from __future__ import annotations
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 from fastapi.responses import StreamingResponse
 from io import BytesIO
+import re
 import zipfile
 from openpyxl import load_workbook, Workbook
 
@@ -12,6 +13,103 @@ _MAX_UPLOAD_SIZE_BYTES = 20 * 1024 * 1024  # 20 MB
 def _check_file(file: UploadFile, expected_ext: str):
     if not file.filename.lower().endswith(expected_ext):
         raise HTTPException(status_code=400, detail=f"Unsupported file type, expected {expected_ext}")
+
+
+_INVALID_SHEET_CHARS = re.compile(r"[\\/*?:\[\]]")
+
+
+def _safe_sheet_title(raw: str | None, fallback: str) -> str:
+    value = (raw or "").strip()
+    if not value:
+        value = fallback
+
+    # Excel sheet title rules: max 31 chars, no \\ / * ? : [ ]
+    value = _INVALID_SHEET_CHARS.sub("_", value).strip("'")
+    if not value:
+        value = fallback
+
+    return value[:31]
+
+
+def _unique_sheet_title(base: str, used: set[str]) -> str:
+    if base not in used:
+        used.add(base)
+        return base
+
+    for index in range(2, 10_000):
+        suffix = f"_{index}"
+        allowed = max(1, 31 - len(suffix))
+        candidate = f"{base[:allowed]}{suffix}"
+        if candidate not in used:
+            used.add(candidate)
+            return candidate
+
+    # extremely defensive fallback
+    candidate = f"part_{len(used) + 1}"[:31]
+    used.add(candidate)
+    return candidate
+
+
+def _alpha_token(index: int, lowercase: bool = False) -> str:
+    # 1 -> A, 26 -> Z, 27 -> AA
+    chars: list[str] = []
+    n = max(1, index)
+    while n > 0:
+        n -= 1
+        chars.append(chr(ord("A") + (n % 26)))
+        n //= 26
+    token = "".join(reversed(chars))
+    return token.lower() if lowercase else token
+
+
+def _roman_token(index: int, lowercase: bool = False) -> str:
+    n = max(1, index)
+    numerals = [
+        (1000, "M"),
+        (900, "CM"),
+        (500, "D"),
+        (400, "CD"),
+        (100, "C"),
+        (90, "XC"),
+        (50, "L"),
+        (40, "XL"),
+        (10, "X"),
+        (9, "IX"),
+        (5, "V"),
+        (4, "IV"),
+        (1, "I"),
+    ]
+    parts: list[str] = []
+    for value, symbol in numerals:
+        while n >= value:
+            parts.append(symbol)
+            n -= value
+    token = "".join(parts)
+    return token.lower() if lowercase else token
+
+
+def _build_part_token(
+    index: int,
+    numbering_style: str,
+    custom_tokens: list[str],
+) -> str:
+    if numbering_style == "numeric":
+        return str(index)
+    if numbering_style == "numeric-padded":
+        return f"{index:02d}"
+    if numbering_style == "alpha-upper":
+        return _alpha_token(index, lowercase=False)
+    if numbering_style == "alpha-lower":
+        return _alpha_token(index, lowercase=True)
+    if numbering_style == "roman-upper":
+        return _roman_token(index, lowercase=False)
+    if numbering_style == "roman-lower":
+        return _roman_token(index, lowercase=True)
+    if numbering_style == "custom":
+        if index <= len(custom_tokens):
+            return custom_tokens[index - 1]
+        return str(index)
+    return str(index)
 
 
 @router.post("/merge-sheets")
@@ -76,6 +174,10 @@ async def split_sheet(
     file: UploadFile = File(..., description="XLSX file"),
     sheet: str = Form(..., description="Sheet name"),
     chunk_size: int = Form(1000, description="Max rows per chunk (including header)"),
+    part_base: str = Form("part", description="Base name used for split sheets"),
+    part_separator: str = Form("_", description="Separator between base name and part token"),
+    numbering_style: str = Form("numeric", description="Part token style"),
+    custom_sequence: str = Form("", description="Custom tokens (one per line) when style is custom"),
 ):
     _check_file(file, ".xlsx")
 
@@ -98,22 +200,55 @@ async def split_sheet(
     if not rows:
         raise HTTPException(status_code=400, detail="Sheet is empty")
 
+    valid_styles = {
+        "numeric",
+        "numeric-padded",
+        "alpha-upper",
+        "alpha-lower",
+        "roman-upper",
+        "roman-lower",
+        "custom",
+    }
+    if numbering_style not in valid_styles:
+        raise HTTPException(status_code=400, detail="Invalid numbering_style")
+
+    if len(part_separator) > 4:
+        raise HTTPException(status_code=400, detail="part_separator must be 4 characters or fewer")
+
+    custom_tokens = [
+        token.strip()
+        for token in re.split(r"[\r\n,]+", custom_sequence)
+        if token.strip()
+    ]
+    if numbering_style == "custom" and not custom_tokens:
+        raise HTTPException(status_code=400, detail="custom_sequence is required when numbering_style is custom")
+
     # first row as header
     header = rows[0]
     chunks = [rows[i : i + chunk_size] for i in range(1, len(rows), chunk_size)]
 
     out_wb = Workbook()
     out_wb.remove(out_wb.active)
+    used_titles: set[str] = set()
 
     for idx, chunk in enumerate(chunks, start=1):
-        part = out_wb.create_sheet(f"part_{idx}")
+        token = _build_part_token(idx, numbering_style, custom_tokens)
+        default_name = f"part_{idx}"
+        requested_name = f"{part_base}{part_separator}{token}"
+        base_title = _safe_sheet_title(requested_name, default_name)
+        sheet_title = _unique_sheet_title(base_title, used_titles)
+        part = out_wb.create_sheet(sheet_title)
         part.append(["" if v is None else v for v in header])
         for row in chunk:
             part.append(["" if v is None else v for v in row])
 
     if not chunks:
         # no data rows, create one sheet with header only
-        part = out_wb.create_sheet("part_1")
+        token = _build_part_token(1, numbering_style, custom_tokens)
+        requested_name = f"{part_base}{part_separator}{token}"
+        base_title = _safe_sheet_title(requested_name, "part_1")
+        sheet_title = _unique_sheet_title(base_title, used_titles)
+        part = out_wb.create_sheet(sheet_title)
         part.append(["" if v is None else v for v in header])
 
     output = BytesIO()

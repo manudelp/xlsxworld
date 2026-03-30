@@ -29,7 +29,11 @@
   --success: #2e8f4e;
   --warning: #b67a1f;
   --danger: #b43838;
+  --danger-soft: rgba(180, 56, 56, 0.12);
   --info: #2f6cb8;
+
+  --reorder-highlight-bg: rgba(42, 73, 24, 0.22);
+  --reorder-highlight-border: var(--world-800);
 
   --background: #ffffff;
   --surface: #f7f8fa;
@@ -100,7 +104,11 @@
     --success: #54b874;
     --warning: #e0b15e;
     --danger: #e17676;
+    --danger-soft: rgba(225, 118, 118, 0.2);
     --info: #7eaee6;
+
+    --reorder-highlight-bg: rgba(143, 196, 101, 0.24);
+    --reorder-highlight-border: var(--world-300);
 
     --background: #1f2329;
     --surface: #262b32;

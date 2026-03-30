@@ -1,8 +1,10 @@
 "use client";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
   uploadForPreview,
   exportCsvUrl,
+  exportCsvZipUrl,
+  exportCsvZipSelectedUrl,
   WorkbookPreview,
 } from "@/lib/tools/inspect";
 import FileUploadDropzone from "@/components/utility/FileUploadDropzone";
@@ -12,16 +14,22 @@ export default function ConvertXlsxToCsv() {
   const [activeSheet, setActiveSheet] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fileName, setFileName] = useState("");
+  const [selectedSheets, setSelectedSheets] = useState<string[]>([]);
 
   const onFile = useCallback(async (file: File) => {
     setError(null);
     setPreview(null);
+    setSelectedSheets([]);
+    setFileName(file.name);
     setLoading(true);
     setActiveSheet(0);
 
     try {
       const p = await uploadForPreview(file, 25);
       setPreview(p);
+      const firstSheet = p.sheets[0]?.name;
+      setSelectedSheets(firstSheet ? [firstSheet] : []);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Upload failed");
     } finally {
@@ -30,17 +38,53 @@ export default function ConvertXlsxToCsv() {
   }, []);
 
   const sheetName = preview?.sheets?.[activeSheet]?.name;
-  const downloadLink =
-    preview && sheetName ? exportCsvUrl(preview.token, sheetName) : "";
+  const downloadSingleLink =
+    preview && selectedSheets.length === 1
+      ? exportCsvUrl(preview.token, selectedSheets[0])
+      : "";
+  const downloadSelectedZipLink =
+    preview && selectedSheets.length > 1
+      ? exportCsvZipSelectedUrl(preview.token, selectedSheets)
+      : "";
+  const downloadZipLink = preview ? exportCsvZipUrl(preview.token) : "";
+  const selectedSheet = preview?.sheets?.[activeSheet] ?? null;
+  const selectedDataRows = Math.max(0, (selectedSheet?.total_rows ?? 0) - 1);
+  const canDownloadAllSheets = (preview?.sheet_count ?? 0) > 1;
+  const selectedCount = selectedSheets.length;
+  const selectedSheetSet = useMemo(() => new Set(selectedSheets), [selectedSheets]);
+
+  const toggleSheet = useCallback((sheet: string, idx: number) => {
+    setActiveSheet(idx);
+    setSelectedSheets((current) => {
+      if (current.includes(sheet)) {
+        return current.filter((name) => name !== sheet);
+      }
+      return [...current, sheet];
+    });
+  }, []);
+
+  const selectAllSheets = useCallback(() => {
+    if (!preview) return;
+    setSelectedSheets(preview.sheets.map((sheet) => sheet.name));
+  }, [preview]);
+
+  const clearSelection = useCallback(() => {
+    setSelectedSheets([]);
+  }, []);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <FileUploadDropzone
         accept=".xls,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
         message="Drop or select an XLSX file to convert to CSV"
+        className="flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition"
+        style={{
+          borderColor: error ? "var(--danger)" : "var(--border)",
+          backgroundColor: error ? "var(--danger-soft)" : "var(--background)",
+        }}
         onFiles={(files) => {
           const file = files[0];
-          if (file) onFile(file);
+          if (file) void onFile(file);
         }}
       />
 
@@ -49,85 +93,168 @@ export default function ConvertXlsxToCsv() {
           Uploading and scanning workbook...
         </div>
       )}
-      {error && <div className="text-sm text-red-600">{error}</div>}
+      {error && <div className="text-sm" style={{ color: "var(--danger)" }}>{error}</div>}
 
       {preview && (
-        <div className="space-y-4">
+        <div
+          className="rounded-lg border p-4"
+          style={{
+            borderColor: "var(--border)",
+            backgroundColor: "var(--surface)",
+          }}
+        >
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h3 className="font-medium">Select sheet to export</h3>
+              <p className="text-sm" style={{ color: "var(--muted-2)" }}>
+                {fileName || "Uploaded workbook"} - {preview.sheet_count} sheet
+                {preview.sheet_count === 1 ? "" : "s"}
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={selectAllSheets}
+                className="cursor-pointer rounded-md border px-3 py-1.5 text-sm"
+                style={{
+                  borderColor: "var(--tag-border)",
+                  backgroundColor: "var(--tag-bg)",
+                  color: "var(--tag-text)",
+                }}
+              >
+                Select all
+              </button>
+              <button
+                type="button"
+                onClick={clearSelection}
+                className="cursor-pointer rounded-md border px-3 py-1.5 text-sm"
+                style={{
+                  borderColor: "var(--tag-border)",
+                  backgroundColor: "var(--tag-bg)",
+                  color: "var(--tag-text)",
+                }}
+              >
+                Clear
+              </button>
+            </div>
+          </div>
+
           <div className="flex flex-wrap gap-2">
             {preview.sheets.map((sheet, idx) => (
               <button
                 key={sheet.name}
-                onClick={() => setActiveSheet(idx)}
-                className={`px-3 py-1 rounded-full text-sm border transition`}
+                onClick={() => toggleSheet(sheet.name, idx)}
+                className="cursor-pointer rounded-full border px-3 py-1 text-sm transition"
                 style={{
-                  backgroundColor:
-                    idx === activeSheet
-                      ? "var(--tag-selected-bg)"
-                      : "var(--tag-bg)",
-                  color:
-                    idx === activeSheet
-                      ? "var(--tag-selected-text)"
-                      : "var(--tag-text)",
+                  backgroundColor: selectedSheetSet.has(sheet.name)
+                    ? "var(--tag-selected-bg)"
+                    : "var(--tag-bg)",
+                  color: selectedSheetSet.has(sheet.name)
+                    ? "var(--tag-selected-text)"
+                    : "var(--tag-text)",
                   borderColor: "var(--tag-border)",
                 }}
+                aria-pressed={selectedSheetSet.has(sheet.name)}
               >
-                {sheet.name}{" "}
-                <span
-                  className="text-[10px]"
-                  style={{ color: "var(--muted-2)" }}
-                >
-                  ({sheet.total_rows} rows)
-                </span>
+                {sheet.name}
               </button>
             ))}
           </div>
+        </div>
+      )}
 
-          <div className="text-sm" style={{ color: "var(--foreground)" }}>
-            Selected sheet: <strong>{sheetName}</strong>
+      {preview && selectedSheet && (
+        <div
+          className="rounded-md border px-3 py-2 text-sm"
+          style={{
+            borderColor: "var(--border)",
+            backgroundColor: "var(--surface-2)",
+            color: "var(--muted-2)",
+          }}
+        >
+          <div className="mb-2 font-medium" style={{ color: "var(--foreground)" }}>
+            Export summary
           </div>
 
-          <div className="flex gap-2 flex-wrap">
-            {downloadLink ? (
-              <a
-                href={downloadLink}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition"
-              >
-                Download CSV
-              </a>
-            ) : (
-              <button
-                disabled
-                className="px-4 py-2 rounded"
+          <div className="flex flex-wrap gap-1.5">
+            <span
+              className="rounded-full border px-2 py-0.5 text-xs"
+              style={{
+                borderColor: "var(--tag-border)",
+                backgroundColor: "var(--tag-bg)",
+                color: "var(--tag-text)",
+              }}
+            >
+              Previewing: {selectedSheet.name}
+            </span>
+            <span
+              className="rounded-full border px-2 py-0.5 text-xs"
+              style={{
+                borderColor: "var(--tag-border)",
+                backgroundColor: "var(--tag-bg)",
+                color: "var(--tag-text)",
+              }}
+            >
+              {selectedDataRows.toLocaleString()} data rows
+            </span>
+            <span
+              className="rounded-full border px-2 py-0.5 text-xs"
+              style={{
+                borderColor: "var(--tag-border)",
+                backgroundColor: "var(--tag-bg)",
+                color: "var(--tag-text)",
+              }}
+            >
+              {selectedCount.toLocaleString()} selected for export
+            </span>
+            <span
+              className="rounded-full border px-2 py-0.5 text-xs"
+              style={{
+                borderColor: "var(--tag-border)",
+                backgroundColor: "var(--tag-bg)",
+                color: "var(--tag-text)",
+              }}
+            >
+              Preview uses first 25 rows
+            </span>
+            {canDownloadAllSheets ? (
+              <span
+                className="rounded-full border px-2 py-0.5 text-xs"
                 style={{
+                  borderColor: "var(--tag-border)",
                   backgroundColor: "var(--tag-bg)",
-                  color: "var(--muted)",
-                  border: "1px solid var(--tag-border)",
+                  color: "var(--tag-text)",
                 }}
               >
-                No sheet selected
-              </button>
-            )}
-            <span className="text-xs" style={{ color: "var(--muted-2)" }}>
-              Token expires after 15 minutes.
-            </span>
+                Also available: all sheets as CSV ZIP
+              </span>
+            ) : null}
           </div>
+        </div>
+      )}
 
+      {preview && (
+        <>
           <div
             className="overflow-x-auto border rounded"
-            style={{ borderColor: "var(--border)" }}
+            style={{
+              borderColor: "var(--border)",
+              backgroundColor: "var(--surface)",
+            }}
           >
             <table className="min-w-full text-left text-sm">
-              <thead className="bg-gray-100">
+              <thead style={{ backgroundColor: "var(--surface-2)" }}>
                 <tr>
                   {preview.sheets[activeSheet]?.headers?.map((h, i) => (
                     <th
                       key={i}
                       className="px-2 py-1 border"
-                      style={{ borderColor: "var(--border)" }}
+                      style={{
+                        borderColor: "var(--border)",
+                        color: "var(--foreground)",
+                      }}
                     >
-                      {h ?? ""}
+                      {h ?? "-"}
                     </th>
                   ))}
                 </tr>
@@ -139,9 +266,12 @@ export default function ConvertXlsxToCsv() {
                       <td
                         key={ci}
                         className="px-2 py-1 border"
-                        style={{ borderColor: "var(--border)" }}
+                        style={{
+                          borderColor: "var(--border)",
+                          color: "var(--foreground)",
+                        }}
                       >
-                        {c ?? ""}
+                        {c ?? "-"}
                       </td>
                     ))}
                   </tr>
@@ -150,10 +280,68 @@ export default function ConvertXlsxToCsv() {
             </table>
           </div>
 
-          <div className="text-xs" style={{ color: "var(--muted-2)" }}>
-            Preview shows first 25 rows. CSV will include the full sheet.
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-xs" style={{ color: "var(--muted-2)" }}>
+              Token expires after 15 minutes. CSV export includes the full selected sheet.
+            </p>
+
+            <div className="flex flex-wrap justify-end gap-2">
+              {selectedCount === 0 ? (
+                <button
+                  disabled
+                  className="rounded-md border px-4 py-2 text-sm"
+                  style={{
+                    borderColor: "var(--tag-border)",
+                    backgroundColor: "var(--tag-bg)",
+                    color: "var(--muted)",
+                  }}
+                >
+                  No sheets selected
+                </button>
+              ) : null}
+
+              {selectedCount === 1 && downloadSingleLink ? (
+                <a
+                  href={downloadSingleLink}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex cursor-pointer items-center gap-2 rounded-md px-4 py-2 text-sm font-medium text-white transition"
+                  style={{ backgroundColor: "var(--primary)" }}
+                >
+                  Download Selected CSV
+                </a>
+              ) : null}
+
+              {selectedCount > 1 && downloadSelectedZipLink ? (
+                <a
+                  href={downloadSelectedZipLink}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex cursor-pointer items-center gap-2 rounded-md px-4 py-2 text-sm font-medium text-white transition"
+                  style={{ backgroundColor: "var(--primary)" }}
+                >
+                  Download Selected CSVs (ZIP)
+                </a>
+              ) : null}
+
+              {canDownloadAllSheets && downloadZipLink ? (
+                <a
+                  href={downloadZipLink}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex cursor-pointer items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition"
+                  style={{
+                    borderColor: "var(--tag-border)",
+                    backgroundColor: "var(--tag-bg)",
+                    color: "var(--tag-text)",
+                  }}
+                >
+                  Download All CSVs (ZIP)
+                </a>
+              ) : null}
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );

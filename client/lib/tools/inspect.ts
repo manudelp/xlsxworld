@@ -41,6 +41,20 @@ export function exportCsvUrl(token: string, sheet: string): string {
   return `${process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8000'}/api/inspect/export/csv?token=${encodeURIComponent(token)}&sheet=${encodeURIComponent(sheet)}`;
 }
 
+export function exportCsvZipUrl(token: string): string {
+  return `${process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8000'}/api/inspect/export/csv-zip?token=${encodeURIComponent(token)}`;
+}
+
+export function exportCsvZipSelectedUrl(token: string, sheets: string[]): string {
+  const base = `${process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8000'}/api/inspect/export/csv-zip-selected`;
+  const params = new URLSearchParams();
+  params.set('token', token);
+  sheets.forEach((sheet) => {
+    params.append('sheets', sheet);
+  });
+  return `${base}?${params.toString()}`;
+}
+
 export function exportJsonUrl(token: string, sheet: string): string {
   return `${process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8000'}/api/inspect/export/json?token=${encodeURIComponent(token)}&sheet=${encodeURIComponent(sheet)}`;
 }

@@ -10,6 +10,9 @@ export default function ConvertCsvToXlsx() {
   const [delimiter, setDelimiter] = useState(",");
   const [sheetName, setSheetName] = useState("Sheet1");
 
+  const canConvert =
+    !!file && !loading && !!sheetName.trim() && delimiter.length > 0;
+
   const onFile = useCallback((selected: File) => {
     setError(null);
     setFile(selected);
@@ -45,10 +48,15 @@ export default function ConvertCsvToXlsx() {
   }, [file, sheetName, delimiter]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <FileUploadDropzone
         accept=".csv,text/csv"
         message="Drop or select a CSV file to convert to XLSX"
+        className="flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition"
+        style={{
+          borderColor: error ? "var(--danger)" : "var(--border)",
+          backgroundColor: error ? "var(--danger-soft)" : "var(--background)",
+        }}
         onFiles={(files) => {
           const selected = files[0];
           if (selected) onFile(selected);
@@ -56,52 +64,116 @@ export default function ConvertCsvToXlsx() {
       />
 
       {file && (
-        <div className="text-sm" style={{ color: "var(--foreground)" }}>
-          Selected file: <strong>{file.name}</strong> (
-          {(file.size / 1024).toFixed(1)} KB)
+        <div
+          className="rounded-md border px-3 py-2 text-sm"
+          style={{
+            borderColor: "var(--border)",
+            backgroundColor: "var(--surface-2)",
+            color: "var(--foreground)",
+          }}
+        >
+          Selected file: <strong>{file.name}</strong> ({(file.size / 1024).toFixed(1)} KB)
         </div>
       )}
 
-      <div className="flex flex-wrap gap-3 items-center">
-        <label
-          className="text-sm flex items-center gap-2"
-          style={{ color: "var(--muted)" }}
+      {file && (
+        <div
+          className="rounded-lg border p-4"
+          style={{
+            borderColor: "var(--border)",
+            backgroundColor: "var(--surface)",
+          }}
         >
-          Sheet name
-          <input
-            value={sheetName}
-            onChange={(e) => setSheetName(e.target.value)}
-            className="border rounded px-2 py-1 text-sm"
-          />
-        </label>
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+            <h3 className="font-medium">Conversion settings</h3>
+            <span
+              className="rounded-full border px-2 py-0.5 text-xs"
+              style={{
+                borderColor: "var(--tag-border)",
+                backgroundColor: "var(--tag-bg)",
+                color: "var(--tag-text)",
+              }}
+            >
+              CSV to XLSX
+            </span>
+          </div>
 
-        <label
-          className="text-sm flex items-center gap-2"
-          style={{ color: "var(--muted)" }}
-        >
-          Delimiter
-          <input
-            value={delimiter}
-            onChange={(e) => setDelimiter(e.target.value)}
-            className="border rounded px-2 py-1 text-sm w-16"
-          />
-        </label>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <label className="block text-sm" style={{ color: "var(--muted)" }}>
+              Output sheet name
+              <input
+                value={sheetName}
+                onChange={(e) => setSheetName(e.target.value)}
+                className="mt-1 w-full rounded border px-3 py-2 text-sm"
+                style={{
+                  borderColor: "var(--border)",
+                  backgroundColor: "var(--surface-2)",
+                  color: "var(--foreground)",
+                }}
+              />
+            </label>
 
-        <button
-          onClick={handleConvert}
-          disabled={!file || loading}
-          className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
-        >
-          {loading ? "Converting..." : "Convert to XLSX"}
-        </button>
-      </div>
+            <div className="block text-sm" style={{ color: "var(--muted)" }}>
+              Delimiter
+              <div className="mt-1 flex flex-wrap items-center gap-2">
+                <input
+                  value={delimiter}
+                  onChange={(e) => setDelimiter(e.target.value)}
+                  className="min-w-[120px] flex-1 rounded border px-3 py-2 text-sm"
+                  style={{
+                    borderColor: "var(--border)",
+                    backgroundColor: "var(--surface-2)",
+                    color: "var(--foreground)",
+                  }}
+                />
 
-      {error && <div className="text-sm text-red-600">{error}</div>}
+                <div className="flex flex-wrap gap-2">
+                  {[",", ";", "\t", "|"].map((value) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setDelimiter(value)}
+                      className="cursor-pointer rounded-md border px-2.5 py-1 text-xs"
+                      style={{
+                        borderColor: "var(--tag-border)",
+                        backgroundColor:
+                          delimiter === value
+                            ? "var(--tag-selected-bg)"
+                            : "var(--tag-bg)",
+                        color:
+                          delimiter === value
+                            ? "var(--tag-selected-text)"
+                            : "var(--tag-text)",
+                      }}
+                    >
+                      {value === "\t" ? "Tab" : value}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
-      <div className="text-xs" style={{ color: "var(--muted-2)" }}>
-        Note: converted file includes data only; formatting and formulas are not
-        preserved.
-      </div>
+      {file && (
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-xs" style={{ color: "var(--muted-2)" }}>
+            Data is preserved; formulas, styles, and advanced Excel formatting are not.
+          </p>
+
+          <button
+            onClick={handleConvert}
+            disabled={!canConvert}
+            className="cursor-pointer rounded-md px-4 py-2 text-sm font-medium text-white transition disabled:cursor-not-allowed disabled:opacity-50"
+            style={{ backgroundColor: "var(--primary)" }}
+          >
+            {loading ? "Converting..." : "Convert to XLSX"}
+          </button>
+        </div>
+      )}
+
+      {error && <div className="text-sm" style={{ color: "var(--danger)" }}>{error}</div>}
     </div>
   );
 }

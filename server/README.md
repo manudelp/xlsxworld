@@ -5,7 +5,7 @@ This folder contains the FastAPI backend for XLSX World.
 ## Overview
 
 - Framework: FastAPI
-- Python: >=3.13
+- Python: 3.13 (pinned for local development)
 - HTTP server: Uvicorn
 - DB: PostgreSQL (psycopg + SQLAlchemy planned)
 
@@ -33,23 +33,46 @@ Local dev:
 	`server/.env` automatically during startup. Do NOT commit `.env` — it is
 	excluded by `server/.gitignore`.
 
-## Installation
+## Prerequisites
+
+- `uv` installed (recommended package manager and runner)
+- Python 3.13 available
+
+Notes:
+- This folder is pinned to Python `3.13` via `.python-version`.
+- Python `3.14` may fail in Windows with `httptools` build errors unless you
+  install Microsoft C++ Build Tools.
+
+## Installation (uv)
 
 ```bash
 cd server
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+uv sync
 ```
 
-## Run locally
+## Run locally (development)
 
 ```bash
 cd server
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+uv run uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 Open [http://localhost:8000/health](http://localhost:8000/health)
+
+## Daily workflow
+
+```bash
+cd server
+uv sync
+uv run uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+## Troubleshooting
+
+- If `uv` is not recognized in PowerShell, reopen terminal or ensure `uv` is in
+  your user `PATH`.
+- If dependencies fail with Python 3.14 on Windows, use Python 3.13 in this
+  project (already pinned) or install Microsoft C++ Build Tools.
 
 ## API endpoints
 
