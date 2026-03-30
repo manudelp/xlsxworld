@@ -31,11 +31,9 @@ export async function mergeSheets(
 
 export async function appendWorkbooks(
   files: File[],
-  outputSheet = "Appended",
 ): Promise<ArrayBuffer> {
   const formData = new FormData();
   files.forEach((file) => formData.append("files", file));
-  formData.append("output_sheet", outputSheet);
 
   const response = await fetch(`${API_BASE}/api/tools/append-workbooks`, {
     method: "POST",

@@ -7,7 +7,6 @@ import FileUploadDropzone from "@/components/utility/FileUploadDropzone";
 export default function AppendWorkbooks() {
   const [files, setFiles] = useState<File[]>([]);
   const [originalOrder, setOriginalOrder] = useState<File[]>([]);
-  const [outputSheet, setOutputSheet] = useState("Appended");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [orderFeedback, setOrderFeedback] = useState<string | null>(null);
@@ -274,7 +273,7 @@ export default function AppendWorkbooks() {
     setLoading(true);
 
     try {
-      const buffer = await appendWorkbooks(files, outputSheet);
+      const buffer = await appendWorkbooks(files);
       const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
@@ -291,7 +290,7 @@ export default function AppendWorkbooks() {
     } finally {
       setLoading(false);
     }
-  }, [files, outputSheet]);
+  }, [files]);
 
   return (
     <div className="space-y-4">
@@ -346,20 +345,6 @@ export default function AppendWorkbooks() {
           </div>
 
           <div className="flex flex-col gap-3">
-            <label className="block text-sm" style={{ color: "var(--muted)" }}>
-              Output sheet name
-              <input
-                value={outputSheet}
-                onChange={(e) => setOutputSheet(e.target.value)}
-                className="mt-1 w-full rounded border px-3 py-2 text-sm"
-                style={{
-                  borderColor: "var(--border)",
-                  backgroundColor: "var(--surface-2)",
-                  color: "var(--foreground)",
-                }}
-              />
-            </label>
-
             <div
               className="rounded-md border px-3 py-2 text-sm"
               style={{
@@ -432,13 +417,13 @@ export default function AppendWorkbooks() {
                     color: "var(--muted-2)",
                   }}
                 >
-                  <div>Output</div>
+                  <div>Result</div>
                   <div
                     className="truncate font-medium"
                     style={{ color: "var(--foreground)" }}
-                    title={outputSheet || "Appended"}
+                    title="Single workbook with all sheets"
                   >
-                    {outputSheet || "Appended"}
+                    All source sheets preserved
                   </div>
                 </div>
               </div>
@@ -680,7 +665,7 @@ export default function AppendWorkbooks() {
 
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="text-xs" style={{ color: "var(--muted-2)" }}>
-          Files are appended vertically in the chosen order, with headers consolidated.
+          Combines all workbook sheets into one output workbook, preserving sheet structure.
         </div>
         <button
           type="button"

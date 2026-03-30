@@ -265,20 +265,21 @@ async def split_sheet(
 @router.post("/append-workbooks")
 async def append_workbooks(
     files: list[UploadFile] = File(..., description="XLSX files to append"),
-    output_sheet: str = Form("Appended", description="Output sheet name"),
 ):
     if len(files) < 2:
         raise HTTPException(status_code=400, detail="At least two workbook files are required")
 
     out_wb = Workbook()
-    out_ws = out_wb.active
-    out_ws.title = output_sheet[:31] if output_sheet else "Appended"
+    out_wb.remove(out_wb.active)
+    used_titles: set[str] = set()
+    copied_sheets = 0
 
-    header_written = False
-    total_rows = 0
+    for file_index, file in enumerate(files, start=1):
+        filename = file.filename or f"workbook_{file_index}.xlsx"
+        source_name = filename.rsplit(".", 1)[0] or f"workbook_{file_index}"
+        source_name = _INVALID_SHEET_CHARS.sub("_", source_name)
 
-    for file in files:
-        if not file.filename.lower().endswith(".xlsx"):
+        if not file.filename or not file.filename.lower().endswith(".xlsx"):
             raise HTTPException(status_code=400, detail="Unsupported file type, expected .xlsx")
 
         raw = await file.read()
@@ -286,21 +287,21 @@ async def append_workbooks(
             raise HTTPException(status_code=400, detail="One of the files is too large")
 
         wb = load_workbook(filename=BytesIO(raw), read_only=True, data_only=True)
-        first_sheet = wb.active
+        for sheet in wb.worksheets:
+            preferred_title = _safe_sheet_title(sheet.title, f"sheet_{copied_sheets + 1}")
+            requested_title = _safe_sheet_title(
+                f"{source_name}_{preferred_title}",
+                preferred_title,
+            )
+            target_title = _unique_sheet_title(requested_title, used_titles)
+            out_ws = out_wb.create_sheet(target_title)
 
-        rows = first_sheet.iter_rows(values_only=True)
-        for i, row in enumerate(rows):
-            if i == 0:
-                if not header_written:
-                    out_ws.append(["" if v is None else v for v in row])
-                    header_written = True
-                else:
-                    continue
-            else:
+            for row in sheet.iter_rows(values_only=True):
                 out_ws.append(["" if v is None else v for v in row])
-                total_rows += 1
 
-    if not header_written:
+            copied_sheets += 1
+
+    if copied_sheets == 0:
         raise HTTPException(status_code=400, detail="No data found in uploaded workbooks")
 
     output = BytesIO()

@@ -13,7 +13,7 @@ import BackToTopButton from "@/components/utility/BackToTopButton";
 import FileUploadDropzone from "@/components/utility/FileUploadDropzone";
 
 type SortDirection = "asc" | "desc";
-const PAGE_SIZE = 500;
+const PAGE_SIZE = 25;
 
 export default function InspectSheets() {
   const [preview, setPreview] = useState<WorkbookPreview | null>(null);
