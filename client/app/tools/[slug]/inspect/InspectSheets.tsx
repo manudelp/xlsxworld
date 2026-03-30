@@ -35,8 +35,17 @@ export default function InspectSheets() {
   const [pagingLoading, setPagingLoading] = useState(false);
   const [loadingAllRows, setLoadingAllRows] = useState(false);
   const [hasLoadedPageData, setHasLoadedPageData] = useState(false);
+  const [isPanningTable, setIsPanningTable] = useState(false);
   const filtersMenuContainerRef = useRef<HTMLDivElement | null>(null);
   const statsMenuContainerRef = useRef<HTMLDivElement | null>(null);
+  const tableScrollRef = useRef<HTMLDivElement | null>(null);
+  const tablePanStateRef = useRef({
+    pointerId: -1,
+    startX: 0,
+    startY: 0,
+    startScrollLeft: 0,
+    startScrollTop: 0,
+  });
 
   const onFile = async (file: File) => {
     setError(null);
@@ -57,9 +66,14 @@ export default function InspectSheets() {
   };
 
   const formatCell = (value: unknown) => {
-    if (value === null || value === undefined || value === "") return "-";
+    if (value === null || value === undefined || value === "") return "";
     if (typeof value === "boolean") return value ? "TRUE" : "FALSE";
     return String(value);
+  };
+
+  const renderCell = (value: unknown) => {
+    const formatted = formatCell(value);
+    return formatted === "" ? "\u00A0" : formatted;
   };
 
   const activeSheet = preview?.sheets[activeSheetIndex] ?? null;
@@ -180,6 +194,56 @@ export default function InspectSheets() {
     };
   }, []);
 
+  const stopTablePan = () => {
+    const container = tableScrollRef.current;
+    const activePointerId = tablePanStateRef.current.pointerId;
+    if (
+      container &&
+      activePointerId !== -1 &&
+      container.hasPointerCapture(activePointerId)
+    ) {
+      container.releasePointerCapture(activePointerId);
+    }
+    tablePanStateRef.current.pointerId = -1;
+    setIsPanningTable(false);
+  };
+
+  const onTablePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+
+    const container = tableScrollRef.current;
+    if (!container) return;
+
+    tablePanStateRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      startScrollLeft: container.scrollLeft,
+      startScrollTop: container.scrollTop,
+    };
+
+    container.setPointerCapture(event.pointerId);
+    setIsPanningTable(true);
+    event.preventDefault();
+  };
+
+  const onTablePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    const container = tableScrollRef.current;
+    const panState = tablePanStateRef.current;
+    if (!container || panState.pointerId !== event.pointerId) return;
+
+    const deltaX = event.clientX - panState.startX;
+    const deltaY = event.clientY - panState.startY;
+    container.scrollLeft = panState.startScrollLeft - deltaX;
+    container.scrollTop = panState.startScrollTop - deltaY;
+  };
+
+  useEffect(() => {
+    return () => {
+      stopTablePan();
+    };
+  }, []);
+
   const tableModel = useMemo(() => {
     if (!activeSheet) {
       return {
@@ -206,8 +270,10 @@ export default function InspectSheets() {
 
     const headers = Array.from({ length: totalColumns }, (_, i) => {
       const raw = sourceHeader[i];
-      const value = formatCell(raw);
-      return value === "-" ? `Column ${i + 1}` : value;
+      if (raw === null || raw === undefined || raw === "") {
+        return `Column ${i + 1}`;
+      }
+      return String(raw);
     });
 
     const normalizedRows = sourceRows.map((row) =>
@@ -750,18 +816,26 @@ export default function InspectSheets() {
                 </div>
 
                 <div
-                  className="rounded-lg border"
-                  style={{ borderColor: "var(--border)" }}
+                  ref={tableScrollRef}
+                  onPointerDown={onTablePointerDown}
+                  onPointerMove={onTablePointerMove}
+                  onPointerUp={stopTablePan}
+                  onPointerCancel={stopTablePan}
+                  onPointerLeave={stopTablePan}
+                  className={`overflow-auto rounded-lg border ${
+                    isPanningTable ? "cursor-grabbing select-none" : "cursor-grab"
+                  }`}
+                  style={{ borderColor: "var(--border)", touchAction: "none" }}
                 >
-                  <table className="w-full table-fixed text-left text-sm">
+                  <table className="min-w-max w-full table-auto text-left text-sm">
                     <thead style={{ backgroundColor: "var(--surface-2)" }}>
                       <tr>
                         {tableModel.totalColumns > 0 ? (
                           tableModel.headers.map((header, headerIndex) => (
                             <th
                               key={headerIndex}
-                              className="px-3 py-2 font-medium break-words"
-                              style={{ color: "var(--muted)" }}
+                              className="h-11 border-r px-3 py-3 align-middle font-medium whitespace-nowrap last:border-r-0"
+                              style={{ color: "var(--muted)", borderColor: "var(--border)" }}
                             >
                               <button
                                 type="button"
@@ -799,9 +873,10 @@ export default function InspectSheets() {
                             ).map((colIndex) => (
                               <td
                                 key={colIndex}
-                                className="px-3 py-2 align-top break-words"
+                                className="h-11 border-r px-3 py-3 align-middle last:border-r-0"
+                                style={{ borderColor: "var(--border)" }}
                               >
-                                {formatCell(row[colIndex])}
+                                {renderCell(row[colIndex])}
                               </td>
                             ))}
                           </tr>
