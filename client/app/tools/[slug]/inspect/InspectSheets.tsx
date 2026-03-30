@@ -211,6 +211,15 @@ export default function InspectSheets() {
   const onTablePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     if (event.pointerType === "mouse" && event.button !== 0) return;
 
+    const target = event.target as HTMLElement | null;
+    if (
+      target?.closest(
+        "button, input, select, textarea, a, summary, [role='button']",
+      )
+    ) {
+      return;
+    }
+
     const container = tableScrollRef.current;
     if (!container) return;
 
