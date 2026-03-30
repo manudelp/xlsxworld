@@ -2,19 +2,19 @@ from __future__ import annotations
 from fastapi import APIRouter, UploadFile, File, HTTPException, Query
 from pydantic import BaseModel
 from typing import List, Any, Dict, Tuple
-from openpyxl import load_workbook
-from io import BytesIO, StringIO
 import secrets
 import time
 
+from excel_reader import ensure_supported_excel_filename, parse_excel_bytes
+
 # Simple in-memory workbook cache; replace with redis or disk later
-# token -> (timestamp, workbook_bytes, sheet_totals)
-_WORKBOOK_STORE: Dict[str, Tuple[float, bytes, Dict[str, int]]] = {}
+# token -> (timestamp, workbook_data, sheet_totals)
+_WORKBOOK_STORE: Dict[str, Tuple[float, Dict[str, List[List[Any]]], Dict[str, int]]] = {}
 _MAX_STORE = 32  # naive cap
 _TTL_SECONDS = 60 * 15  # 15 minutes
 _MAX_UPLOAD_SIZE_BYTES = 20 * 1024 * 1024  # 20 MB
 
-router = APIRouter(prefix="/api/inspect", tags=["inspect"])
+router = APIRouter(prefix="/api/tools/inspect", tags=["tools"])
 
 class SheetPreview(BaseModel):
     name: str
@@ -36,13 +36,17 @@ class SheetPage(BaseModel):
     total_rows: int
     done: bool
 
-@router.post("/preview", response_model=WorkbookPreview)
+@router.post(
+    "/preview",
+    response_model=WorkbookPreview,
+    summary="Preview Workbook",
+    description="Uploads an Excel workbook, stores it temporarily, and returns sheet headers plus sample rows.",
+)
 async def preview_workbook(
     file: UploadFile = File(..., description="Excel file to inspect"),
     sample_rows: int = Query(25, ge=1, le=500),
 ):
-    if not file.filename.lower().endswith((".xlsx", ".xlsm", ".xltx", ".xltm")):
-        raise HTTPException(status_code=400, detail="Unsupported file type")
+    ensure_supported_excel_filename(file.filename)
 
     raw = await file.read()
 
@@ -52,12 +56,8 @@ async def preview_workbook(
             detail=f"File too large (max {_MAX_UPLOAD_SIZE_BYTES // 1024 // 1024}MB)",
         )
 
-    try:
-        wb = load_workbook(filename=BytesIO(raw), read_only=True, data_only=True)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Failed to parse workbook: {e}")
+    workbook_data = parse_excel_bytes(raw, file.filename)
 
-    # store raw bytes with token
     token = secrets.token_urlsafe(16)
     if len(_WORKBOOK_STORE) >= _MAX_STORE:
         # drop oldest
@@ -69,36 +69,23 @@ async def preview_workbook(
     sheet_totals: Dict[str, int] = {}
 
     sheets: List[SheetPreview] = []
-    for ws in wb.worksheets:
+    for sheet_name, rows in workbook_data.items():
+        header_list = [*rows[0]] if rows else []
+        data_rows = [[*row] for row in rows[1 : 1 + sample_rows]] if len(rows) > 1 else []
 
-        rows_iter = ws.iter_rows(values_only=True)
-        try:
-            header = next(rows_iter)
-            header_list = list(header) if header else []
-        except StopIteration:
-            header_list = []
-            rows_iter = iter(())
-
-        data_rows = []
-        total_data_rows = 0
-        for r in rows_iter:
-            total_data_rows += 1
-            if len(data_rows) < sample_rows:
-                data_rows.append([*r])
-
-        sheet_total = total_data_rows + (1 if header_list else 0)
-        sheet_totals[ws.title] = sheet_total
+        sheet_total = len(rows)
+        sheet_totals[sheet_name] = sheet_total
 
         sheets.append(
             SheetPreview(
-                name=ws.title,
+                name=sheet_name,
                 headers=[*header_list],
                 sample=data_rows,
                 total_rows=sheet_total,
             )
         )
 
-    _WORKBOOK_STORE[token] = (time.time(), raw, sheet_totals)
+    _WORKBOOK_STORE[token] = (time.time(), workbook_data, sheet_totals)
     return WorkbookPreview(token=token, sheets=sheets, sheet_count=len(sheets))
 
 
@@ -107,23 +94,15 @@ def _load_workbook_from_token(token: str):
     if not meta:
         raise HTTPException(status_code=404, detail="Unknown or expired token")
 
-    if len(meta) == 3:
-        ts, raw, sheet_totals = meta
-    else:
-        ts, raw = meta  # backward compatibility
-        sheet_totals = None
+    ts, workbook_data, sheet_totals = meta
 
     if time.time() - ts > _TTL_SECONDS:
         _WORKBOOK_STORE.pop(token, None)
         raise HTTPException(status_code=404, detail="Token expired")
 
     # touch
-    _WORKBOOK_STORE[token] = (time.time(), raw, sheet_totals) if sheet_totals is not None else (time.time(), raw)
-
-    try:
-        return load_workbook(filename=BytesIO(raw), read_only=True, data_only=True)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Failed to reopen workbook: {e}")
+    _WORKBOOK_STORE[token] = (time.time(), workbook_data, sheet_totals)
+    return workbook_data
 
 
 def _get_sheet_total_rows(token: str, sheet: str) -> int | None:
@@ -131,72 +110,44 @@ def _get_sheet_total_rows(token: str, sheet: str) -> int | None:
     if not meta:
         return None
 
-    if len(meta) == 3:
-        _, _, sheet_totals = meta
-        return sheet_totals.get(sheet)
-
-    return None
+    _, _, sheet_totals = meta
+    return sheet_totals.get(sheet)
 
 
-@router.get("/sheet", response_model=SheetPage)
+@router.get(
+    "/sheet",
+    response_model=SheetPage,
+    summary="Page Sheet",
+    description="Returns paginated rows for one sheet from a previously uploaded workbook token.",
+)
 async def page_sheet(
     token: str = Query(..., description="Workbook token from preview"),
     sheet: str = Query(..., description="Sheet name"),
     offset: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=2000),
 ):
-    wb = _load_workbook_from_token(token)
-    if sheet not in wb.sheetnames:
+    workbook_data = _load_workbook_from_token(token)
+    if sheet not in workbook_data:
         raise HTTPException(status_code=404, detail="Sheet not found")
-    ws = wb[sheet]
+    rows = workbook_data[sheet]
 
     sheet_total = _get_sheet_total_rows(token, sheet)
     total_rows = sheet_total if sheet_total is not None else 0
     known_data_rows = sheet_total - 1 if sheet_total is not None and sheet_total > 0 else None
 
-    rows_iter = ws.iter_rows(values_only=True)
-    header = None
-    data_rows: List[List[Any]] = []
-
-    try:
-        first = next(rows_iter)
-        header = list(first) if first else []
-        if sheet_total is None:
-            total_rows += 1
-    except StopIteration:
+    if not rows:
         return SheetPage(sheet=sheet, header=None, rows=[], offset=offset, limit=limit, total_rows=0, done=True)
 
-    # Skip until offset (page starts after header)
-    skipped = 0
-    while skipped < offset:
-        try:
-            next(rows_iter)
-            skipped += 1
-            if sheet_total is None:
-                total_rows += 1
-        except StopIteration:
-            break
-
-    fetched = 0
-    for r in rows_iter:
-        if fetched < limit:
-            data_rows.append([*r])
-            fetched += 1
-            if sheet_total is None:
-                total_rows += 1
-        else:
-            if sheet_total is None:
-                total_rows += 1
-                continue
-            # known total, we can stop early
-            break
+    header = [*rows[0]]
+    data_only_rows = rows[1:]
+    data_rows = [[*row] for row in data_only_rows[offset : offset + limit]]
+    fetched = len(data_rows)
 
     if known_data_rows is not None:
         done = offset + fetched >= known_data_rows
     else:
-        # total_rows includes header row if exists
-        data_total = max(0, total_rows - 1)
-        done = offset + fetched >= data_total
+        done = offset + fetched >= len(data_only_rows)
+        total_rows = len(rows)
 
     return SheetPage(
         sheet=sheet,
@@ -208,146 +159,3 @@ async def page_sheet(
         done=done,
     )
 
-@router.get("/export/csv")
-async def export_csv(token: str, sheet: str):
-    from fastapi.responses import StreamingResponse
-    import csv
-
-    wb = _load_workbook_from_token(token)
-    if sheet not in wb.sheetnames:
-        raise HTTPException(status_code=404, detail="Sheet not found")
-    ws = wb[sheet]
-
-    def gen():
-        # csv.writer writes text, so use a text buffer and encode to bytes per chunk
-        output = StringIO()
-        writer = csv.writer(output)
-        for r in ws.iter_rows(values_only=True):
-            writer.writerow(["" if c is None else c for c in r])
-            data = output.getvalue()
-            if data:
-                yield data.encode("utf-8")
-            output.seek(0)
-            output.truncate(0)
-
-    return StreamingResponse(
-        gen(),
-        media_type="text/csv; charset=utf-8",
-        headers={"Content-Disposition": f"attachment; filename={sheet}.csv"},
-    )
-
-
-@router.get("/export/csv-zip")
-async def export_csv_zip(token: str):
-    from fastapi.responses import StreamingResponse
-    import csv
-    import re
-    import zipfile
-
-    wb = _load_workbook_from_token(token)
-
-    zipped = BytesIO()
-    used_names: set[str] = set()
-
-    def build_unique_name(raw_name: str) -> str:
-        safe = re.sub(r"[^A-Za-z0-9._-]+", "_", raw_name).strip("._")
-        if not safe:
-            safe = "sheet"
-        candidate = safe
-        i = 2
-        while f"{candidate}.csv" in used_names:
-            candidate = f"{safe}_{i}"
-            i += 1
-        filename = f"{candidate}.csv"
-        used_names.add(filename)
-        return filename
-
-    with zipfile.ZipFile(zipped, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
-        for ws in wb.worksheets:
-            output = StringIO()
-            writer = csv.writer(output)
-            for r in ws.iter_rows(values_only=True):
-                writer.writerow(["" if c is None else c for c in r])
-            zf.writestr(build_unique_name(ws.title), output.getvalue().encode("utf-8"))
-
-    zipped.seek(0)
-    return StreamingResponse(
-        iter([zipped.getvalue()]),
-        media_type="application/zip",
-        headers={"Content-Disposition": "attachment; filename=all-sheets-csv.zip"},
-    )
-
-
-@router.get("/export/csv-zip-selected")
-async def export_csv_zip_selected(token: str, sheets: List[str] = Query(...)):
-    from fastapi.responses import StreamingResponse
-    import csv
-    import re
-    import zipfile
-
-    if not sheets:
-        raise HTTPException(status_code=400, detail="Select at least one sheet")
-
-    wb = _load_workbook_from_token(token)
-    missing = [name for name in sheets if name not in wb.sheetnames]
-    if missing:
-        raise HTTPException(status_code=404, detail=f"Sheet not found: {missing[0]}")
-
-    zipped = BytesIO()
-    used_names: set[str] = set()
-
-    def build_unique_name(raw_name: str) -> str:
-        safe = re.sub(r"[^A-Za-z0-9._-]+", "_", raw_name).strip("._")
-        if not safe:
-            safe = "sheet"
-        candidate = safe
-        i = 2
-        while f"{candidate}.csv" in used_names:
-            candidate = f"{safe}_{i}"
-            i += 1
-        filename = f"{candidate}.csv"
-        used_names.add(filename)
-        return filename
-
-    with zipfile.ZipFile(zipped, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
-        for sheet_name in sheets:
-            ws = wb[sheet_name]
-            output = StringIO()
-            writer = csv.writer(output)
-            for r in ws.iter_rows(values_only=True):
-                writer.writerow(["" if c is None else c for c in r])
-            zf.writestr(build_unique_name(ws.title), output.getvalue().encode("utf-8"))
-
-    zipped.seek(0)
-    return StreamingResponse(
-        iter([zipped.getvalue()]),
-        media_type="application/zip",
-        headers={"Content-Disposition": "attachment; filename=selected-sheets-csv.zip"},
-    )
-
-@router.get("/export/json")
-async def export_json(token: str, sheet: str):
-    from fastapi.responses import StreamingResponse
-    import json
-
-    wb = _load_workbook_from_token(token)
-    if sheet not in wb.sheetnames:
-        raise HTTPException(status_code=404, detail="Sheet not found")
-    ws = wb[sheet]
-
-    def gen():
-        first = True
-        yield "["
-        for r in ws.iter_rows(values_only=True):
-            row = ["" if c is None else c for c in r]
-            if not first:
-                yield ","
-            yield json.dumps(row, ensure_ascii=False)
-            first = False
-        yield "]"
-
-    return StreamingResponse(
-        gen(),
-        media_type="application/json; charset=utf-8",
-        headers={"Content-Disposition": f"attachment; filename={sheet}.json"},
-    )

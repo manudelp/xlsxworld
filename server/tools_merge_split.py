@@ -4,15 +4,16 @@ from fastapi.responses import StreamingResponse
 from io import BytesIO
 import re
 import zipfile
-from openpyxl import load_workbook, Workbook
+from openpyxl import Workbook
+
+from excel_reader import ensure_supported_excel_filename, parse_excel_bytes
 
 router = APIRouter(prefix="/api/tools", tags=["tools"])
 _MAX_UPLOAD_SIZE_BYTES = 20 * 1024 * 1024  # 20 MB
 
 
-def _check_file(file: UploadFile, expected_ext: str):
-    if not file.filename.lower().endswith(expected_ext):
-        raise HTTPException(status_code=400, detail=f"Unsupported file type, expected {expected_ext}")
+def _check_excel_file(file: UploadFile):
+    ensure_supported_excel_filename(file.filename)
 
 
 _INVALID_SHEET_CHARS = re.compile(r"[\\/*?:\[\]]")
@@ -112,29 +113,31 @@ def _build_part_token(
     return str(index)
 
 
-@router.post("/merge-sheets")
+@router.post(
+    "/merge-sheets",
+    summary="Merge Sheets",
+    description="Merges multiple sheets from one workbook into a single output sheet.",
+)
 async def merge_sheets(
-    file: UploadFile = File(..., description="XLSX file"),
+    file: UploadFile = File(..., description="Excel file"),
     sheet_names: str = Form("", description="Comma-separated sheet names to merge (empty=all)"),
     output_sheet: str = Form("Merged", description="Output sheet name"),
 ):
-    _check_file(file, ".xlsx")
+    _check_excel_file(file)
 
     raw = await file.read()
     if len(raw) > _MAX_UPLOAD_SIZE_BYTES:
         raise HTTPException(status_code=400, detail="File too large")
 
-    try:
-        wb = load_workbook(filename=BytesIO(raw), read_only=True, data_only=True)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Failed to parse workbook: {e}")
+    workbook_data = parse_excel_bytes(raw, file.filename)
+    sheet_order = list(workbook_data.keys())
 
     selected = [s.strip() for s in sheet_names.split(",") if s.strip()]
     if not selected:
-        selected = wb.sheetnames
+        selected = sheet_order
 
     for s in selected:
-        if s not in wb.sheetnames:
+        if s not in workbook_data:
             raise HTTPException(status_code=400, detail=f"Sheet not found: {s}")
 
     out_wb = Workbook()
@@ -142,10 +145,8 @@ async def merge_sheets(
     out_ws.title = output_sheet[:31] if output_sheet else "Merged"
 
     header_written = False
-    row_count = 0
     for sheet_name in selected:
-        ws = wb[sheet_name]
-        rows = ws.iter_rows(values_only=True)
+        rows = workbook_data[sheet_name]
         for i, row in enumerate(rows):
             if i == 0:
                 if not header_written:
@@ -156,7 +157,6 @@ async def merge_sheets(
                     continue
             else:
                 out_ws.append(["" if v is None else v for v in row])
-                row_count += 1
 
     output = BytesIO()
     out_wb.save(output)
@@ -169,9 +169,13 @@ async def merge_sheets(
     )
 
 
-@router.post("/split-sheet")
+@router.post(
+    "/split-sheet",
+    summary="Split Sheet",
+    description="Splits one sheet into multiple sheets by row chunk size and naming strategy.",
+)
 async def split_sheet(
-    file: UploadFile = File(..., description="XLSX file"),
+    file: UploadFile = File(..., description="Excel file"),
     sheet: str = Form(..., description="Sheet name"),
     chunk_size: int = Form(1000, description="Max rows per chunk (including header)"),
     part_base: str = Form("part", description="Base name used for split sheets"),
@@ -179,7 +183,7 @@ async def split_sheet(
     numbering_style: str = Form("numeric", description="Part token style"),
     custom_sequence: str = Form("", description="Custom tokens (one per line) when style is custom"),
 ):
-    _check_file(file, ".xlsx")
+    _check_excel_file(file)
 
     raw = await file.read()
     if len(raw) > _MAX_UPLOAD_SIZE_BYTES:
@@ -187,16 +191,12 @@ async def split_sheet(
     if chunk_size < 2:
         raise HTTPException(status_code=400, detail="chunk_size must be >= 2")
 
-    try:
-        wb = load_workbook(filename=BytesIO(raw), read_only=True, data_only=True)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Failed to parse workbook: {e}")
+    workbook_data = parse_excel_bytes(raw, file.filename)
 
-    if sheet not in wb.sheetnames:
+    if sheet not in workbook_data:
         raise HTTPException(status_code=404, detail="Sheet not found")
 
-    ws = wb[sheet]
-    rows = list(ws.iter_rows(values_only=True))
+    rows = workbook_data[sheet]
     if not rows:
         raise HTTPException(status_code=400, detail="Sheet is empty")
 
@@ -262,9 +262,13 @@ async def split_sheet(
     )
 
 
-@router.post("/append-workbooks")
+@router.post(
+    "/append-workbooks",
+    summary="Append Workbooks",
+    description="Combines sheets from multiple uploaded workbooks into one workbook.",
+)
 async def append_workbooks(
-    files: list[UploadFile] = File(..., description="XLSX files to append"),
+    files: list[UploadFile] = File(..., description="Excel files to append"),
 ):
     if len(files) < 2:
         raise HTTPException(status_code=400, detail="At least two workbook files are required")
@@ -279,16 +283,15 @@ async def append_workbooks(
         source_name = filename.rsplit(".", 1)[0] or f"workbook_{file_index}"
         source_name = _INVALID_SHEET_CHARS.sub("_", source_name)
 
-        if not file.filename or not file.filename.lower().endswith(".xlsx"):
-            raise HTTPException(status_code=400, detail="Unsupported file type, expected .xlsx")
+        _check_excel_file(file)
 
         raw = await file.read()
         if len(raw) > _MAX_UPLOAD_SIZE_BYTES:
             raise HTTPException(status_code=400, detail="One of the files is too large")
 
-        wb = load_workbook(filename=BytesIO(raw), read_only=True, data_only=True)
-        for sheet in wb.worksheets:
-            preferred_title = _safe_sheet_title(sheet.title, f"sheet_{copied_sheets + 1}")
+        workbook_data = parse_excel_bytes(raw, file.filename)
+        for sheet_name, rows in workbook_data.items():
+            preferred_title = _safe_sheet_title(sheet_name, f"sheet_{copied_sheets + 1}")
             requested_title = _safe_sheet_title(
                 f"{source_name}_{preferred_title}",
                 preferred_title,
@@ -296,7 +299,7 @@ async def append_workbooks(
             target_title = _unique_sheet_title(requested_title, used_titles)
             out_ws = out_wb.create_sheet(target_title)
 
-            for row in sheet.iter_rows(values_only=True):
+            for row in rows:
                 out_ws.append(["" if v is None else v for v in row])
 
             copied_sheets += 1
@@ -315,26 +318,29 @@ async def append_workbooks(
     )
 
 
-@router.post("/split-workbook")
-async def split_workbook(file: UploadFile = File(..., description="XLSX file")):
-    _check_file(file, ".xlsx")
+@router.post(
+    "/split-workbook",
+    summary="Split Workbook",
+    description="Exports each workbook sheet as a separate XLSX file inside a ZIP archive.",
+)
+async def split_workbook(file: UploadFile = File(..., description="Excel file")):
+    _check_excel_file(file)
     raw = await file.read()
     if len(raw) > _MAX_UPLOAD_SIZE_BYTES:
         raise HTTPException(status_code=400, detail="File too large")
 
-    wb = load_workbook(filename=BytesIO(raw), read_only=True, data_only=True)
-    if not wb.sheetnames:
+    workbook_data = parse_excel_bytes(raw, file.filename)
+    if not workbook_data:
         raise HTTPException(status_code=400, detail="Workbook is empty")
 
     zipped = BytesIO()
     with zipfile.ZipFile(zipped, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
-        for sheet_name in wb.sheetnames:
-            ws = wb[sheet_name]
+        for sheet_name, rows in workbook_data.items():
             child_wb = Workbook()
             child_ws = child_wb.active
             child_ws.title = sheet_name[:31] if sheet_name else "Sheet1"
 
-            for row in ws.iter_rows(values_only=True):
+            for row in rows:
                 child_ws.append(["" if v is None else v for v in row])
 
             child_bytes = BytesIO()

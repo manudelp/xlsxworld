@@ -81,6 +81,9 @@ uv run uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 - `/api/auth/signup`, `/api/auth/login`, `/api/auth/me`
 - `/api/tools/inspect` etc (in `tools_inspect.py`)
 
+Supported Excel upload formats for inspect/merge/split endpoints:
+- `.xlsx`, `.xls`, `.xlsm`, `.xlsb`, `.xltx`, `.xltm`, `.xlam`
+
 ## Tests
 
 Add tests to `tests/` or create as needed, then run with pytest.
