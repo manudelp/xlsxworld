@@ -430,8 +430,8 @@ export default function InspectSheets() {
   return (
     <div className="space-y-4">
       <FileUploadDropzone
-        accept=".xls,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
-        message="Drop or select an Excel file to inspect its content"
+        accept=".xls,.xlsx,.xlsm,.xlsb,.xltx,.xltm,.xlam,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.binary.macroEnabled.12,application/vnd.ms-excel.sheet.macroEnabled.12"
+        message="Drop or select an Excel file (.xlsx, .xls, .xlsb, etc.) to inspect"
         onFiles={(files) => {
           const file = files[0];
           if (file) onFile(file);

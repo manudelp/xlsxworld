@@ -155,7 +155,7 @@ export default function SplitSheet() {
 
   const handleSplit = useCallback(async () => {
     if (!file) {
-      setError("Please select an XLSX file first.");
+      setError("Please select an Excel file first.");
       return;
     }
 
@@ -219,8 +219,8 @@ export default function SplitSheet() {
   return (
     <div className="space-y-4">
       <FileUploadDropzone
-        accept=".xls,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
-        message="Drop or select an Excel file to split a sheet into chunks"
+        accept=".xls,.xlsx,.xlsm,.xlsb,.xltx,.xltm,.xlam,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.binary.macroEnabled.12,application/vnd.ms-excel.sheet.macroEnabled.12"
+        message="Drop or select an Excel file (.xlsx, .xls, .xlsb, etc.) to split a sheet"
         className="flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition"
         style={{
           borderColor: error ? "var(--danger)" : "var(--border)",
@@ -538,20 +538,22 @@ export default function SplitSheet() {
         </div>
       )}
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-xs" style={{ color: "var(--muted-2)" }}>
-          Output names follow your base name and numbering style, like sheet_01 or chunk_A.
-        </p>
+      {file && (
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-xs" style={{ color: "var(--muted-2)" }}>
+            Output names follow your base name and numbering style, like sheet_01 or chunk_A.
+          </p>
 
-        <button
-          onClick={handleSplit}
-          disabled={!canSplit}
-          className="cursor-pointer rounded-md px-4 py-2 text-sm font-medium text-white transition disabled:cursor-not-allowed disabled:opacity-50"
-          style={{ backgroundColor: "var(--primary)" }}
-        >
-          {loading ? "Splitting..." : "Split Sheet"}
-        </button>
-      </div>
+          <button
+            onClick={handleSplit}
+            disabled={!canSplit}
+            className="cursor-pointer rounded-md px-4 py-2 text-sm font-medium text-white transition disabled:cursor-not-allowed disabled:opacity-50"
+            style={{ backgroundColor: "var(--primary)" }}
+          >
+            {loading ? "Splitting..." : "Split Sheet"}
+          </button>
+        </div>
+      )}
 
       {error && <div className="text-sm" style={{ color: "var(--danger)" }}>{error}</div>}
     </div>

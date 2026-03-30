@@ -31,6 +31,7 @@ Build interfaces that are:
 ## Layout Patterns
 
 - Follow the upload-first progressive disclosure pattern: show only the dropzone initially, then reveal settings, summary, and actions after upload.
+- Never show tool-specific UI (options, previews, summaries, action buttons, or results) before at least one file is uploaded.
 - Keep section hierarchy consistent: upload area -> selection/settings card -> summary/insights -> action row.
 - Place secondary control buttons (`Select all`, `Clear`, ordering actions) in the top-right header actions area of the relevant card.
 - Use a consistent primary action row: helper text on the left and primary CTA aligned right.
@@ -124,5 +125,6 @@ Before merging frontend work, confirm:
 - Primary and secondary actions follow the agreed placement pattern.
 - New colors are tokenized in `globals.css` (no hardcoded state colors).
 - Upload-first screens hide non-essential UI before file selection.
+- Tool pages reveal tool controls only after at least one file upload is confirmed.
 - Summaries are concise and non-duplicative.
 - No TypeScript or lint errors in changed files.

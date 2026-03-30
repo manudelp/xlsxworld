@@ -45,7 +45,7 @@ export default function SplitWorkbook() {
 
   const handleSplit = useCallback(async () => {
     if (!file) {
-      setError("Please select an XLSX file first.");
+      setError("Please select an Excel file first.");
       return;
     }
 
@@ -79,8 +79,8 @@ export default function SplitWorkbook() {
   return (
     <div className="space-y-4">
       <FileUploadDropzone
-        accept=".xls,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
-        message="Drop or select an Excel file to split its sheets into separate workbooks"
+        accept=".xls,.xlsx,.xlsm,.xlsb,.xltx,.xltm,.xlam,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.binary.macroEnabled.12,application/vnd.ms-excel.sheet.macroEnabled.12"
+        message="Drop or select an Excel file (.xlsx, .xls, .xlsb, etc.)"
         className="flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition"
         style={{
           borderColor: error ? "var(--danger)" : "var(--border)",
@@ -209,16 +209,18 @@ export default function SplitWorkbook() {
         </div>
       )}
 
-      <div className="flex justify-end">
-        <button
-          onClick={handleSplit}
-          disabled={!canSplit}
-          className="cursor-pointer rounded-md px-4 py-2 text-sm font-medium text-white transition disabled:cursor-not-allowed disabled:opacity-50"
-          style={{ backgroundColor: "var(--primary)" }}
-        >
-          {loading ? "Splitting..." : "Split Workbook"}
-        </button>
-      </div>
+      {file && (
+        <div className="flex justify-end">
+          <button
+            onClick={handleSplit}
+            disabled={!canSplit}
+            className="cursor-pointer rounded-md px-4 py-2 text-sm font-medium text-white transition disabled:cursor-not-allowed disabled:opacity-50"
+            style={{ backgroundColor: "var(--primary)" }}
+          >
+            {loading ? "Splitting..." : "Split Workbook"}
+          </button>
+        </div>
+      )}
 
       {error && <div className="text-sm" style={{ color: "var(--danger)" }}>{error}</div>}
     </div>

@@ -265,7 +265,7 @@ export default function AppendWorkbooks() {
 
   const handleAppend = useCallback(async () => {
     if (files.length < 2) {
-      setError("Select at least two XLSX files to append.");
+      setError("Select at least two Excel files to append.");
       return;
     }
 
@@ -295,9 +295,9 @@ export default function AppendWorkbooks() {
   return (
     <div className="space-y-4">
       <FileUploadDropzone
-        accept=".xls,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
+        accept=".xls,.xlsx,.xlsm,.xlsb,.xltx,.xltm,.xlam,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.binary.macroEnabled.12,application/vnd.ms-excel.sheet.macroEnabled.12"
         multiple
-        message="Drop or select at least 2 Excel files to append"
+        message="Drop or select at least 2 Excel files (.xlsx, .xls, .xlsb, etc.) to append"
         className="flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition"
         style={{
           borderColor: error ? "var(--danger)" : "var(--border)",
@@ -663,24 +663,26 @@ export default function AppendWorkbooks() {
         </div>
       )}
 
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div className="text-xs" style={{ color: "var(--muted-2)" }}>
-          Combines all workbook sheets into one output workbook, preserving sheet structure.
+      {files.length > 0 && (
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="text-xs" style={{ color: "var(--muted-2)" }}>
+            Combines all workbook sheets into one output workbook, preserving sheet structure.
+          </div>
+          <button
+            type="button"
+            onClick={handleAppend}
+            disabled={files.length < 2 || loading}
+            className="cursor-pointer rounded-md border px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+            style={{
+              borderColor: "var(--tag-border)",
+              backgroundColor: "var(--tag-bg)",
+              color: "var(--tag-text)",
+            }}
+          >
+            {loading ? "Appending..." : "Append Workbooks"}
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={handleAppend}
-          disabled={files.length < 2 || loading}
-          className="cursor-pointer rounded-md border px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
-          style={{
-            borderColor: "var(--tag-border)",
-            backgroundColor: "var(--tag-bg)",
-            color: "var(--tag-text)",
-          }}
-        >
-          {loading ? "Appending..." : "Append Workbooks"}
-        </button>
-      </div>
+      )}
     </div>
   );
 }

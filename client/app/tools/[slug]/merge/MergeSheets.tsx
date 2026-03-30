@@ -242,7 +242,7 @@ export default function MergeSheets() {
 
   const handleMerge = useCallback(async () => {
     if (!file) {
-      setError("Please select an XLSX file first.");
+      setError("Please select an Excel file first.");
       return;
     }
 
@@ -278,8 +278,8 @@ export default function MergeSheets() {
   return (
     <div className="space-y-4">
       <FileUploadDropzone
-        accept=".xls,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
-        message="Drop or select an Excel file to merge its sheets"
+        accept=".xls,.xlsx,.xlsm,.xlsb,.xltx,.xltm,.xlam,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.binary.macroEnabled.12,application/vnd.ms-excel.sheet.macroEnabled.12"
+        message="Drop or select an Excel file (.xlsx, .xls, .xlsb, etc.) to merge sheets"
         className="flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition"
         style={{
           borderColor: error ? "var(--danger)" : "var(--border)",
@@ -724,24 +724,26 @@ export default function MergeSheets() {
         </div>
       )}
 
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div className="text-xs" style={{ color: "var(--muted-2)" }}>
-          Tip: Selected sheets are merged using the order shown above.
+      {file && (
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="text-xs" style={{ color: "var(--muted-2)" }}>
+            Tip: Selected sheets are merged using the order shown above.
+          </div>
+          <button
+            type="button"
+            onClick={handleMerge}
+            disabled={!isReadyToMerge || loading}
+            className="cursor-pointer rounded-md border px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+            style={{
+              borderColor: "var(--tag-border)",
+              backgroundColor: "var(--tag-bg)",
+              color: "var(--tag-text)",
+            }}
+          >
+            {loading ? "Merging..." : "Merge Sheets"}
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={handleMerge}
-          disabled={!isReadyToMerge || loading}
-          className="cursor-pointer rounded-md border px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
-          style={{
-            borderColor: "var(--tag-border)",
-            backgroundColor: "var(--tag-bg)",
-            color: "var(--tag-text)",
-          }}
-        >
-          {loading ? "Merging..." : "Merge Sheets"}
-        </button>
-      </div>
+      )}
     </div>
   );
 }
