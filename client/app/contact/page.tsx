@@ -2,30 +2,78 @@
 
 import { FormEvent, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function ContactPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
-  const [status, setStatus] = useState<"idle" | "sent" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [statusMessage, setStatusMessage] = useState("");
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!name.trim() || !email.trim() || !message.trim()) {
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim();
+    const trimmedMessage = message.trim();
+
+    if (!trimmedName || !trimmedEmail || !trimmedMessage) {
       setStatus("error");
+      setStatusMessage("Please complete all fields before submitting.");
       return;
     }
 
-    // Here you can hook a backend API endpoint, e.g. /api/contact, if/when available.
-    setStatus("sent");
+    setStatus("sending");
+    setStatusMessage("");
+
+    try {
+      const response = await fetch("/api/proxy/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: trimmedName,
+          email: trimmedEmail,
+          message: trimmedMessage,
+        }),
+      });
+
+      const payload = (await response.json().catch(() => null)) as
+        | { detail?: string; ok?: boolean }
+        | null;
+
+      if (!response.ok || payload?.ok === false) {
+        throw new Error(payload?.detail || "Unable to send your message right now.");
+      }
+
+      setStatus("sent");
+      setStatusMessage(payload?.detail || "Thanks! Your message has been sent.");
+      setName("");
+      setEmail("");
+      setMessage("");
+    } catch (error) {
+      setStatus("error");
+      setStatusMessage(
+        error instanceof Error
+          ? error.message
+          : "Unable to send your message right now.",
+      );
+    }
   }
 
   return (
     <main className="max-w-3xl mx-auto px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
       <h1 className="text-3xl font-semibold mb-3 flex items-center gap-2 text-foreground">
         <span>Contact XLSX</span>
-        <Image src="/icon.svg" alt="XLSX World" width={32} height={32} className="inline-block" />
+        <Image
+          src="/icon.svg"
+          alt="XLSX World"
+          width={32}
+          height={32}
+          className="inline-block"
+        />
         <span>World</span>
       </h1>
       <p className="mb-7 text-base leading-relaxed text-muted">
@@ -47,9 +95,11 @@ export default function ContactPage() {
               <input
                 id="contact-name"
                 type="text"
+                name="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Your name"
+                disabled={status === "sending"}
                 className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-muted shadow-sm transition-colors duration-150 focus:border-primary focus:ring-2 focus:ring-primary/25 outline-none"
               />
             </div>
@@ -64,9 +114,11 @@ export default function ContactPage() {
               <input
                 id="contact-email"
                 type="email"
+                name="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
+                disabled={status === "sending"}
                 className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-muted shadow-sm transition-colors duration-150 focus:border-primary focus:ring-2 focus:ring-primary/25 outline-none"
               />
               <p className="mt-1 text-xs text-primary">
@@ -84,31 +136,34 @@ export default function ContactPage() {
             </label>
             <textarea
               id="contact-message"
+              name="message"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               rows={6}
               placeholder="What can we help with?"
-              className="mt-1 block w-full min-h-[140px] rounded-md border border-border bg-surface-2 px-3 py-2 text-sm text-foreground placeholder:text-muted shadow-sm transition-colors duration-150 focus:border-primary focus:ring-2 focus:ring-primary/25 outline-none"
+              disabled={status === "sending"}
+              className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-muted shadow-sm transition-colors duration-150 focus:border-primary focus:ring-2 focus:ring-primary/25 outline-none"
             />
           </div>
 
           <div className="flex items-center gap-4">
             <button
               type="submit"
+              disabled={status === "sending"}
               className="inline-flex items-center justify-center rounded-md bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-colors duration-150 hover:!bg-primary-hover active:bg-primary-active focus:outline-none focus:ring-2 focus:ring-primary/35 focus:ring-offset-2 focus:ring-offset-background hover:cursor-pointer"
             >
-              Send Message
+              {status === "sending" ? "Sending..." : "Send Message"}
             </button>
 
             <div>
               {status === "sent" && (
                 <p className="text-sm text-success">
-                  Thanks! Your message has been queued for review.
+                  {statusMessage || "Thanks! Your message has been sent."}
                 </p>
               )}
               {status === "error" && (
                 <p className="text-sm text-danger">
-                  Please complete all fields before submitting.
+                  {statusMessage || "Unable to send your message right now."}
                 </p>
               )}
             </div>
@@ -118,15 +173,16 @@ export default function ContactPage() {
 
       <section className="mt-10 grid gap-5 sm:grid-cols-2">
         <div className="rounded-xl border border-border bg-primary-soft p-5">
-          <h2 className="text-lg font-medium text-foreground">Support</h2>
+          <h2 className="text-lg font-medium text-foreground">FAQ</h2>
           <p className="text-sm text-muted mt-1">
-            Email us at{" "}
-            <a
+            Browse our{" "}
+            <Link
+              href="/faq"
               className="text-primary hover:underline font-medium"
-              href="mailto:support@xlsxworld.com"
             >
-              support@xlsxworld.com
-            </a>
+              frequently asked questions
+            </Link>{" "}
+            to find quick answers to common issues.
           </p>
         </div>
 
@@ -135,7 +191,8 @@ export default function ContactPage() {
             Join the community
           </h2>
           <p className="text-sm text-muted mt-1">
-            Share feedback or feature requests in the app&apos;s issue tracker in the repository.
+            Share feedback or feature requests in the app&apos;s issue tracker
+            in the repository.
           </p>
         </div>
       </section>
