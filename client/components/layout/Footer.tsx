@@ -67,14 +67,20 @@ export default function Footer() {
           <Link href="/faq" className="hover:underline">
             FAQ
           </Link>
-          <Link href="/contact" className="hover:underline">
-            Contact
-          </Link>
           <Link
             href="https://link.clashroyale.com/invite/clan/es/?platform=android&tag=RUPQ8RQR&token=x8e92r9f"
             className="hover:underline"
           >
-            Clash Royale Clan
+            GameDesk
+          </Link>
+          <Link href="/contact" className="hover:underline">
+            Contact
+          </Link>
+          <Link href="/privacy" className="hover:underline">
+            Privacy
+          </Link>
+          <Link href="/terms" className="hover:underline">
+            Terms
           </Link>
         </div>
         <div className="text-center md:text-right flex flex-col items-center md:items-end gap-1">
@@ -83,6 +89,7 @@ export default function Footer() {
             <span>{healthLabel}</span>
           </div>
           <div>© XLSX World {new Date().getFullYear()}</div>
+          <div className="text-xs text-white/60">Simplifying spreadsheets, one file at a time.</div>
         </div>
       </div>
     </footer>

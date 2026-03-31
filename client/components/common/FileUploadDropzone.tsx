@@ -63,6 +63,9 @@ export default function FileUploadDropzone({
         <span className="text-sm" style={{ color: "var(--muted)" }}>
           {message}
         </span>
+        <span className="text-xs mt-1" style={{ color: "var(--muted-2)" }}>
+          Max 20 MB per file
+        </span>
       </label>
     </div>
   );
