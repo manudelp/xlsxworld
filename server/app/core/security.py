@@ -3,8 +3,8 @@ import os
 import datetime as dt
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from passlib.context import CryptContext
 from pydantic import BaseModel, EmailStr
@@ -17,9 +17,7 @@ JWT_EXP_MIN = int(os.getenv("JWT_EXP_MIN", "60"))
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
-
-router = APIRouter(prefix="/api/auth", tags=["auth"])
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 
 class UserOut(BaseModel):
@@ -83,7 +81,6 @@ def create_user(email: str, password: str, role: str = "user") -> dict:
             )
             row = cur.fetchone()
             if not row:
-                # Already exists, fetch it
                 u = get_user_by_email(email)
                 if not u:
                     raise HTTPException(status_code=500, detail="Failed to upsert user")
@@ -110,38 +107,3 @@ def require_admin(user: UserOut = Depends(get_current_user)) -> UserOut:
     if user.role != "admin":
         raise HTTPException(status_code=403, detail="Admin only")
     return user
-
-
-@router.post("/signup", response_model=UserOut)
-def signup(body: dict):
-    email = body.get("email")
-    password = body.get("password")
-    if not email or not password:
-        raise HTTPException(status_code=400, detail="email and password required")
-    # first user becomes admin (optional); otherwise default user
-    with get_db_conn() as conn:
-        with conn.cursor() as cur:
-            cur.execute("SELECT COUNT(1) FROM users")
-            total = cur.fetchone()[0]
-    role = "admin" if total == 0 else "user"
-    u = create_user(email, password, role=role)
-    return UserOut(**u)
-
-
-@router.post("/login")
-def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = get_user_by_email(form_data.username)
-    if not user or not verify_password(form_data.password, user["password_hash"]):
-        raise HTTPException(status_code=400, detail="Incorrect email or password")
-    token = create_access_token(user["id"], user["role"])  # type: ignore
-    return {"access_token": token, "token_type": "bearer"}
-
-
-@router.get("/me", response_model=UserOut)
-def me(current: UserOut = Depends(get_current_user)):
-    return current
-
-
-@router.get("/admin/ping")
-def admin_ping(_: UserOut = Depends(require_admin)):
-    return {"pong": True}

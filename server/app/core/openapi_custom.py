@@ -33,12 +33,14 @@ def attach_custom_openapi(app: FastAPI) -> None:
         )
 
         schema_rename_map = {
-            "Body_append_workbooks_api_tools_append_workbooks_post": "AppendWorkbooksRequest",
-            "Body_csv_to_xlsx_api_convert_csv_to_xlsx_post": "CsvToXlsxRequest",
-            "Body_merge_sheets_api_tools_merge_sheets_post": "MergeSheetsRequest",
-            "Body_preview_workbook_api_tools_inspect_preview_post": "PreviewWorkbookRequest",
-            "Body_split_sheet_api_tools_split_sheet_post": "SplitSheetRequest",
-            "Body_split_workbook_api_tools_split_workbook_post": "SplitWorkbookRequest",
+            "Body_append_workbooks_api_v1_tools_append_workbooks_post": "AppendWorkbooksRequest",
+            "Body_csv_to_xlsx_api_v1_tools_convert_csv_to_xlsx_post": "CsvToXlsxRequest",
+            "Body_merge_sheets_api_v1_tools_merge_sheets_post": "MergeSheetsRequest",
+            "Body_preview_workbook_api_v1_tools_inspect_preview_post": "PreviewWorkbookRequest",
+            "Body_split_sheet_api_v1_tools_split_sheet_post": "SplitSheetRequest",
+            "Body_split_workbook_api_v1_tools_split_workbook_post": "SplitWorkbookRequest",
+            "Body_xlsx_to_csv_api_v1_tools_convert_xlsx_to_csv_post": "XlsxToCsvRequest",
+            "Body_xlsx_to_csv_zip_api_v1_tools_convert_xlsx_to_csv_zip_post": "XlsxToCsvZipRequest",
         }
 
         components = openapi_schema.setdefault("components", {}).setdefault("schemas", {})
@@ -58,6 +60,8 @@ def attach_custom_openapi(app: FastAPI) -> None:
             "PreviewWorkbookRequest": "Preview Workbook Request",
             "SplitSheetRequest": "Split Sheet Request",
             "SplitWorkbookRequest": "Split Workbook Request",
+            "XlsxToCsvRequest": "XLSX to CSV Request",
+            "XlsxToCsvZipRequest": "XLSX to CSV ZIP Request",
             "HTTPValidationError": "HTTP Validation Error",
             "ValidationError": "Validation Error",
         }

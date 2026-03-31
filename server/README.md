@@ -9,17 +9,55 @@ This folder contains the FastAPI backend for XLSX World.
 - HTTP server: Uvicorn
 - DB: PostgreSQL (psycopg + SQLAlchemy planned)
 
-## Included modules
+## Project structure
 
-- `main.py`: lightweight app entrypoint
-- `app_factory.py`: creates the FastAPI app, middleware, and router wiring
-- `openapi_custom.py`: OpenAPI schema customization
-- `api/system.py`: root and health routes (`/`, `/health`)
-- `api/contact.py`: contact form route (`/api/contact`)
-- `contact_delivery.py`: webhook/Telegram delivery logic
-- `auth.py`: user/auth routes (`/api/auth/*`), JWT handling, password hashing
-- `tools_inspect.py`, `tools_convert.py`, `tools_merge_split.py`: Excel tool endpoints
-- `schemas.py`: shared pydantic models
+```
+server/
+├── main.py                          # Application entry point
+├── Dockerfile
+├── pyproject.toml
+├── requirements.txt
+└── app/
+    ├── core/                        # App-wide config & cross-cutting concerns
+    │   ├── app_factory.py           # FastAPI app creation, middleware, router wiring
+    │   ├── security.py              # JWT, password hashing, auth dependencies
+    │   ├── openapi_custom.py        # OpenAPI schema customization
+    │   └── rate_limit.py            # Rate limiter instance
+    │
+    ├── middleware/                   # Future: billing guard, upload-limit, logging
+    │
+    ├── routes/                      # Platform routes (non-tool)
+    │   ├── __init__.py              # Collects all platform routers
+    │   ├── system.py                # /, /health
+    │   ├── contact.py               # /api/v1/contact
+    │   └── auth.py                  # /api/v1/auth/*
+    │
+    ├── tools/                       # Every tool lives here, grouped by category
+    │   ├── __init__.py              # Collects all category routers
+    │   ├── _common.py               # Shared helpers (sheet title sanitization, upload size, etc.)
+    │   ├── inspect/                 # Workbook inspection tools
+    │   │   ├── __init__.py          # Category router
+    │   │   ├── _store.py            # In-memory workbook token store
+    │   │   ├── preview.py           # POST /api/v1/tools/inspect/preview
+    │   │   └── page_sheet.py        # GET  /api/v1/tools/inspect/sheet
+    │   ├── convert/                 # Format conversion tools
+    │   │   ├── __init__.py          # Category router
+    │   │   ├── csv_to_xlsx.py       # POST /api/v1/tools/convert/csv-to-xlsx
+    │   │   └── xlsx_to_csv.py       # POST /api/v1/tools/convert/xlsx-to-csv, xlsx-to-csv-zip
+    │   └── merge_split/             # Merge & split tools
+    │       ├── __init__.py          # Category router
+    │       ├── merge_sheets.py      # POST /api/v1/tools/merge-sheets
+    │       ├── split_sheet.py       # POST /api/v1/tools/split-sheet
+    │       ├── split_workbook.py    # POST /api/v1/tools/split-workbook
+    │       └── append_workbooks.py  # POST /api/v1/tools/append-workbooks
+    │
+    ├── services/                    # Business logic & external integrations
+    │   ├── excel_reader.py          # Multi-format Excel parsing
+    │   └── contact_delivery.py      # Webhook/Telegram delivery
+    │
+    └── schemas/                     # Pydantic data models
+        └── schemas.py
+```
 
 ## Environment
 
@@ -60,10 +98,10 @@ CONTACT_TEST_KEY=my-local-only-key   # optional, protects the test endpoint
 
 ```
 # without key
-curl -X POST http://localhost:8000/api/contact/test
+curl -X POST http://localhost:8000/api/v1/contact/test
 
 # with key
-curl -X POST 'http://localhost:8000/api/contact/test?key=my-local-only-key'
+curl -X POST 'http://localhost:8000/api/v1/contact/test?key=my-local-only-key'
 ```
 
 The test endpoint calls the same delivery code used by the contact form.
@@ -118,13 +156,24 @@ uv run uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
 ## API endpoints
 
-- `GET /`: status
-- `GET /health`: health check
-- `/api/auth/signup`, `/api/auth/login`, `/api/auth/me`
-- `/api/tools/inspect` etc (in `tools_inspect.py`)
+All tool endpoints are under `/api/v1/`:
 
-Supported Excel upload formats for inspect/merge/split endpoints:
+- `GET /` — status
+- `GET /health` — health check
+- `POST /api/v1/auth/signup`, `POST /api/v1/auth/login`, `GET /api/v1/auth/me`
+- `POST /api/v1/tools/inspect/preview`, `GET /api/v1/tools/inspect/sheet`
+- `POST /api/v1/tools/convert/csv-to-xlsx`, `POST /api/v1/tools/convert/xlsx-to-csv`, `POST /api/v1/tools/convert/xlsx-to-csv-zip`
+- `POST /api/v1/tools/merge-sheets`, `POST /api/v1/tools/split-sheet`, `POST /api/v1/tools/split-workbook`, `POST /api/v1/tools/append-workbooks`
+
+Supported Excel upload formats:
 - `.xlsx`, `.xls`, `.xlsm`, `.xlsb`, `.xltx`, `.xltm`, `.xlam`
+
+## Adding a new tool
+
+1. Create a new file in the appropriate category folder (e.g. `app/tools/convert/json_to_xlsx.py`)
+2. Define a `router = APIRouter()` with your endpoint(s)
+3. Import and include it in the category's `__init__.py`
+4. That's it — the app_factory picks it up automatically
 
 ## Tests
 

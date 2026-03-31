@@ -67,5 +67,5 @@ dependencies = [
   "slowapi>=0.1.9",
 ]
 
-[tool.setuptools]
-py-modules = ["main", "auth", "tools_inspect", "schemas"]
+[tool.setuptools.packages.find]
+where = ["."]

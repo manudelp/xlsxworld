@@ -1,10 +1,10 @@
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, EmailStr, Field
 
-from contact_delivery import deliver_contact_message
-from rate_limit import limiter
+from app.services.contact_delivery import deliver_contact_message
+from app.core.rate_limit import limiter
 
-router = APIRouter(prefix="/api/contact", tags=["meta"])
+router = APIRouter(prefix="/api/v1/contact", tags=["meta"])
 
 
 class ContactMessage(BaseModel):
@@ -27,16 +27,14 @@ async def submit_contact(request: Request, payload: ContactMessage):
     if not name or not message:
         raise HTTPException(status_code=400, detail="Name and message are required.")
 
-    # 1. Turnstile Secret Key from Env
     from os import getenv
     import httpx
 
     turnstile_secret = getenv("TURNSTILE_SECRET_KEY", "").strip()
-    if turnstile_secret:  # Only enforce CAPTCHA if secret is configured
+    if turnstile_secret:
         if not payload.cf_turnstile_response:
             raise HTTPException(status_code=400, detail="Please complete the CAPTCHA.")
 
-        # 2. Verify with Cloudflare
         verify_url = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
         async with httpx.AsyncClient() as client:
             resp = await client.post(verify_url, data={
@@ -50,4 +48,3 @@ async def submit_contact(request: Request, payload: ContactMessage):
 
     await deliver_contact_message(name=name, email=str(payload.email), message=message)
     return {"ok": True, "detail": "Thanks! Your message has been sent."}
-
