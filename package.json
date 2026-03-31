@@ -20,5 +20,8 @@
       "prettier --write",
       "npm --prefix client run lint --silent -- --fix"
     ]
+  },
+  "dependencies": {
+    "@marsidev/react-turnstile": "^1.5.0"
   }
 }

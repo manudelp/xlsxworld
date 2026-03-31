@@ -11,6 +11,8 @@ import tools_merge_split
 from api.contact import router as contact_router
 from api.system import router as system_router
 from openapi_custom import attach_custom_openapi
+from rate_limit import limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 
 try:
     from dotenv import load_dotenv  # type: ignore
@@ -21,6 +23,9 @@ except Exception:
 
 def create_app() -> FastAPI:
     app = FastAPI(title="XLSX World API", version="1.0.0")
+
+    app.state.limiter = limiter
+    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
     base_dir = Path(__file__).resolve().parent
     load_dotenv(base_dir / ".env")

@@ -3,11 +3,13 @@
 import { FormEvent, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { Turnstile } from "@marsidev/react-turnstile";
 
 export default function ContactPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [statusMessage, setStatusMessage] = useState("");
 
@@ -24,6 +26,12 @@ export default function ContactPage() {
       return;
     }
 
+    if (!turnstileToken) {
+      setStatus("error");
+      setStatusMessage("Please complete the CAPTCHA.");
+      return;
+    }
+
     setStatus("sending");
     setStatusMessage("");
 
@@ -37,6 +45,7 @@ export default function ContactPage() {
           name: trimmedName,
           email: trimmedEmail,
           message: trimmedMessage,
+          cf_turnstile_response: turnstileToken,
         }),
       });
 
@@ -143,6 +152,13 @@ export default function ContactPage() {
               placeholder="What can we help with?"
               disabled={status === "sending"}
               className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-muted shadow-sm transition-colors duration-150 focus:border-primary focus:ring-2 focus:ring-primary/25 outline-none"
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Turnstile
+              siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"}
+              onSuccess={(token) => setTurnstileToken(token)}
             />
           </div>
 
