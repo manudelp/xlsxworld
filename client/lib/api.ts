@@ -1,8 +1,24 @@
 export interface ApiError { detail: string }
 
-// For production on Vercel the client calls the Next.js server-side proxy at `/api`.
-// For local development you can set `NEXT_PUBLIC_API_BASE` to your local backend.
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? '/api/';
+
+export function buildUrl(path: string, qs?: Record<string, string | number | boolean | undefined>): string {
+  const url = new URL(path, API_BASE);
+  if (qs) Object.entries(qs).forEach(([k,v]) => { if (v !== undefined && v !== null) url.searchParams.set(k, String(v)); });
+  return url.toString();
+}
+
+export function buildUrlWithArrayParams(path: string, params: Record<string, string | string[]>): string {
+  const url = new URL(path, API_BASE);
+  Object.entries(params).forEach(([k, v]) => {
+    if (Array.isArray(v)) {
+      v.forEach((item) => url.searchParams.append(k, item));
+    } else {
+      url.searchParams.set(k, v);
+    }
+  });
+  return url.toString();
+}
 
 async function handle<T>(res: Response): Promise<T> {
   if (!res.ok) {
@@ -18,15 +34,11 @@ async function handle<T>(res: Response): Promise<T> {
 
 export const api = {
   async postForm<T>(path: string, form: FormData, qs?: Record<string, string | number | boolean | undefined>): Promise<T> {
-    const url = new URL(path, API_BASE);
-    if (qs) Object.entries(qs).forEach(([k,v]) => { if (v !== undefined && v !== null) url.searchParams.set(k, String(v)); });
-    const res = await fetch(url.toString(), { method: 'POST', body: form });
+    const res = await fetch(buildUrl(path, qs), { method: 'POST', body: form });
     return handle<T>(res);
   },
   async get<T>(path: string, qs?: Record<string, string | number | boolean | undefined>): Promise<T> {
-    const url = new URL(path, API_BASE);
-    if (qs) Object.entries(qs).forEach(([k,v]) => { if (v !== undefined && v !== null) url.searchParams.set(k, String(v)); });
-    const res = await fetch(url.toString());
+    const res = await fetch(buildUrl(path, qs));
     return handle<T>(res);
   }
 };

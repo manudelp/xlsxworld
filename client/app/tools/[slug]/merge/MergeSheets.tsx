@@ -2,7 +2,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, ChevronUp, GripVertical } from "lucide-react";
 import { mergeSheets } from "@/lib/tools/merge";
-import FileUploadDropzone from "@/components/utility/FileUploadDropzone";
+import FileUploadDropzone from "@/components/common/FileUploadDropzone";
 import { uploadForPreview, type WorkbookPreview } from "@/lib/tools/inspect";
 
 export default function MergeSheets() {

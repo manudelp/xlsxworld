@@ -5,14 +5,14 @@ import {
   WorkbookPreview,
 } from "@/lib/tools/inspect";
 import {
-  exportCsvUrl,
-  exportCsvZipUrl,
-  exportCsvZipSelectedUrl,
+  xlsxToCsv,
+  xlsxToCsvZip,
 } from "@/lib/tools/convert";
-import FileUploadDropzone from "@/components/utility/FileUploadDropzone";
+import FileUploadDropzone from "@/components/common/FileUploadDropzone";
 
 export default function ConvertXlsxToCsv() {
   const [preview, setPreview] = useState<WorkbookPreview | null>(null);
+  const [file, setFile] = useState<File | null>(null);
   const [activeSheet, setActiveSheet] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,6 +23,7 @@ export default function ConvertXlsxToCsv() {
     setError(null);
     setPreview(null);
     setSelectedSheets([]);
+    setFile(file);
     setFileName(file.name);
     setLoading(true);
     setActiveSheet(0);
@@ -40,15 +41,6 @@ export default function ConvertXlsxToCsv() {
   }, []);
 
   const sheetName = preview?.sheets?.[activeSheet]?.name;
-  const downloadSingleLink =
-    preview && selectedSheets.length === 1
-      ? exportCsvUrl(preview.token, selectedSheets[0])
-      : "";
-  const downloadSelectedZipLink =
-    preview && selectedSheets.length > 1
-      ? exportCsvZipSelectedUrl(preview.token, selectedSheets)
-      : "";
-  const downloadZipLink = preview ? exportCsvZipUrl(preview.token) : "";
   const selectedSheet = preview?.sheets?.[activeSheet] ?? null;
   const selectedDataRows = Math.max(0, (selectedSheet?.total_rows ?? 0) - 1);
   const canDownloadAllSheets = (preview?.sheet_count ?? 0) > 1;
@@ -298,44 +290,95 @@ export default function ConvertXlsxToCsv() {
                 </button>
               ) : null}
 
-              {selectedCount === 1 && downloadSingleLink ? (
-                <a
-                  href={downloadSingleLink}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex cursor-pointer items-center gap-2 rounded-md px-4 py-2 text-sm font-medium text-white transition"
+              {selectedCount === 1 && file ? (
+                <button
+                  onClick={async () => {
+                    try {
+                      setLoading(true);
+                      const buf = await xlsxToCsv(file, selectedSheets[0]);
+                      const blob = new Blob([buf], { type: "text/csv" });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = `${selectedSheets[0]}.csv`;
+                      document.body.appendChild(a);
+                      a.click();
+                      a.remove();
+                      URL.revokeObjectURL(url);
+                    } catch (e) {
+                      setError(e instanceof Error ? e.message : "Export failed");
+                    } finally {
+                      setLoading(false);
+                    }
+                  }}
+                  disabled={loading}
+                  className="inline-flex cursor-pointer items-center gap-2 rounded-md px-4 py-2 text-sm font-medium text-white transition disabled:opacity-50"
                   style={{ backgroundColor: "var(--primary)" }}
                 >
-                  Download Selected CSV
-                </a>
+                  {loading ? "Exporting..." : "Download Selected CSV"}
+                </button>
               ) : null}
 
-              {selectedCount > 1 && downloadSelectedZipLink ? (
-                <a
-                  href={downloadSelectedZipLink}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex cursor-pointer items-center gap-2 rounded-md px-4 py-2 text-sm font-medium text-white transition"
+              {selectedCount > 1 && file ? (
+                <button
+                  onClick={async () => {
+                    try {
+                      setLoading(true);
+                      const buf = await xlsxToCsvZip(file, selectedSheets);
+                      const blob = new Blob([buf], { type: "application/zip" });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = "selected-sheets-csv.zip";
+                      document.body.appendChild(a);
+                      a.click();
+                      a.remove();
+                      URL.revokeObjectURL(url);
+                    } catch (e) {
+                      setError(e instanceof Error ? e.message : "Export failed");
+                    } finally {
+                      setLoading(false);
+                    }
+                  }}
+                  disabled={loading}
+                  className="inline-flex cursor-pointer items-center gap-2 rounded-md px-4 py-2 text-sm font-medium text-white transition disabled:opacity-50"
                   style={{ backgroundColor: "var(--primary)" }}
                 >
-                  Download Selected CSVs (ZIP)
-                </a>
+                  {loading ? "Exporting..." : "Download Selected CSVs (ZIP)"}
+                </button>
               ) : null}
 
-              {canDownloadAllSheets && downloadZipLink ? (
-                <a
-                  href={downloadZipLink}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex cursor-pointer items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition"
+              {canDownloadAllSheets && file ? (
+                <button
+                  onClick={async () => {
+                    try {
+                      setLoading(true);
+                      const buf = await xlsxToCsvZip(file);
+                      const blob = new Blob([buf], { type: "application/zip" });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = "all-sheets-csv.zip";
+                      document.body.appendChild(a);
+                      a.click();
+                      a.remove();
+                      URL.revokeObjectURL(url);
+                    } catch (e) {
+                      setError(e instanceof Error ? e.message : "Export failed");
+                    } finally {
+                      setLoading(false);
+                    }
+                  }}
+                  disabled={loading}
+                  className="inline-flex cursor-pointer items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition disabled:opacity-50"
                   style={{
                     borderColor: "var(--tag-border)",
                     backgroundColor: "var(--tag-bg)",
                     color: "var(--tag-text)",
                   }}
                 >
-                  Download All CSVs (ZIP)
-                </a>
+                  {loading ? "Exporting..." : "Download All CSVs (ZIP)"}
+                </button>
               ) : null}
             </div>
           </div>

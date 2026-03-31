@@ -36,7 +36,7 @@ export default function ContactPage() {
     setStatusMessage("");
 
     try {
-      const response = await fetch("/api/proxy/api/contact", {
+      const response = await fetch("/api/proxy/api/v1/contact", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

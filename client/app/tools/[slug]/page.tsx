@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { toolItems } from "@/components/utility/toolsData";
+import { toolItems } from "@/components/tools/toolsData";
 import InspectSheets from "@/app/tools/[slug]/inspect/InspectSheets";
 import ConvertXlsxToCsv from "./convert/ConvertXlsxToCsv";
 import ConvertCsvToXlsx from "./convert/ConvertCsvToXlsx";

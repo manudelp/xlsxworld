@@ -2,7 +2,7 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { Layers3, Scissors } from "lucide-react";
 import { splitSheet } from "@/lib/tools/split";
-import FileUploadDropzone from "@/components/utility/FileUploadDropzone";
+import FileUploadDropzone from "@/components/common/FileUploadDropzone";
 import { uploadForPreview, type WorkbookPreview } from "@/lib/tools/inspect";
 
 type NumberingStyle =

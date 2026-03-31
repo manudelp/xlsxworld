@@ -2,7 +2,7 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { Archive, Layers3 } from "lucide-react";
 import { splitWorkbook } from "@/lib/tools/split";
-import FileUploadDropzone from "@/components/utility/FileUploadDropzone";
+import FileUploadDropzone from "@/components/common/FileUploadDropzone";
 import { uploadForPreview, type WorkbookPreview } from "@/lib/tools/inspect";
 
 export default function SplitWorkbook() {

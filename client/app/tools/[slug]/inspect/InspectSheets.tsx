@@ -9,8 +9,8 @@ import {
   type Row,
   type WorkbookPreview,
 } from "@/lib/tools/inspect";
-import BackToTopButton from "@/components/utility/BackToTopButton";
-import FileUploadDropzone from "@/components/utility/FileUploadDropzone";
+import BackToTopButton from "@/components/common/BackToTopButton";
+import FileUploadDropzone from "@/components/common/FileUploadDropzone";
 
 type SortDirection = "asc" | "desc";
 const PAGE_SIZE = 25;

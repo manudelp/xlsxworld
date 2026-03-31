@@ -2,7 +2,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, ChevronUp, GripVertical } from "lucide-react";
 import { appendWorkbooks } from "@/lib/tools/merge";
-import FileUploadDropzone from "@/components/utility/FileUploadDropzone";
+import FileUploadDropzone from "@/components/common/FileUploadDropzone";
 
 export default function AppendWorkbooks() {
   const [files, setFiles] = useState<File[]>([]);

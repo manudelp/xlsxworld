@@ -1,8 +1,8 @@
 "use client";
 import React, { useMemo, useState } from "react";
-import ToolsFilter from "./ToolsFilter";
-import Tool from "./Tool";
-import { toolItems } from "./toolsData";
+import ToolsFilter from "@/components/tools/ToolsFilter";
+import Tool from "@/components/tools/Tool";
+import { toolItems } from "@/components/tools/toolsData";
 
 export default function Tools() {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");

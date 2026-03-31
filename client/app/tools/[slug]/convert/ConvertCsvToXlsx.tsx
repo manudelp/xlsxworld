@@ -1,7 +1,7 @@
 "use client";
 import React, { useCallback, useState } from "react";
 import { csvToXlsx } from "@/lib/tools/convert";
-import FileUploadDropzone from "@/components/utility/FileUploadDropzone";
+import FileUploadDropzone from "@/components/common/FileUploadDropzone";
 
 export default function ConvertCsvToXlsx() {
   const [file, setFile] = useState<File | null>(null);

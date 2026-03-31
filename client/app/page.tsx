@@ -1,4 +1,4 @@
-import Tools from "@/components/utility/Tools";
+import Tools from "@/components/tools/Tools";
 
 export default function Home() {
   return (

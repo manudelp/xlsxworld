@@ -1,52 +1,29 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000";
+import { api } from '../api';
 
 export async function csvToXlsx(
   file: File,
   sheetName = "Sheet1",
   delimiter = ",",
 ): Promise<ArrayBuffer> {
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("sheet_name", sheetName);
-  formData.append("delimiter", delimiter);
+  const fd = new FormData();
+  fd.append("file", file);
+  fd.append("sheet_name", sheetName);
+  fd.append("delimiter", delimiter);
+  return api.postForm<ArrayBuffer>('/api/v1/tools/convert/csv-to-xlsx', fd);
+}
 
-  const response = await fetch(`${API_BASE}/api/convert/csv-to-xlsx`, {
-    method: "POST",
-    body: formData,
-  });
+export async function xlsxToCsv(file: File, sheet: string): Promise<ArrayBuffer> {
+  const fd = new FormData();
+  fd.append("file", file);
+  return api.postForm<ArrayBuffer>('/api/v1/tools/convert/xlsx-to-csv', fd, { sheet });
+}
 
-  if (!response.ok) {
-    let detail = response.statusText;
-    try {
-      const payload = await response.json();
-      if (payload?.detail) detail = payload.detail;
-    } catch {
-      // ignore non-json error payload
-    }
-    throw new Error(detail);
+export async function xlsxToCsvZip(file: File, sheets?: string[]): Promise<ArrayBuffer> {
+  const fd = new FormData();
+  fd.append("file", file);
+  const qs: Record<string, string> = {};
+  if (sheets && sheets.length > 0) {
+    qs.sheets = sheets.join(",");
   }
-
-  return response.arrayBuffer();
-}
-
-export function exportCsvUrl(token: string, sheet: string): string {
-  const params = new URLSearchParams();
-  params.set("token", token);
-  params.set("sheet", sheet);
-  return `${API_BASE}/api/convert/xlsx-to-csv/export/csv?${params.toString()}`;
-}
-
-export function exportCsvZipUrl(token: string): string {
-  const params = new URLSearchParams();
-  params.set("token", token);
-  return `${API_BASE}/api/convert/xlsx-to-csv/export/csv-zip?${params.toString()}`;
-}
-
-export function exportCsvZipSelectedUrl(token: string, sheets: string[]): string {
-  const params = new URLSearchParams();
-  params.set("token", token);
-  sheets.forEach((sheet) => {
-    params.append("sheets", sheet);
-  });
-  return `${API_BASE}/api/convert/xlsx-to-csv/export/csv-zip-selected?${params.toString()}`;
+  return api.postForm<ArrayBuffer>('/api/v1/tools/convert/xlsx-to-csv-zip', fd, qs);
 }
