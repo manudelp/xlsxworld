@@ -90,7 +90,7 @@ export default function ContactPage() {
         report a bug.
       </p>
 
-      <div className="bg-surface-2 border border-border rounded-xl p-6 shadow-sm relative overflow-hidden">
+      <div className="bg-surface-2 border border-border rounded-xl p-4 sm:p-6 shadow-sm relative overflow-hidden">
         <div className="absolute left-0 right-0 top-0 h-1 bg-primary/30" />
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

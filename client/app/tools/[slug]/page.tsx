@@ -29,7 +29,7 @@ export default async function ToolPage({
   if (!tool) return notFound();
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-12">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
       <h1 className="text-3xl font-semibold mb-2 flex items-center gap-3">
         <span className="text-4xl" aria-hidden>
           {tool.icon}

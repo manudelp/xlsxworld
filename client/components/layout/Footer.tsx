@@ -60,7 +60,7 @@ export default function Footer() {
   return (
     <footer className="w-full bg-[#292931] text-white py-6 px-4">
       <div className="container mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
-        <div className="flex gap-6">
+        <div className="flex flex-wrap justify-center md:justify-start gap-x-6 gap-y-2">
           <Link href="/" className="hover:underline">
             Home
           </Link>

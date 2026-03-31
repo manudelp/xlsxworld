@@ -96,7 +96,7 @@ export default function FAQPage() {
                 {group.questions.map((item, itemIdx) => (
                   <details
                     key={itemIdx}
-                    className="group rounded-xl border border-border bg-primary-soft p-5 [&_summary::-webkit-details-marker]:hidden"
+                    className="group rounded-xl border border-border bg-primary-soft p-3 sm:p-5 [&_summary::-webkit-details-marker]:hidden"
                   >
                     <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-foreground font-medium outline-none">
                       <span className="text-lg">{item.q}</span>

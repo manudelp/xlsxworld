@@ -21,12 +21,12 @@ export default function ToolsFilter({
   }, [categories]);
 
   return (
-    <div className="flex flex-wrap justify-center gap-4 mb-8">
+    <div className="flex flex-wrap justify-center gap-2 sm:gap-4 mb-8">
       {normalized.map((cat) => (
         <button
           key={cat}
           onClick={() => onSelect(cat)}
-          className={`tag h-[34px] text-[16px] leading-[26px] font-medium px-4 py-1 flex items-center cursor-pointer border rounded-full transition-all duration-200 ease-in-out hover:opacity-95`}
+          className={`tag h-[30px] sm:h-[34px] text-[14px] sm:text-[16px] leading-[22px] sm:leading-[26px] font-medium px-3 sm:px-4 py-1 flex items-center cursor-pointer border rounded-full transition-all duration-200 ease-in-out hover:opacity-95`}
           style={{
             backgroundColor:
               selected === cat ? "var(--tag-selected-bg)" : "var(--tag-bg)",
