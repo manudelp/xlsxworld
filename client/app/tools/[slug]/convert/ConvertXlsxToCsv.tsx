@@ -79,11 +79,7 @@ export default function ConvertXlsxToCsv() {
       <FileUploadDropzone
         accept=".xls,.xlsx,.xlsm,.xlsb,.xltx,.xltm,.xlam,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.binary.macroEnabled.12,application/vnd.ms-excel.sheet.macroEnabled.12"
         message="Drop or select an Excel file (.xlsx, .xls, .xlsb, etc.) to convert to CSV"
-        className="flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition"
-        style={{
-          borderColor: error ? "var(--danger)" : "var(--border)",
-          backgroundColor: error ? "var(--danger-soft)" : "var(--background)",
-        }}
+        hasError={!!error}
         onFiles={(files) => {
           const file = files[0];
           if (file) void onFile(file);

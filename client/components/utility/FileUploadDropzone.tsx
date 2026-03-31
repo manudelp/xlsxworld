@@ -9,6 +9,7 @@ type FileUploadDropzoneProps = {
   multiple?: boolean;
   className?: string;
   style?: CSSProperties;
+  hasError?: boolean;
 };
 
 export default function FileUploadDropzone({
@@ -18,6 +19,7 @@ export default function FileUploadDropzone({
   multiple = false,
   className,
   style,
+  hasError = false,
 }: FileUploadDropzoneProps) {
   return (
     <div
@@ -35,14 +37,19 @@ export default function FileUploadDropzone({
       <label
         className={
           className ||
-          "flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition"
+          `group flex min-h-[160px] h-40 w-full cursor-pointer flex-col items-center justify-center p-6 text-center rounded-xl border-2 border-dashed transition-all duration-200 
+          ${hasError 
+            ? "border-[var(--danger)] bg-[var(--danger-soft)]" 
+            : "border-[var(--border)] bg-[var(--background)] hover:border-primary hover:bg-primary-soft"
+          }`
         }
-        style={{
-          backgroundColor: "var(--background)",
-          borderColor: "var(--border)",
-          ...style,
-        }}
+        style={style}
       >
+        <div className={`mb-3 rounded-full p-3 transition-colors ${hasError ? 'bg-[var(--danger)] text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 group-hover:bg-primary group-hover:text-white'}`}>
+          <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+          </svg>
+        </div>
         <input
           type="file"
           accept={accept}

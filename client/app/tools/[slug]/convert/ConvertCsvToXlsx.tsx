@@ -52,11 +52,7 @@ export default function ConvertCsvToXlsx() {
       <FileUploadDropzone
         accept=".csv,text/csv"
         message="Drop or select a CSV file to convert to XLSX"
-        className="flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition"
-        style={{
-          borderColor: error ? "var(--danger)" : "var(--border)",
-          backgroundColor: error ? "var(--danger-soft)" : "var(--background)",
-        }}
+        hasError={!!error}
         onFiles={(files) => {
           const selected = files[0];
           if (selected) onFile(selected);

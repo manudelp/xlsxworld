@@ -298,11 +298,7 @@ export default function AppendWorkbooks() {
         accept=".xls,.xlsx,.xlsm,.xlsb,.xltx,.xltm,.xlam,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.binary.macroEnabled.12,application/vnd.ms-excel.sheet.macroEnabled.12"
         multiple
         message="Drop or select at least 2 Excel files (.xlsx, .xls, .xlsb, etc.) to append"
-        className="flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition"
-        style={{
-          borderColor: error ? "var(--danger)" : "var(--border)",
-          backgroundColor: error ? "var(--danger-soft)" : "var(--background)",
-        }}
+        hasError={!!error}
         onFiles={onFiles}
       />
 
