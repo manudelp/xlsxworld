@@ -1,7 +1,24 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { BarChart3, Funnel } from "lucide-react";
+import {
+  ArrowDownUp,
+  BarChart3,
+  CaseSensitive,
+  Eye,
+  EyeOff,
+  Highlighter,
+  ListFilter,
+  Maximize2,
+  Minimize2,
+  PanelTopClose,
+  PanelTopOpen,
+  Rows2,
+  SearchX,
+  Table2,
+  Rows3,
+  RotateCcw,
+} from "lucide-react";
 import {
   fetchSheetPage,
   uploadForPreview,
@@ -13,7 +30,36 @@ import BackToTopButton from "@/components/common/BackToTopButton";
 import FileUploadDropzone from "@/components/common/FileUploadDropzone";
 
 type SortDirection = "asc" | "desc";
+type TableRow = {
+  sourceIndex: number;
+  cells: (string | number | boolean | null)[];
+};
+
 const PAGE_SIZE = 25;
+const DEFAULT_COLUMN_WIDTH = 180;
+const MIN_COLUMN_WIDTH = 72;
+const MAX_COLUMN_WIDTH = 640;
+const DEFAULT_ROW_HEIGHT = 44;
+const COMPACT_ROW_HEIGHT = 30;
+const MIN_ROW_HEIGHT = 28;
+const MAX_ROW_HEIGHT = 240;
+
+type ResizeState =
+  | {
+      kind: "column";
+      index: number;
+      pointerId: number;
+      startPointer: number;
+      startSize: number;
+    }
+  | {
+      kind: "row";
+      index: number;
+      pointerId: number;
+      startPointer: number;
+      startSize: number;
+    }
+  | null;
 
 export default function InspectSheets() {
   const [preview, setPreview] = useState<WorkbookPreview | null>(null);
@@ -22,11 +68,8 @@ export default function InspectSheets() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [globalQuery, setGlobalQuery] = useState("");
-  const [columnFilterIndex, setColumnFilterIndex] = useState(0);
-  const [columnFilterQuery, setColumnFilterQuery] = useState("");
   const [sortColumnIndex, setSortColumnIndex] = useState<number | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
-  const [showFiltersMenu, setShowFiltersMenu] = useState(false);
   const [showStatsMenu, setShowStatsMenu] = useState(false);
   const [pagedRows, setPagedRows] = useState<Row[]>([]);
   const [pagedHeader, setPagedHeader] = useState<Cell[] | null>(null);
@@ -36,9 +79,27 @@ export default function InspectSheets() {
   const [loadingAllRows, setLoadingAllRows] = useState(false);
   const [hasLoadedPageData, setHasLoadedPageData] = useState(false);
   const [isPanningTable, setIsPanningTable] = useState(false);
-  const filtersMenuContainerRef = useRef<HTMLDivElement | null>(null);
+  const [columnWidths, setColumnWidths] = useState<Record<number, number>>({});
+  const [rowHeights, setRowHeights] = useState<Record<number, number>>({});
+  const [columnWidthMode, setColumnWidthMode] = useState<"fixed" | "expanded">(
+    "fixed",
+  );
+  const [rowDensity, setRowDensity] = useState<"comfortable" | "compact">(
+    "comfortable",
+  );
+  const [baseRowHeight, setBaseRowHeight] = useState(DEFAULT_ROW_HEIGHT);
+  const [stickyHeader, setStickyHeader] = useState(false);
+  const [showRowNumbers, setShowRowNumbers] = useState(true);
+  const [caseSensitiveSearch, setCaseSensitiveSearch] = useState(false);
+  const [hideEmptyRows, setHideEmptyRows] = useState(false);
+  const [highlightEmptyCells, setHighlightEmptyCells] = useState(false);
+  const [zebraRows, setZebraRows] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
   const statsMenuContainerRef = useRef<HTMLDivElement | null>(null);
   const tableScrollRef = useRef<HTMLDivElement | null>(null);
+  const tableElementRef = useRef<HTMLTableElement | null>(null);
+  const resizeStateRef = useRef<ResizeState>(null);
+  const measureCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const tablePanStateRef = useRef({
     pointerId: -1,
     startX: 0,
@@ -71,6 +132,9 @@ export default function InspectSheets() {
     return String(value);
   };
 
+  const isEmptyCell = (value: unknown) =>
+    value === null || value === undefined || value === "";
+
   const renderCell = (value: unknown) => {
     const formatted = formatCell(value);
     return formatted === "" ? "\u00A0" : formatted;
@@ -81,11 +145,8 @@ export default function InspectSheets() {
 
   useEffect(() => {
     setGlobalQuery("");
-    setColumnFilterQuery("");
     setSortColumnIndex(null);
     setSortDirection("desc");
-    setColumnFilterIndex(0);
-    setShowFiltersMenu(false);
     setShowStatsMenu(false);
     setPagedRows([]);
     setPagedHeader(null);
@@ -94,6 +155,8 @@ export default function InspectSheets() {
     setPagingLoading(false);
     setLoadingAllRows(false);
     setHasLoadedPageData(false);
+    resizeStateRef.current = null;
+    setIsResizing(false);
   }, [activeSheetIndex]);
 
   const loadPage = async (append: boolean) => {
@@ -172,14 +235,9 @@ export default function InspectSheets() {
       const target = event.target as Node | null;
       if (!target) return;
 
-      const clickedInsideFilters =
-        filtersMenuContainerRef.current?.contains(target) ?? false;
       const clickedInsideStats =
         statsMenuContainerRef.current?.contains(target) ?? false;
 
-      if (!clickedInsideFilters) {
-        setShowFiltersMenu(false);
-      }
       if (!clickedInsideStats) {
         setShowStatsMenu(false);
       }
@@ -209,7 +267,9 @@ export default function InspectSheets() {
   };
 
   const onTablePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (event.pointerType === "mouse" && event.button !== 0) return;
+    if (isResizing) return;
+    if (event.pointerType !== "mouse") return;
+    if (event.button !== 0 || !event.altKey) return;
 
     const target = event.target as HTMLElement | null;
     if (
@@ -237,6 +297,7 @@ export default function InspectSheets() {
   };
 
   const onTablePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (isResizing) return;
     const container = tableScrollRef.current;
     const panState = tablePanStateRef.current;
     if (!container || panState.pointerId !== event.pointerId) return;
@@ -253,11 +314,251 @@ export default function InspectSheets() {
     };
   }, []);
 
+  const clamp = (value: number, min: number, max: number) =>
+    Math.min(max, Math.max(min, value));
+
+  const getExcelColumnLabel = (index: number) => {
+    let value = index + 1;
+    let label = "";
+
+    while (value > 0) {
+      const remainder = (value - 1) % 26;
+      label = String.fromCharCode(65 + remainder) + label;
+      value = Math.floor((value - 1) / 26);
+    }
+
+    return label;
+  };
+
+  const getColumnWidth = (index: number) =>
+    columnWidths[index] ?? DEFAULT_COLUMN_WIDTH;
+
+  const getRowHeight = (index: number) => rowHeights[index] ?? baseRowHeight;
+
+  const getMeasureContext = () => {
+    if (!measureCanvasRef.current) {
+      measureCanvasRef.current = document.createElement("canvas");
+    }
+    return measureCanvasRef.current.getContext("2d");
+  };
+
+  const autofitColumnWidth = (index: number, headerLabel: string) => {
+    const context = getMeasureContext();
+    if (!context) return;
+
+    // Match table text styles closely enough for practical Excel-like auto-fit.
+    context.font = "500 14px system-ui";
+
+    let widest = context.measureText(headerLabel).width;
+    const sampleRows = tableModel.rows.slice(0, 300);
+    for (const row of sampleRows) {
+      const width = context.measureText(formatCell(row.cells[index])).width;
+      if (width > widest) widest = width;
+    }
+
+    const paddedWidth = widest + 28;
+    const nextWidth = clamp(
+      Math.ceil(paddedWidth),
+      MIN_COLUMN_WIDTH,
+      MAX_COLUMN_WIDTH,
+    );
+
+    setColumnWidths((prev) => ({ ...prev, [index]: nextWidth }));
+  };
+
+  const autofitAllColumns = () => {
+    if (tableModel.totalColumns === 0) return;
+
+    const context = getMeasureContext();
+    if (!context) return;
+    context.font = "500 14px system-ui";
+
+    const nextWidths: Record<number, number> = {};
+    for (let colIndex = 0; colIndex < tableModel.totalColumns; colIndex += 1) {
+      const header = tableModel.headers[colIndex] ?? `Column ${colIndex + 1}`;
+      let widest = context.measureText(header).width;
+      const sampleRows = tableModel.rows.slice(0, 300);
+      for (const row of sampleRows) {
+        const width = context.measureText(formatCell(row.cells[colIndex])).width;
+        if (width > widest) widest = width;
+      }
+
+      nextWidths[colIndex] = clamp(
+        Math.ceil(widest + 28),
+        MIN_COLUMN_WIDTH,
+        MAX_COLUMN_WIDTH,
+      );
+    }
+    setColumnWidths(nextWidths);
+  };
+
+  const resetColumnWidths = () => {
+    const nextWidths: Record<number, number> = {};
+    for (let colIndex = 0; colIndex < tableModel.totalColumns; colIndex += 1) {
+      nextWidths[colIndex] = DEFAULT_COLUMN_WIDTH;
+    }
+    setColumnWidths(nextWidths);
+  };
+
+  const toggleColumnWidthMode = () => {
+    if (columnWidthMode === "fixed") {
+      autofitAllColumns();
+      setColumnWidthMode("expanded");
+      return;
+    }
+
+    resetColumnWidths();
+    setColumnWidthMode("fixed");
+  };
+
+  const toggleRowDensity = () => {
+    if (rowDensity === "comfortable") {
+      setRowDensity("compact");
+      setBaseRowHeight(COMPACT_ROW_HEIGHT);
+      return;
+    }
+    setRowDensity("comfortable");
+    setBaseRowHeight(DEFAULT_ROW_HEIGHT);
+  };
+
+  const rowNumberPaddingClass =
+    rowDensity === "comfortable" ? "py-2" : "py-1";
+  const cellPaddingClass = rowDensity === "comfortable" ? "py-3" : "py-1.5";
+
+  const hasSizedColumns = Object.keys(columnWidths).length > 0;
+  const hasSizedRows = Object.keys(rowHeights).length > 0;
+  const hasActiveSort = sortColumnIndex !== null;
+  const isViewDirty =
+    globalQuery.trim().length > 0 ||
+    hasActiveSort ||
+    hasSizedColumns ||
+    hasSizedRows ||
+    columnWidthMode !== "fixed" ||
+    rowDensity !== "comfortable" ||
+    baseRowHeight !== DEFAULT_ROW_HEIGHT ||
+    stickyHeader ||
+    !showRowNumbers ||
+    caseSensitiveSearch ||
+    hideEmptyRows ||
+    highlightEmptyCells ||
+    zebraRows;
+
+  const resetView = () => {
+    setGlobalQuery("");
+    setSortColumnIndex(null);
+    setSortDirection("desc");
+    setColumnWidths({});
+    setRowHeights({});
+    setColumnWidthMode("fixed");
+    setRowDensity("comfortable");
+    setBaseRowHeight(DEFAULT_ROW_HEIGHT);
+    setStickyHeader(false);
+    setShowRowNumbers(true);
+    setCaseSensitiveSearch(false);
+    setHideEmptyRows(false);
+    setHighlightEmptyCells(false);
+    setZebraRows(false);
+    tableScrollRef.current?.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+  };
+
+  const clearQuickSearch = () => {
+    setGlobalQuery("");
+  };
+
+  const clearSorting = () => {
+    setSortColumnIndex(null);
+    setSortDirection("desc");
+  };
+
+  const startColumnResize = (
+    index: number,
+    event: React.PointerEvent<HTMLDivElement>,
+  ) => {
+    if (event.button !== 0) return;
+
+    stopTablePan();
+    resizeStateRef.current = {
+      kind: "column",
+      index,
+      pointerId: event.pointerId,
+      startPointer: event.clientX,
+      startSize: getColumnWidth(index),
+    };
+    setIsResizing(true);
+    event.currentTarget.setPointerCapture(event.pointerId);
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
+  const startRowResize = (
+    index: number,
+    event: React.PointerEvent<HTMLDivElement>,
+  ) => {
+    if (event.button !== 0) return;
+
+    stopTablePan();
+    resizeStateRef.current = {
+      kind: "row",
+      index,
+      pointerId: event.pointerId,
+      startPointer: event.clientY,
+      startSize: getRowHeight(index),
+    };
+    setIsResizing(true);
+    event.currentTarget.setPointerCapture(event.pointerId);
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
+  useEffect(() => {
+    if (!isResizing) return;
+
+    const onPointerMove = (event: PointerEvent) => {
+      const resizeState = resizeStateRef.current;
+      if (!resizeState || resizeState.pointerId !== event.pointerId) return;
+
+      if (resizeState.kind === "column") {
+        const delta = event.clientX - resizeState.startPointer;
+        const next = clamp(
+          Math.round(resizeState.startSize + delta),
+          MIN_COLUMN_WIDTH,
+          MAX_COLUMN_WIDTH,
+        );
+        setColumnWidths((prev) => ({ ...prev, [resizeState.index]: next }));
+      } else {
+        const delta = event.clientY - resizeState.startPointer;
+        const next = clamp(
+          Math.round(resizeState.startSize + delta),
+          MIN_ROW_HEIGHT,
+          MAX_ROW_HEIGHT,
+        );
+        setRowHeights((prev) => ({ ...prev, [resizeState.index]: next }));
+      }
+    };
+
+    const endResize = (event: PointerEvent) => {
+      const resizeState = resizeStateRef.current;
+      if (!resizeState || resizeState.pointerId !== event.pointerId) return;
+      resizeStateRef.current = null;
+      setIsResizing(false);
+    };
+
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", endResize);
+    window.addEventListener("pointercancel", endResize);
+
+    return () => {
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerup", endResize);
+      window.removeEventListener("pointercancel", endResize);
+    };
+  }, [isResizing]);
+
   const tableModel = useMemo(() => {
     if (!activeSheet) {
       return {
         headers: [] as string[],
-        rows: [] as (string | number | boolean | null)[][],
+        rows: [] as TableRow[],
         totalColumns: 0,
         sampleSize: 0,
         nullRates: [] as number[],
@@ -277,37 +578,46 @@ export default function InspectSheets() {
       0,
     );
 
-    const headers = Array.from({ length: totalColumns }, (_, i) => {
-      const raw = sourceHeader[i];
-      if (raw === null || raw === undefined || raw === "") {
-        return `Column ${i + 1}`;
-      }
-      return String(raw);
-    });
-
-    const normalizedRows = sourceRows.map((row) =>
-      Array.from({ length: totalColumns }, (_, colIdx) => row[colIdx] ?? null),
+    const headers = Array.from({ length: totalColumns }, (_, i) =>
+      getExcelColumnLabel(i),
     );
 
-    const query = globalQuery.trim().toLowerCase();
-    const colQuery = columnFilterQuery.trim().toLowerCase();
+    const indexedRows: TableRow[] = sourceRows.map((row, sourceIndex) => ({
+      sourceIndex,
+      cells: Array.from(
+        { length: totalColumns },
+        (_, colIdx) => row[colIdx] ?? null,
+      ),
+    }));
 
-    let filteredRows = normalizedRows.filter((row) => {
+    const query = caseSensitiveSearch
+      ? globalQuery.trim()
+      : globalQuery.trim().toLowerCase();
+
+    let filteredRows = indexedRows.filter((row) => {
       const globalMatch =
         query.length === 0 ||
-        row.some((cell) => formatCell(cell).toLowerCase().includes(query));
+        row.cells.some((cell) => {
+          const cellText = formatCell(cell);
+          const comparable = caseSensitiveSearch
+            ? cellText
+            : cellText.toLowerCase();
+          return comparable.includes(query);
+        });
 
-      const columnMatch =
-        colQuery.length === 0 ||
-        formatCell(row[columnFilterIndex]).toLowerCase().includes(colQuery);
-
-      return globalMatch && columnMatch;
+      return globalMatch;
     });
+
+    if (hideEmptyRows) {
+      filteredRows = filteredRows.filter(
+        (row) => !row.cells.every((cell) => isEmptyCell(cell)),
+      );
+    }
 
     if (sortColumnIndex !== null) {
       filteredRows = [...filteredRows].sort((a, b) => {
-        const left = a[sortColumnIndex];
-        const right = b[sortColumnIndex];
+        const left = a.cells[sortColumnIndex];
+        const right = b.cells[sortColumnIndex];
 
         const leftEmpty = left === null || left === undefined || left === "";
         const rightEmpty =
@@ -331,13 +641,13 @@ export default function InspectSheets() {
       });
     }
 
-    const sampleSize = normalizedRows.length;
+    const sampleSize = indexedRows.length;
 
     const nullRates = Array.from({ length: totalColumns }, (_, colIdx) => {
       if (sampleSize === 0) return 0;
       let emptyCount = 0;
-      for (const row of normalizedRows) {
-        const cell = row[colIdx];
+      for (const row of indexedRows) {
+        const cell = row.cells[colIdx];
         if (cell === null || cell === undefined || cell === "") emptyCount += 1;
       }
       return (emptyCount / sampleSize) * 100;
@@ -345,8 +655,8 @@ export default function InspectSheets() {
 
     const inferredTypes = Array.from({ length: totalColumns }, (_, colIdx) => {
       const found = new Set<string>();
-      for (const row of normalizedRows) {
-        const cell = row[colIdx];
+      for (const row of indexedRows) {
+        const cell = row.cells[colIdx];
         if (cell === null || cell === undefined || cell === "") continue;
         if (typeof cell === "number") {
           found.add("number");
@@ -369,15 +679,15 @@ export default function InspectSheets() {
 
     let duplicateRows = 0;
     const seen = new Set<string>();
-    for (const row of normalizedRows) {
-      const key = JSON.stringify(row);
+    for (const row of indexedRows) {
+      const key = JSON.stringify(row.cells);
       if (seen.has(key)) duplicateRows += 1;
       else seen.add(key);
     }
 
     let emptyRows = 0;
-    for (const row of normalizedRows) {
-      const allEmpty = row.every(
+    for (const row of indexedRows) {
+      const allEmpty = row.cells.every(
         (cell) => cell === null || cell === undefined || cell === "",
       );
       if (allEmpty) emptyRows += 1;
@@ -395,10 +705,10 @@ export default function InspectSheets() {
     };
   }, [
     activeSheet,
-    columnFilterIndex,
-    columnFilterQuery,
+    caseSensitiveSearch,
     globalQuery,
     hasLoadedPageData,
+    hideEmptyRows,
     pagedHeader,
     pagedRows,
     sortColumnIndex,
@@ -511,112 +821,12 @@ export default function InspectSheets() {
                       {activeSheet.headers.length} columns
                     </div>
 
-                    <div className="relative" ref={filtersMenuContainerRef}>
-                      <button
-                        type="button"
-                        aria-label="Toggle filters menu"
-                        onClick={() => {
-                          setShowFiltersMenu((prev) => !prev);
-                          setShowStatsMenu(false);
-                        }}
-                        className="cursor-pointer rounded-md border px-2 py-1 text-sm"
-                        style={{
-                          borderColor: "var(--tag-border)",
-                          backgroundColor: "var(--tag-bg)",
-                          color: "var(--tag-text)",
-                        }}
-                        title="Filters"
-                      >
-                        <Funnel size={16} aria-hidden="true" />
-                      </button>
-
-                      {showFiltersMenu && (
-                        <div
-                          className="absolute right-0 z-20 mt-2 w-72 rounded-lg border p-3"
-                          style={{
-                            borderColor: "var(--border)",
-                            backgroundColor: "var(--surface-2)",
-                          }}
-                        >
-                          <div className="mb-2 text-sm font-medium">
-                            Filters
-                          </div>
-
-                          <label
-                            className="mb-2 block text-sm"
-                            style={{ color: "var(--muted)" }}
-                          >
-                            Search in preview
-                            <input
-                              type="text"
-                              value={globalQuery}
-                              onChange={(e) => setGlobalQuery(e.target.value)}
-                              placeholder="Find any value"
-                              className="mt-1 w-full rounded border px-3 py-2 text-sm"
-                              style={{
-                                borderColor: "var(--border)",
-                                backgroundColor: "var(--surface)",
-                                color: "var(--foreground)",
-                              }}
-                            />
-                          </label>
-
-                          <label
-                            className="mb-2 block text-sm"
-                            style={{ color: "var(--muted)" }}
-                          >
-                            Filter column
-                            <select
-                              value={columnFilterIndex}
-                              onChange={(e) =>
-                                setColumnFilterIndex(Number(e.target.value))
-                              }
-                              className="mt-1 w-full rounded border px-3 py-2 text-sm"
-                              style={{
-                                borderColor: "var(--border)",
-                                backgroundColor: "var(--surface)",
-                                color: "var(--foreground)",
-                              }}
-                            >
-                              {tableModel.headers.map((header, idx) => (
-                                <option key={idx} value={idx}>
-                                  {header}
-                                </option>
-                              ))}
-                            </select>
-                          </label>
-
-                          <label
-                            className="block text-sm"
-                            style={{ color: "var(--muted)" }}
-                          >
-                            Filter value
-                            <input
-                              type="text"
-                              value={columnFilterQuery}
-                              onChange={(e) =>
-                                setColumnFilterQuery(e.target.value)
-                              }
-                              placeholder="Contains..."
-                              className="mt-1 w-full rounded border px-3 py-2 text-sm"
-                              style={{
-                                borderColor: "var(--border)",
-                                backgroundColor: "var(--surface)",
-                                color: "var(--foreground)",
-                              }}
-                            />
-                          </label>
-                        </div>
-                      )}
-                    </div>
-
                     <div className="relative" ref={statsMenuContainerRef}>
                       <button
                         type="button"
                         aria-label="Toggle statistics menu"
                         onClick={() => {
                           setShowStatsMenu((prev) => !prev);
-                          setShowFiltersMenu(false);
                         }}
                         className="cursor-pointer rounded-md border px-2 py-1 text-sm"
                         style={{
@@ -826,37 +1036,480 @@ export default function InspectSheets() {
                 </div>
 
                 <div
+                  className="mb-2 rounded-md border px-3 py-2"
+                  style={{
+                    borderColor: "var(--border)",
+                    backgroundColor: "var(--surface-2)",
+                  }}
+                >
+                  <div className="flex flex-wrap items-center gap-2">
+                    <input
+                      type="text"
+                      value={globalQuery}
+                      onChange={(e) => setGlobalQuery(e.target.value)}
+                      placeholder="Quick search..."
+                      className="w-full min-w-[14rem] flex-1 rounded-md border px-3 py-2 text-sm md:w-auto md:flex-none"
+                      style={{
+                        borderColor: "var(--border)",
+                        backgroundColor: "var(--surface)",
+                        color: "var(--foreground)",
+                      }}
+                    />
+
+                    <div className="group relative">
+                      <button
+                        type="button"
+                        onClick={clearQuickSearch}
+                        aria-label="Clear quick search"
+                        className="cursor-pointer rounded-md border p-2.5 text-sm inline-flex items-center justify-center"
+                        style={{
+                          borderColor: "var(--tag-border)",
+                          backgroundColor: "var(--tag-bg)",
+                          color: "var(--tag-text)",
+                        }}
+                      >
+                        <SearchX size={16} aria-hidden="true" />
+                      </button>
+                      <span
+                        className="pointer-events-none absolute left-1/2 top-full z-30 mt-1 -translate-x-1/2 rounded border px-2 py-1 text-xs opacity-0 shadow-sm transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
+                        style={{
+                          borderColor: "var(--border)",
+                          backgroundColor: "var(--surface)",
+                          color: "var(--foreground)",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        Clear Search
+                      </span>
+                    </div>
+
+                    <div className="group relative">
+                      <button
+                        type="button"
+                        onClick={clearSorting}
+                        aria-label="Clear sorting"
+                        className="cursor-pointer rounded-md border p-2.5 text-sm inline-flex items-center justify-center"
+                        style={{
+                          borderColor: "var(--tag-border)",
+                          backgroundColor:
+                            sortColumnIndex !== null
+                              ? "var(--tag-selected-bg)"
+                              : "var(--tag-bg)",
+                          color:
+                            sortColumnIndex !== null
+                              ? "var(--tag-selected-text)"
+                              : "var(--tag-text)",
+                        }}
+                      >
+                        <ArrowDownUp size={16} aria-hidden="true" />
+                      </button>
+                      <span
+                        className="pointer-events-none absolute left-1/2 top-full z-30 mt-1 -translate-x-1/2 rounded border px-2 py-1 text-xs opacity-0 shadow-sm transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
+                        style={{
+                          borderColor: "var(--border)",
+                          backgroundColor: "var(--surface)",
+                          color: "var(--foreground)",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        Clear Sort
+                      </span>
+                    </div>
+
+                    <div className="group relative">
+                      <button
+                        type="button"
+                        onClick={() => setCaseSensitiveSearch((prev) => !prev)}
+                        aria-label="Toggle case sensitive search"
+                        className="cursor-pointer rounded-md border p-2.5 text-sm inline-flex items-center justify-center"
+                        style={{
+                          borderColor: "var(--tag-border)",
+                          backgroundColor: caseSensitiveSearch
+                            ? "var(--tag-selected-bg)"
+                            : "var(--tag-bg)",
+                          color: caseSensitiveSearch
+                            ? "var(--tag-selected-text)"
+                            : "var(--tag-text)",
+                        }}
+                      >
+                        <CaseSensitive size={16} aria-hidden="true" />
+                      </button>
+                      <span
+                        className="pointer-events-none absolute left-1/2 top-full z-30 mt-1 -translate-x-1/2 rounded border px-2 py-1 text-xs opacity-0 shadow-sm transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
+                        style={{
+                          borderColor: "var(--border)",
+                          backgroundColor: "var(--surface)",
+                          color: "var(--foreground)",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        Case Sensitive
+                      </span>
+                    </div>
+
+                    <div
+                      aria-hidden="true"
+                      className="mx-1 h-6 w-px"
+                      style={{ backgroundColor: "var(--border)" }}
+                    />
+
+                    <div className="group relative">
+                      <button
+                        type="button"
+                        onClick={() => setHideEmptyRows((prev) => !prev)}
+                        aria-label="Toggle hide empty rows"
+                        className="cursor-pointer rounded-md border p-2.5 text-sm inline-flex items-center justify-center"
+                        style={{
+                          borderColor: "var(--tag-border)",
+                          backgroundColor: hideEmptyRows
+                            ? "var(--tag-selected-bg)"
+                            : "var(--tag-bg)",
+                          color: hideEmptyRows
+                            ? "var(--tag-selected-text)"
+                            : "var(--tag-text)",
+                        }}
+                      >
+                        <ListFilter size={16} aria-hidden="true" />
+                      </button>
+                      <span
+                        className="pointer-events-none absolute left-1/2 top-full z-30 mt-1 -translate-x-1/2 rounded border px-2 py-1 text-xs opacity-0 shadow-sm transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
+                        style={{
+                          borderColor: "var(--border)",
+                          backgroundColor: "var(--surface)",
+                          color: "var(--foreground)",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        Hide Empty Rows
+                      </span>
+                    </div>
+
+                    <div className="group relative">
+                      <button
+                        type="button"
+                        onClick={() => setHighlightEmptyCells((prev) => !prev)}
+                        aria-label="Toggle highlight empty cells"
+                        className="cursor-pointer rounded-md border p-2.5 text-sm inline-flex items-center justify-center"
+                        style={{
+                          borderColor: "var(--tag-border)",
+                          backgroundColor: highlightEmptyCells
+                            ? "var(--tag-selected-bg)"
+                            : "var(--tag-bg)",
+                          color: highlightEmptyCells
+                            ? "var(--tag-selected-text)"
+                            : "var(--tag-text)",
+                        }}
+                      >
+                        <Highlighter size={16} aria-hidden="true" />
+                      </button>
+                      <span
+                        className="pointer-events-none absolute left-1/2 top-full z-30 mt-1 -translate-x-1/2 rounded border px-2 py-1 text-xs opacity-0 shadow-sm transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
+                        style={{
+                          borderColor: "var(--border)",
+                          backgroundColor: "var(--surface)",
+                          color: "var(--foreground)",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        Highlight Empty Cells
+                      </span>
+                    </div>
+
+                    <div className="group relative">
+                      <button
+                        type="button"
+                        onClick={() => setZebraRows((prev) => !prev)}
+                        aria-label="Toggle zebra rows"
+                        className="cursor-pointer rounded-md border p-2.5 text-sm inline-flex items-center justify-center"
+                        style={{
+                          borderColor: "var(--tag-border)",
+                          backgroundColor: zebraRows
+                            ? "var(--tag-selected-bg)"
+                            : "var(--tag-bg)",
+                          color: zebraRows
+                            ? "var(--tag-selected-text)"
+                            : "var(--tag-text)",
+                        }}
+                      >
+                        <Table2 size={16} aria-hidden="true" />
+                      </button>
+                      <span
+                        className="pointer-events-none absolute left-1/2 top-full z-30 mt-1 -translate-x-1/2 rounded border px-2 py-1 text-xs opacity-0 shadow-sm transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
+                        style={{
+                          borderColor: "var(--border)",
+                          backgroundColor: "var(--surface)",
+                          color: "var(--foreground)",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        Zebra Rows
+                      </span>
+                    </div>
+
+                    <div className="group relative">
+                      <button
+                        type="button"
+                        onClick={toggleColumnWidthMode}
+                        aria-label={
+                          columnWidthMode === "fixed"
+                            ? "Fit all columns to content"
+                            : "Set fixed column widths"
+                        }
+                        className="cursor-pointer rounded-md border p-2.5 text-sm inline-flex items-center justify-center"
+                        style={{
+                          borderColor: "var(--tag-border)",
+                          backgroundColor: "var(--tag-bg)",
+                          color: "var(--tag-text)",
+                        }}
+                      >
+                        {columnWidthMode === "fixed" ? (
+                          <Maximize2 size={16} aria-hidden="true" />
+                        ) : (
+                          <Minimize2 size={16} aria-hidden="true" />
+                        )}
+                      </button>
+                      <span
+                        className="pointer-events-none absolute left-1/2 top-full z-30 mt-1 -translate-x-1/2 rounded border px-2 py-1 text-xs opacity-0 shadow-sm transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
+                        style={{
+                          borderColor: "var(--border)",
+                          backgroundColor: "var(--surface)",
+                          color: "var(--foreground)",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {columnWidthMode === "fixed" ? "Fit Width" : "Fixed Width"}
+                      </span>
+                    </div>
+
+                    <div className="group relative">
+                      <button
+                        type="button"
+                        onClick={toggleRowDensity}
+                        aria-label="Toggle compact row density"
+                        className="cursor-pointer rounded-md border p-2.5 text-sm inline-flex items-center justify-center"
+                        style={{
+                          borderColor: "var(--tag-border)",
+                          backgroundColor:
+                            rowDensity === "compact"
+                              ? "var(--tag-selected-bg)"
+                              : "var(--tag-bg)",
+                          color:
+                            rowDensity === "compact"
+                              ? "var(--tag-selected-text)"
+                              : "var(--tag-text)",
+                        }}
+                      >
+                        {rowDensity === "comfortable" ? (
+                          <Rows2 size={16} aria-hidden="true" />
+                        ) : (
+                          <Rows3 size={16} aria-hidden="true" />
+                        )}
+                      </button>
+                      <span
+                        className="pointer-events-none absolute left-1/2 top-full z-30 mt-1 -translate-x-1/2 rounded border px-2 py-1 text-xs opacity-0 shadow-sm transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
+                        style={{
+                          borderColor: "var(--border)",
+                          backgroundColor: "var(--surface)",
+                          color: "var(--foreground)",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {rowDensity === "comfortable" ? "Compact Rows" : "Comfortable Rows"}
+                      </span>
+                    </div>
+
+                    <div className="group relative">
+                      <button
+                        type="button"
+                        onClick={() => setStickyHeader((prev) => !prev)}
+                        aria-label="Toggle sticky header"
+                        className="cursor-pointer rounded-md border p-2.5 text-sm inline-flex items-center justify-center"
+                        style={{
+                          borderColor: "var(--tag-border)",
+                          backgroundColor: stickyHeader
+                            ? "var(--tag-selected-bg)"
+                            : "var(--tag-bg)",
+                          color: stickyHeader
+                            ? "var(--tag-selected-text)"
+                            : "var(--tag-text)",
+                        }}
+                      >
+                        {stickyHeader ? (
+                          <PanelTopClose size={16} aria-hidden="true" />
+                        ) : (
+                          <PanelTopOpen size={16} aria-hidden="true" />
+                        )}
+                      </button>
+                      <span
+                        className="pointer-events-none absolute left-1/2 top-full z-30 mt-1 -translate-x-1/2 rounded border px-2 py-1 text-xs opacity-0 shadow-sm transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
+                        style={{
+                          borderColor: "var(--border)",
+                          backgroundColor: "var(--surface)",
+                          color: "var(--foreground)",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        Sticky Header
+                      </span>
+                    </div>
+
+                    <div className="group relative">
+                      <button
+                        type="button"
+                        onClick={() => setShowRowNumbers((prev) => !prev)}
+                        aria-label={
+                          showRowNumbers ? "Hide row numbers" : "Show row numbers"
+                        }
+                        className="cursor-pointer rounded-md border p-2.5 text-sm inline-flex items-center justify-center"
+                        style={{
+                          borderColor: "var(--tag-border)",
+                          backgroundColor: !showRowNumbers
+                            ? "var(--tag-selected-bg)"
+                            : "var(--tag-bg)",
+                          color: !showRowNumbers
+                            ? "var(--tag-selected-text)"
+                            : "var(--tag-text)",
+                        }}
+                      >
+                        {showRowNumbers ? (
+                          <EyeOff size={16} aria-hidden="true" />
+                        ) : (
+                          <Eye size={16} aria-hidden="true" />
+                        )}
+                      </button>
+                      <span
+                        className="pointer-events-none absolute left-1/2 top-full z-30 mt-1 -translate-x-1/2 rounded border px-2 py-1 text-xs opacity-0 shadow-sm transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
+                        style={{
+                          borderColor: "var(--border)",
+                          backgroundColor: "var(--surface)",
+                          color: "var(--foreground)",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {showRowNumbers ? "Hide Row Numbers" : "Show Row Numbers"}
+                      </span>
+                    </div>
+
+                    <div className="group relative ml-auto">
+                      <button
+                        type="button"
+                        onClick={resetView}
+                        aria-label="Reset view settings"
+                        className="cursor-pointer rounded-md border p-2.5 text-sm inline-flex items-center justify-center"
+                        style={{
+                          borderColor: "var(--tag-border)",
+                          backgroundColor: isViewDirty
+                            ? "var(--tag-selected-bg)"
+                            : "var(--tag-bg)",
+                          color: isViewDirty
+                            ? "var(--tag-selected-text)"
+                            : "var(--tag-text)",
+                        }}
+                      >
+                        <RotateCcw size={16} aria-hidden="true" />
+                      </button>
+                      <span
+                        className="pointer-events-none absolute left-1/2 top-full z-30 mt-1 -translate-x-1/2 rounded border px-2 py-1 text-xs opacity-0 shadow-sm transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
+                        style={{
+                          borderColor: "var(--border)",
+                          backgroundColor: "var(--surface)",
+                          color: "var(--foreground)",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        Reset View
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div
                   ref={tableScrollRef}
                   onPointerDown={onTablePointerDown}
                   onPointerMove={onTablePointerMove}
                   onPointerUp={stopTablePan}
                   onPointerCancel={stopTablePan}
                   onPointerLeave={stopTablePan}
-                  className={`overflow-auto rounded-lg border ${
-                    isPanningTable ? "cursor-grabbing select-none" : "cursor-grab"
+                  className={`inspect-scrollbar-themed overflow-x-auto overflow-y-auto rounded-lg border ${
+                    isResizing
+                      ? "cursor-col-resize select-none"
+                      : isPanningTable
+                        ? "cursor-grabbing select-none"
+                        : "cursor-default"
                   }`}
-                  style={{ borderColor: "var(--border)", touchAction: "none" }}
+                  style={{
+                    borderColor: "var(--border)",
+                    touchAction: "pan-x pan-y",
+                    maxHeight: stickyHeader ? "65vh" : "none",
+                  }}
                 >
-                  <table className="min-w-max w-full table-auto text-left text-sm">
+                  <table
+                    ref={tableElementRef}
+                    className="w-max min-w-full table-fixed text-left text-sm"
+                  >
+                    <colgroup>
+                      {showRowNumbers && <col style={{ width: "56px" }} />}
+                      {Array.from(
+                        { length: tableModel.totalColumns },
+                        (_, colIndex) => colIndex,
+                      ).map((colIndex) => (
+                        <col
+                          key={`col-${colIndex}`}
+                          style={{ width: `${getColumnWidth(colIndex)}px` }}
+                        />
+                      ))}
+                    </colgroup>
                     <thead style={{ backgroundColor: "var(--surface-2)" }}>
                       <tr>
+                        {showRowNumbers && (
+                          <th
+                            className={`${stickyHeader ? "sticky top-0 z-20" : ""} border-r px-2 py-2 text-center text-xs font-medium`}
+                            style={{
+                              color: "var(--muted)",
+                              borderColor: "var(--border)",
+                              backgroundColor: "var(--surface-2)",
+                            }}
+                          >
+                            #
+                          </th>
+                        )}
                         {tableModel.totalColumns > 0 ? (
                           tableModel.headers.map((header, headerIndex) => (
                             <th
                               key={headerIndex}
-                              className="h-11 border-r px-3 py-3 align-middle font-medium whitespace-nowrap last:border-r-0"
-                              style={{ color: "var(--muted)", borderColor: "var(--border)" }}
+                              className={`${stickyHeader ? "sticky top-0 z-20" : ""} relative border-r px-3 py-3 align-middle font-medium whitespace-nowrap`}
+                              style={{
+                                color: "var(--muted)",
+                                borderColor: "var(--border)",
+                                width: `${getColumnWidth(headerIndex)}px`,
+                                maxWidth: `${getColumnWidth(headerIndex)}px`,
+                                backgroundColor: "var(--surface-2)",
+                              }}
                             >
                               <button
                                 type="button"
                                 onClick={() => toggleSort(headerIndex)}
-                                className="cursor-pointer w-full text-left"
+                                className="block w-full cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-left"
                                 style={{ color: "inherit" }}
                               >
                                 {header}
                                 {sortColumnIndex === headerIndex &&
                                   (sortDirection === "asc" ? " ↑" : " ↓")}
                               </button>
+                              <div
+                                role="separator"
+                                aria-label={`Resize column ${header}`}
+                                onPointerDown={(event) =>
+                                  startColumnResize(headerIndex, event)
+                                }
+                                onDoubleClick={(event) => {
+                                  event.preventDefault();
+                                  event.stopPropagation();
+                                  autofitColumnWidth(headerIndex, header);
+                                }}
+                                className="absolute right-0 top-0 h-full w-2 cursor-col-resize"
+                                style={{ touchAction: "none" }}
+                              />
                             </th>
                           ))
                         ) : (
@@ -873,20 +1526,65 @@ export default function InspectSheets() {
                       {tableModel.rows.length > 0 ? (
                         tableModel.rows.map((row, rowIndex) => (
                           <tr
-                            key={rowIndex}
+                            key={row.sourceIndex}
                             className="border-t"
-                            style={{ borderColor: "var(--border)" }}
+                            style={{
+                              borderColor: "var(--border)",
+                              height: `${getRowHeight(rowIndex)}px`,
+                            }}
                           >
+                            {showRowNumbers && (
+                              <td
+                                className={`relative border-r px-2 ${rowNumberPaddingClass} text-right text-xs`}
+                                style={{
+                                  borderColor: "var(--border)",
+                                  color: "var(--muted-2)",
+                                  backgroundColor: "var(--surface-2)",
+                                  userSelect: "none",
+                                }}
+                              >
+                                {hideEmptyRows
+                                  ? row.sourceIndex + 1
+                                  : rowIndex + 1}
+                                <div
+                                  role="separator"
+                                  aria-label={`Resize row ${rowIndex + 1}`}
+                                  onPointerDown={(event) =>
+                                    startRowResize(rowIndex, event)
+                                  }
+                                  className="absolute bottom-0 left-0 h-2 w-full cursor-row-resize"
+                                  style={{ touchAction: "none" }}
+                                />
+                              </td>
+                            )}
                             {Array.from(
                               { length: tableModel.totalColumns },
                               (_, colIndex) => colIndex,
                             ).map((colIndex) => (
                               <td
                                 key={colIndex}
-                                className="h-11 border-r px-3 py-3 align-middle last:border-r-0"
-                                style={{ borderColor: "var(--border)" }}
+                                className={`border-r px-3 ${cellPaddingClass} align-middle overflow-hidden whitespace-nowrap`}
+                                style={{
+                                  borderColor: "var(--border)",
+                                  width: `${getColumnWidth(colIndex)}px`,
+                                  maxWidth: `${getColumnWidth(colIndex)}px`,
+                                  backgroundColor:
+                                    highlightEmptyCells &&
+                                    isEmptyCell(row.cells[colIndex])
+                                      ? "var(--primary-soft)"
+                                      : zebraRows && rowIndex % 2 === 1
+                                        ? "var(--surface-2)"
+                                        : "var(--surface)",
+                                }}
                               >
-                                {renderCell(row[colIndex])}
+                                <span
+                                  className="block w-full overflow-hidden text-ellipsis whitespace-nowrap"
+                                  title={
+                                    formatCell(row.cells[colIndex]) || undefined
+                                  }
+                                >
+                                  {renderCell(row.cells[colIndex])}
+                                </span>
                               </td>
                             ))}
                           </tr>
@@ -894,6 +1592,7 @@ export default function InspectSheets() {
                       ) : (
                         <tr>
                           <td
+                            colSpan={tableModel.totalColumns + (showRowNumbers ? 1 : 0)}
                             className="px-3 py-3 text-sm"
                             style={{ color: "var(--muted-2)" }}
                           >
@@ -958,6 +1657,10 @@ export default function InspectSheets() {
                 <p className="mt-2 text-xs" style={{ color: "var(--muted-2)" }}>
                   Search, filter, and sort apply to the currently loaded rows
                   for this sheet.
+                </p>
+                <p className="mt-1 text-xs" style={{ color: "var(--muted-2)" }}>
+                  Tip: use Shift + mouse wheel for horizontal scroll and Alt +
+                  drag to pan the grid.
                 </p>
               </>
             ) : (
