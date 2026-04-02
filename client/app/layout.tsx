@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import AmbientBackground from "@/components/layout/AmbientBackground";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -66,6 +67,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
+        <AmbientBackground />
         <Header />
         <main className="pt-[60px] min-h-screen">{children}</main>
         <Footer />

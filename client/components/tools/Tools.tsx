@@ -36,7 +36,7 @@ export default function Tools() {
       />
 
       {/* TOOLS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 min-h-[200px] w-full relative">
+      <div className="grid items-start grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 min-h-[200px] w-full relative">
         {filteredTools.map((tool) => (
           <Tool key={tool.title} {...tool} />
         ))}

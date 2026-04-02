@@ -23,8 +23,8 @@ export default function Tool({
 }: ToolProps) {
   return (
     <div
-      className={`rounded-[16px] m-0 relative overflow-hidden z-[1] transition ${
-        commingSoon ? "opacity-50" : "hover:ring-1 hover:ring-primary/50 hover:shadow-lg"
+      className={`tool-card h-[166px] sm:h-[174px] rounded-[16px] m-0 relative overflow-hidden z-[1] ${
+        commingSoon ? "opacity-50" : "tool-card-interactive"
       }`}
       data-category={category}
       style={{
@@ -36,7 +36,7 @@ export default function Tool({
       <Link
         href={commingSoon ? "#" : href}
         title={title}
-        className={`block p-4 ${commingSoon ? "cursor-not-allowed" : ""}`}
+        className={`tool-card-link block h-full p-4 ${commingSoon ? "cursor-not-allowed" : ""}`}
         tabIndex={commingSoon ? -1 : undefined}
         aria-disabled={commingSoon ? "true" : undefined}
       >
