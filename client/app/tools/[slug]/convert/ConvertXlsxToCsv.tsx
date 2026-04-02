@@ -226,7 +226,7 @@ export default function ConvertXlsxToCsv() {
       {preview && (
         <>
           <div
-            className="overflow-x-auto border rounded"
+            className="scrollbar-themed overflow-x-auto border rounded"
             style={{
               borderColor: "var(--border)",
               backgroundColor: "var(--surface)",

@@ -232,32 +232,38 @@ button:hover {
   }
 }
 
-/* Inspect tool: themed scrollbars when sticky header mode is enabled */
+/* Reusable themed scrollbars for tool tables */
+.scrollbar-themed,
 .inspect-scrollbar-themed {
   scrollbar-color: var(--primary) var(--surface);
   scrollbar-width: thin;
 }
 
+.scrollbar-themed::-webkit-scrollbar,
 .inspect-scrollbar-themed::-webkit-scrollbar {
   width: 12px;
   height: 12px;
 }
 
+.scrollbar-themed::-webkit-scrollbar-track,
 .inspect-scrollbar-themed::-webkit-scrollbar-track {
   background: var(--surface);
   border-radius: 999px;
 }
 
+.scrollbar-themed::-webkit-scrollbar-thumb,
 .inspect-scrollbar-themed::-webkit-scrollbar-thumb {
   background: var(--primary);
   border: 2px solid var(--surface);
   border-radius: 999px;
 }
 
+.scrollbar-themed::-webkit-scrollbar-thumb:hover,
 .inspect-scrollbar-themed::-webkit-scrollbar-thumb:hover {
   background: var(--primary-hover);
 }
 
+.scrollbar-themed::-webkit-scrollbar-corner,
 .inspect-scrollbar-themed::-webkit-scrollbar-corner {
   background: var(--surface);
 }
