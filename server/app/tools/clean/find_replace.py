@@ -1,0 +1,88 @@
+from __future__ import annotations
+
+import re
+
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from fastapi.responses import StreamingResponse
+
+from app.services.excel_reader import parse_excel_bytes
+from app.tools._common import MAX_UPLOAD_SIZE_BYTES, check_excel_file
+from app.tools.clean._utils import (
+    get_cell,
+    parse_columns_arg,
+    resolve_column_indexes,
+    resolve_target_sheets,
+    with_updated_cell,
+    workbook_bytes_from_data,
+)
+
+router = APIRouter()
+
+
+@router.post(
+    "/find-replace",
+    summary="Find and Replace",
+    description="Finds and replaces text (plain or regex) in selected columns.",
+)
+async def find_replace(
+    file: UploadFile = File(..., description="Excel file"),
+    find_text: str = Form(..., description="Text or regex pattern to find"),
+    replace_text: str = Form("", description="Replacement text"),
+    sheet: str = Form("", description="Sheet name (required if all_sheets=false)"),
+    all_sheets: bool = Form(False, description="Apply to all sheets"),
+    columns: str = Form("", description="Comma-separated column names (empty=all columns)"),
+    use_regex: bool = Form(False, description="Interpret find_text as regex"),
+    match_case: bool = Form(False, description="Case-sensitive matching"),
+):
+    check_excel_file(file)
+    raw = await file.read()
+    if len(raw) > MAX_UPLOAD_SIZE_BYTES:
+        raise HTTPException(status_code=400, detail="File too large")
+
+    if not find_text:
+        raise HTTPException(status_code=400, detail="find_text is required")
+
+    flags = 0 if match_case else re.IGNORECASE
+    pattern_text = find_text if use_regex else re.escape(find_text)
+
+    try:
+        pattern = re.compile(pattern_text, flags)
+    except re.error as error:
+        raise HTTPException(status_code=400, detail=f"Invalid pattern: {error}") from error
+
+    workbook_data = parse_excel_bytes(raw, file.filename)
+    target_sheets = resolve_target_sheets(workbook_data, sheet, all_sheets)
+    selected_columns = parse_columns_arg(columns)
+
+    for sheet_name in target_sheets:
+        rows = workbook_data[sheet_name]
+        if len(rows) <= 1:
+            continue
+
+        header = rows[0]
+        data_rows = rows[1:]
+        column_indexes = resolve_column_indexes(header, selected_columns)
+
+        replaced_rows: list[list[object]] = []
+        for row in data_rows:
+            updated_row = list(row)
+            for index in column_indexes:
+                value = get_cell(updated_row, index)
+                if not isinstance(value, str):
+                    continue
+                updated_row = with_updated_cell(
+                    updated_row,
+                    index,
+                    pattern.sub(replace_text, value),
+                )
+            replaced_rows.append(updated_row)
+
+        workbook_data[sheet_name] = [header, *replaced_rows]
+
+    output_bytes = workbook_bytes_from_data(workbook_data)
+
+    return StreamingResponse(
+        iter([output_bytes]),
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": "attachment; filename=find-replace.xlsx"},
+    )
