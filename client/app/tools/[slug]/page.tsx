@@ -7,6 +7,10 @@ import MergeSheets from "./merge/MergeSheets";
 import SplitSheet from "./split/SplitSheet";
 import AppendWorkbooks from "./merge/AppendWorkbooks";
 import SplitWorkbook from "./split/SplitWorkbook";
+import RemoveDuplicates from "./clean/RemoveDuplicates";
+import TrimSpaces from "./clean/TrimSpaces";
+import NormalizeCase from "./clean/NormalizeCase";
+import FindReplace from "./clean/FindReplace";
 
 // Map certain slugs to special components
 const specialComponents: Record<string, React.ReactNode> = {
@@ -17,6 +21,10 @@ const specialComponents: Record<string, React.ReactNode> = {
   "append-workbooks": <AppendWorkbooks />,
   "split-sheet": <SplitSheet />,
   "split-workbook": <SplitWorkbook />,
+  "remove-duplicates": <RemoveDuplicates />,
+  "trim-spaces": <TrimSpaces />,
+  "normalize-case": <NormalizeCase />,
+  "find-replace": <FindReplace />,
 };
 
 export default async function ToolPage({
