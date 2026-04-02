@@ -186,7 +186,7 @@ export const toolItems: ToolItem[] = [
     title: "Trim Spaces",
     heading: "Trim Spaces",
     description: "Clean messy text by removing leading and trailing spaces across one or all sheets, with an option to also collapse repeated spaces inside each value.",
-    icon: "✂️",
+    icon: "🧼",
     category: "Clean",
     commingSoon: false,
     isNew: true,
