@@ -731,7 +731,7 @@ export default function MergeSheets() {
             disabled={!isReadyToMerge || loading}
             className="tool-primary-action cursor-pointer rounded-md px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {loading ? "Merging..." : "Merge Sheets"}
+            {loading ? "Merging..." : "Merge"}
           </button>
         </div>
       )}

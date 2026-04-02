@@ -687,7 +687,7 @@ export default function AppendWorkbooks() {
             disabled={files.length < 2 || loading}
             className="tool-primary-action cursor-pointer rounded-md px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {loading ? "Appending..." : "Append Workbooks"}
+            {loading ? "Appending..." : "Append"}
           </button>
         </div>
       )}

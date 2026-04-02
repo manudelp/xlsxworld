@@ -545,7 +545,7 @@ export default function SplitSheet() {
             disabled={!canSplit}
             className="tool-primary-action cursor-pointer rounded-md px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {loading ? "Splitting..." : "Split Sheet"}
+            {loading ? "Splitting..." : "Split"}
           </button>
         </div>
       )}
