@@ -94,6 +94,7 @@ export default function InspectSheets() {
   const [hideEmptyRows, setHideEmptyRows] = useState(false);
   const [highlightEmptyCells, setHighlightEmptyCells] = useState(false);
   const [zebraRows, setZebraRows] = useState(false);
+  const [fullWidthPreview, setFullWidthPreview] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const statsMenuContainerRef = useRef<HTMLDivElement | null>(null);
   const tableScrollRef = useRef<HTMLDivElement | null>(null);
@@ -441,7 +442,8 @@ export default function InspectSheets() {
     caseSensitiveSearch ||
     hideEmptyRows ||
     highlightEmptyCells ||
-    zebraRows;
+    zebraRows ||
+    fullWidthPreview;
 
   const resetView = () => {
     setGlobalQuery("");
@@ -458,6 +460,7 @@ export default function InspectSheets() {
     setHideEmptyRows(false);
     setHighlightEmptyCells(false);
     setZebraRows(false);
+    setFullWidthPreview(false);
     tableScrollRef.current?.scrollTo({ top: 0, left: 0, behavior: "smooth" });
   };
 
@@ -1393,6 +1396,47 @@ export default function InspectSheets() {
                     <div className="group relative ml-auto">
                       <button
                         type="button"
+                        onClick={() => setFullWidthPreview((prev) => !prev)}
+                        aria-label={
+                          fullWidthPreview
+                            ? "Restore preview width"
+                            : "Expand preview to full width"
+                        }
+                        className="cursor-pointer rounded-md border p-2.5 text-sm inline-flex items-center justify-center"
+                        style={{
+                          borderColor: "var(--tag-border)",
+                          backgroundColor: fullWidthPreview
+                            ? "var(--tag-selected-bg)"
+                            : "var(--tag-bg)",
+                          color: fullWidthPreview
+                            ? "var(--tag-selected-text)"
+                            : "var(--tag-text)",
+                        }}
+                      >
+                        {fullWidthPreview ? (
+                          <Minimize2 size={16} aria-hidden="true" />
+                        ) : (
+                          <Maximize2 size={16} aria-hidden="true" />
+                        )}
+                      </button>
+                      <span
+                        className="pointer-events-none absolute left-1/2 top-full z-30 mt-1 -translate-x-1/2 rounded border px-2 py-1 text-xs opacity-0 shadow-sm transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
+                        style={{
+                          borderColor: "var(--border)",
+                          backgroundColor: "var(--surface)",
+                          color: "var(--foreground)",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {fullWidthPreview
+                          ? "Restore Preview Width"
+                          : "Expand Preview Width"}
+                      </span>
+                    </div>
+
+                    <div className="group relative">
+                      <button
+                        type="button"
                         onClick={resetView}
                         aria-label="Reset view settings"
                         className="cursor-pointer rounded-md border p-2.5 text-sm inline-flex items-center justify-center"
@@ -1424,25 +1468,32 @@ export default function InspectSheets() {
                 </div>
 
                 <div
-                  ref={tableScrollRef}
-                  onPointerDown={onTablePointerDown}
-                  onPointerMove={onTablePointerMove}
-                  onPointerUp={stopTablePan}
-                  onPointerCancel={stopTablePan}
-                  onPointerLeave={stopTablePan}
-                  className={`inspect-scrollbar-themed overflow-x-auto overflow-y-auto rounded-lg border ${
-                    isResizing
-                      ? "cursor-col-resize select-none"
-                      : isPanningTable
-                        ? "cursor-grabbing select-none"
-                        : "cursor-default"
+                  className={`relative left-1/2 -translate-x-1/2 will-change-[width] transition-[width] duration-300 ease-out ${
+                    fullWidthPreview
+                      ? "w-[calc(100vw-2rem)]"
+                      : "w-full"
                   }`}
-                  style={{
-                    borderColor: "var(--border)",
-                    touchAction: "pan-x pan-y",
-                    maxHeight: stickyHeader ? "65vh" : "none",
-                  }}
                 >
+                  <div
+                    ref={tableScrollRef}
+                    onPointerDown={onTablePointerDown}
+                    onPointerMove={onTablePointerMove}
+                    onPointerUp={stopTablePan}
+                    onPointerCancel={stopTablePan}
+                    onPointerLeave={stopTablePan}
+                    className={`inspect-scrollbar-themed overflow-x-auto overflow-y-auto rounded-lg border ${
+                      isResizing
+                        ? "cursor-col-resize select-none"
+                        : isPanningTable
+                          ? "cursor-grabbing select-none"
+                          : "cursor-default"
+                    }`}
+                    style={{
+                      borderColor: "var(--border)",
+                      touchAction: "pan-x pan-y",
+                      maxHeight: stickyHeader ? "65vh" : "none",
+                    }}
+                  >
                   <table
                     ref={tableElementRef}
                     className="w-max min-w-full table-fixed text-left text-sm"
@@ -1602,6 +1653,7 @@ export default function InspectSheets() {
                       )}
                     </tbody>
                   </table>
+                  </div>
                 </div>
 
                 <div className="mt-3 flex flex-wrap items-center gap-2">
