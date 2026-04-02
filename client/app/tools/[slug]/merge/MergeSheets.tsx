@@ -729,12 +729,7 @@ export default function MergeSheets() {
             type="button"
             onClick={handleMerge}
             disabled={!isReadyToMerge || loading}
-            className="cursor-pointer rounded-md border px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
-            style={{
-              borderColor: "var(--tag-border)",
-              backgroundColor: "var(--tag-bg)",
-              color: "var(--tag-text)",
-            }}
+            className="tool-primary-action cursor-pointer rounded-md px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? "Merging..." : "Merge Sheets"}
           </button>

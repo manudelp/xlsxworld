@@ -1,5 +1,5 @@
 from __future__ import annotations
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 from fastapi.responses import StreamingResponse
 from io import BytesIO
 import zipfile
@@ -16,7 +16,10 @@ router = APIRouter()
     summary="Split Workbook",
     description="Exports each workbook sheet as a separate XLSX file inside a ZIP archive.",
 )
-async def split_workbook(file: UploadFile = File(..., description="Excel file")):
+async def split_workbook(
+    file: UploadFile = File(..., description="Excel file"),
+    sheet_names: str = Form("", description="Comma-separated sheet names to split (empty=all)"),
+):
     check_excel_file(file)
     raw = await file.read()
     if len(raw) > MAX_UPLOAD_SIZE_BYTES:
@@ -25,6 +28,24 @@ async def split_workbook(file: UploadFile = File(..., description="Excel file"))
     workbook_data = parse_excel_bytes(raw, file.filename)
     if not workbook_data:
         raise HTTPException(status_code=400, detail="Workbook is empty")
+
+    selected_sheet_names = [
+        sheet_name.strip() for sheet_name in sheet_names.split(",") if sheet_name.strip()
+    ]
+    if selected_sheet_names:
+        missing = [name for name in selected_sheet_names if name not in workbook_data]
+        if missing:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Sheet not found: {missing[0]}",
+            )
+        selected_set = set(selected_sheet_names)
+        workbook_data = {
+            name: rows for name, rows in workbook_data.items() if name in selected_set
+        }
+
+    if not workbook_data:
+        raise HTTPException(status_code=400, detail="Select at least one sheet")
 
     zipped = BytesIO()
     with zipfile.ZipFile(zipped, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:

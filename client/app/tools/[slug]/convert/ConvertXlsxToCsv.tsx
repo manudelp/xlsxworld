@@ -312,8 +312,7 @@ export default function ConvertXlsxToCsv() {
                     }
                   }}
                   disabled={loading}
-                  className="inline-flex cursor-pointer items-center gap-2 rounded-md px-4 py-2 text-sm font-medium text-white transition disabled:opacity-50"
-                  style={{ backgroundColor: "var(--primary)" }}
+                  className="tool-primary-action inline-flex cursor-pointer items-center gap-2 rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50"
                 >
                   {loading ? "Exporting..." : "Download Selected CSV"}
                 </button>
@@ -341,8 +340,7 @@ export default function ConvertXlsxToCsv() {
                     }
                   }}
                   disabled={loading}
-                  className="inline-flex cursor-pointer items-center gap-2 rounded-md px-4 py-2 text-sm font-medium text-white transition disabled:opacity-50"
-                  style={{ backgroundColor: "var(--primary)" }}
+                  className="tool-primary-action inline-flex cursor-pointer items-center gap-2 rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50"
                 >
                   {loading ? "Exporting..." : "Download Selected CSVs (ZIP)"}
                 </button>
@@ -370,12 +368,7 @@ export default function ConvertXlsxToCsv() {
                     }
                   }}
                   disabled={loading}
-                  className="inline-flex cursor-pointer items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition disabled:opacity-50"
-                  style={{
-                    borderColor: "var(--tag-border)",
-                    backgroundColor: "var(--tag-bg)",
-                    color: "var(--tag-text)",
-                  }}
+                  className="tool-primary-action inline-flex cursor-pointer items-center gap-2 rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50"
                 >
                   {loading ? "Exporting..." : "Download All CSVs (ZIP)"}
                 </button>

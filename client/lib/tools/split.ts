@@ -33,8 +33,14 @@ export async function splitSheet(
   return api.postForm<ArrayBuffer>('/api/v1/tools/split-sheet', fd);
 }
 
-export async function splitWorkbook(file: File): Promise<ArrayBuffer> {
+export async function splitWorkbook(
+  file: File,
+  sheetNames: string[] = [],
+): Promise<ArrayBuffer> {
   const fd = new FormData();
   fd.append("file", file);
+  if (sheetNames.length > 0) {
+    fd.append("sheet_names", sheetNames.join(","));
+  }
   return api.postForm<ArrayBuffer>('/api/v1/tools/split-workbook', fd);
 }

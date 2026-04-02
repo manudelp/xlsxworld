@@ -8,6 +8,7 @@ import { uploadForPreview, type WorkbookPreview } from "@/lib/tools/inspect";
 export default function SplitWorkbook() {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<WorkbookPreview | null>(null);
+  const [selectedSheets, setSelectedSheets] = useState<string[]>([]);
   const [fileName, setFileName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -17,12 +18,14 @@ export default function SplitWorkbook() {
     setError(null);
     setFile(selected);
     setPreview(null);
+    setSelectedSheets([]);
     setFileName(selected.name);
     setPreviewLoading(true);
 
     try {
       const workbook = await uploadForPreview(selected, 1);
       setPreview(workbook);
+      setSelectedSheets(workbook.sheets.map((sheet) => sheet.name));
 
       if (workbook.sheet_count === 0) {
         setError("No sheets were detected in this workbook.");
@@ -38,10 +41,19 @@ export default function SplitWorkbook() {
     () => preview?.sheets.map((sheet) => sheet.name) ?? [],
     [preview],
   );
-  const previewNames = useMemo(() => sheetNames.slice(0, 8), [sheetNames]);
-  const hiddenNames = Math.max(0, sheetNames.length - previewNames.length);
+  const selectedSheetSet = useMemo(() => new Set(selectedSheets), [selectedSheets]);
+  const selectedCount = selectedSheets.length;
   const canSplit =
-    !!file && !loading && !previewLoading && (preview?.sheet_count ?? 0) > 0;
+    !!file && !loading && !previewLoading && selectedCount > 0;
+
+  const toggleSheet = useCallback((sheetName: string) => {
+    setSelectedSheets((current) => {
+      if (current.includes(sheetName)) {
+        return current.filter((name) => name !== sheetName);
+      }
+      return [...current, sheetName];
+    });
+  }, []);
 
   const handleSplit = useCallback(async () => {
     if (!file) {
@@ -49,8 +61,8 @@ export default function SplitWorkbook() {
       return;
     }
 
-    if ((preview?.sheet_count ?? 0) < 1) {
-      setError("Upload a workbook with at least one sheet.");
+    if (selectedCount < 1) {
+      setError("Select at least one sheet to split.");
       return;
     }
 
@@ -58,7 +70,7 @@ export default function SplitWorkbook() {
     setLoading(true);
 
     try {
-      const buffer = await splitWorkbook(file);
+      const buffer = await splitWorkbook(file, selectedSheets);
       const blob = new Blob([buffer], { type: "application/zip" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -74,7 +86,7 @@ export default function SplitWorkbook() {
     } finally {
       setLoading(false);
     }
-  }, [file, preview?.sheet_count]);
+  }, [file, selectedCount, selectedSheets]);
 
   return (
     <div className="space-y-4">
@@ -122,32 +134,59 @@ export default function SplitWorkbook() {
             </span>
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            {previewNames.map((sheetName) => (
-              <span
-                key={sheetName}
-                className="rounded-full border px-2.5 py-1 text-xs"
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <div className="text-sm" style={{ color: "var(--muted-2)" }}>
+              Select sheets to include in the ZIP output.
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setSelectedSheets(sheetNames)}
+                className="cursor-pointer rounded border px-2 py-1 text-xs"
                 style={{
                   borderColor: "var(--tag-border)",
                   backgroundColor: "var(--tag-bg)",
                   color: "var(--tag-text)",
+                }}
+              >
+                Select all
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedSheets([])}
+                className="cursor-pointer rounded border px-2 py-1 text-xs"
+                style={{
+                  borderColor: "var(--tag-border)",
+                  backgroundColor: "var(--tag-bg)",
+                  color: "var(--tag-text)",
+                }}
+              >
+                Clear
+              </button>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            {sheetNames.map((sheetName) => (
+              <button
+                key={sheetName}
+                type="button"
+                onClick={() => toggleSheet(sheetName)}
+                className="rounded-full border px-2.5 py-1 text-xs"
+                style={{
+                  borderColor: "var(--tag-border)",
+                  backgroundColor: selectedSheetSet.has(sheetName)
+                    ? "var(--tag-selected-bg)"
+                    : "var(--tag-bg)",
+                  color: selectedSheetSet.has(sheetName)
+                    ? "var(--tag-selected-text)"
+                    : "var(--tag-text)",
                 }}
               >
                 {sheetName}
-              </span>
+              </button>
             ))}
-            {hiddenNames > 0 ? (
-              <span
-                className="rounded-full border px-2.5 py-1 text-xs"
-                style={{
-                  borderColor: "var(--tag-border)",
-                  backgroundColor: "var(--tag-bg)",
-                  color: "var(--tag-text)",
-                }}
-              >
-                +{hiddenNames} more
-              </span>
-            ) : null}
           </div>
         </div>
       )}
@@ -187,6 +226,17 @@ export default function SplitWorkbook() {
                 color: "var(--tag-text)",
               }}
             >
+              {selectedCount.toLocaleString()} selected
+            </span>
+
+            <span
+              className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs"
+              style={{
+                borderColor: "var(--tag-border)",
+                backgroundColor: "var(--tag-bg)",
+                color: "var(--tag-text)",
+              }}
+            >
               <Archive size={14} />
               Sheet names preserved in output files
             </span>
@@ -210,8 +260,7 @@ export default function SplitWorkbook() {
           <button
             onClick={handleSplit}
             disabled={!canSplit}
-            className="cursor-pointer rounded-md px-4 py-2 text-sm font-medium text-white transition disabled:cursor-not-allowed disabled:opacity-50"
-            style={{ backgroundColor: "var(--primary)" }}
+            className="tool-primary-action cursor-pointer rounded-md px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? "Splitting..." : "Split Workbook"}
           </button>

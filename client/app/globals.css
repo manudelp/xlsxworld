@@ -184,6 +184,43 @@ body {
     color 200ms ease;
 }
 
+.tool-primary-action {
+  border: 1px solid transparent;
+  background-color: var(--primary);
+  color: var(--primary-contrast);
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.tool-primary-action:hover {
+  background-color: var(--primary-hover);
+}
+
+.tool-primary-action:active {
+  background-color: var(--primary-active);
+}
+
+@media (prefers-color-scheme: dark) {
+  .tool-primary-action {
+    border-color: var(--border);
+    background-color: var(--surface-2);
+    color: var(--foreground);
+  }
+
+  .tool-primary-action:hover {
+    background-color: var(--world-800);
+    background-color: color-mix(in srgb, var(--surface-2) 85%, var(--primary) 15%);
+    border-color: color-mix(in srgb, var(--border) 70%, var(--primary) 30%);
+  }
+
+  .tool-primary-action:active {
+    background-color: color-mix(in srgb, var(--surface-2) 78%, var(--primary) 22%);
+  }
+}
+
 /* sensible button hover defaults that respect dark mode */
 button:hover {
   background-color: rgba(0, 0, 0, 0.04);

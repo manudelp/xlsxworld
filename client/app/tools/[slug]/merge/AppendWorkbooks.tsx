@@ -7,6 +7,7 @@ import FileUploadDropzone from "@/components/common/FileUploadDropzone";
 export default function AppendWorkbooks() {
   const [files, setFiles] = useState<File[]>([]);
   const [originalOrder, setOriginalOrder] = useState<File[]>([]);
+  const [outputName, setOutputName] = useState("appended-workbooks");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [orderFeedback, setOrderFeedback] = useState<string | null>(null);
@@ -280,7 +281,8 @@ export default function AppendWorkbooks() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "appended-workbooks.xlsx";
+      const normalizedOutputName = outputName.trim().replace(/\.xlsx$/i, "");
+      a.download = `${normalizedOutputName || "appended-workbooks"}.xlsx`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -290,7 +292,7 @@ export default function AppendWorkbooks() {
     } finally {
       setLoading(false);
     }
-  }, [files]);
+  }, [files, outputName]);
 
   return (
     <div className="space-y-4">
@@ -460,6 +462,21 @@ export default function AppendWorkbooks() {
                 )}
               </div>
             </div>
+
+            <label className="block text-sm" style={{ color: "var(--muted)" }}>
+              Output file name
+              <input
+                value={outputName}
+                onChange={(event) => setOutputName(event.target.value)}
+                placeholder="appended-workbooks"
+                className="mt-1 w-full rounded border px-3 py-2 text-sm"
+                style={{
+                  borderColor: "var(--border)",
+                  backgroundColor: "var(--surface)",
+                  color: "var(--foreground)",
+                }}
+              />
+            </label>
           </div>
 
           <div
@@ -668,12 +685,7 @@ export default function AppendWorkbooks() {
             type="button"
             onClick={handleAppend}
             disabled={files.length < 2 || loading}
-            className="cursor-pointer rounded-md border px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
-            style={{
-              borderColor: "var(--tag-border)",
-              backgroundColor: "var(--tag-bg)",
-              color: "var(--tag-text)",
-            }}
+            className="tool-primary-action cursor-pointer rounded-md px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? "Appending..." : "Append Workbooks"}
           </button>
