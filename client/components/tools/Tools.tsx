@@ -13,10 +13,17 @@ export default function Tools() {
   );
 
   const filteredTools = useMemo(
-    () =>
-      selectedCategory === "All"
-        ? toolItems
-        : toolItems.filter((t) => t.category === selectedCategory),
+    () => {
+      const scopedTools =
+        selectedCategory === "All"
+          ? toolItems
+          : toolItems.filter((t) => t.category === selectedCategory);
+
+      const available = scopedTools.filter((tool) => !tool.commingSoon);
+      const comingSoon = scopedTools.filter((tool) => tool.commingSoon);
+
+      return [...available, ...comingSoon];
+    },
     [selectedCategory],
   );
 

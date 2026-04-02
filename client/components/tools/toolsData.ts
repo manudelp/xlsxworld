@@ -22,7 +22,6 @@ export const toolItems: ToolItem[] = [
     description: "Inspect sheet structure with filters, sorting, and quick stats before running other tools.",
     icon: "👀",
     category: "Inspect",
-    isNew: true,
   },
 
   // Merge / Split
@@ -35,7 +34,6 @@ export const toolItems: ToolItem[] = [
     icon: "🔗",
     category: "Merge",
     commingSoon: false,
-    isNew: true,
   },
   {
     href: "/tools/append-workbooks",
@@ -46,7 +44,6 @@ export const toolItems: ToolItem[] = [
     icon: "🧩",
     category: "Merge",
     commingSoon: false,
-    isNew: true,
   },
   {
     href: "/tools/split-sheet",
@@ -57,7 +54,6 @@ export const toolItems: ToolItem[] = [
     icon: "✂️",
     category: "Split",
     commingSoon: false,
-    isNew: true,
   },
   {
     href: "/tools/split-workbook",
@@ -68,7 +64,6 @@ export const toolItems: ToolItem[] = [
     icon: "🍱",
     category: "Split",
     commingSoon: false,
-    isNew: true,
   },
 
   // Convert
@@ -81,7 +76,6 @@ export const toolItems: ToolItem[] = [
     icon: "🔁",
     category: "Convert",
     commingSoon: false,
-    isNew: true,
   },
   {
     href: "/tools/csv-to-xlsx",
@@ -92,7 +86,6 @@ export const toolItems: ToolItem[] = [
     icon: "📄",
     category: "Convert",
     commingSoon: false,
-    isNew: true,
   },
   {
     href: "/tools/xlsx-to-pdf",
@@ -184,17 +177,19 @@ export const toolItems: ToolItem[] = [
     description: "Find and remove duplicate rows based on selected columns.",
     icon: "🧹",
     category: "Clean",
-    commingSoon: true,
+    commingSoon: false,
+    isNew: true,
   },
   {
     href: "/tools/trim-spaces",
     slug: "trim-spaces",
     title: "Trim Spaces",
     heading: "Trim Spaces",
-    description: "Trim leading and trailing whitespace from columns.",
+    description: "Clean messy text by removing leading and trailing spaces across one or all sheets, with an option to also collapse repeated spaces inside each value.",
     icon: "✂️",
     category: "Clean",
-    commingSoon: true,
+    commingSoon: false,
+    isNew: true,
   },
   {
     href: "/tools/normalize-case",
@@ -204,7 +199,8 @@ export const toolItems: ToolItem[] = [
     description: "Normalize text to upper, lower, or title case.",
     icon: "🔤",
     category: "Clean",
-    commingSoon: true,
+    commingSoon: false,
+    isNew: true,
   },
   {
     href: "/tools/find-replace",
@@ -214,7 +210,8 @@ export const toolItems: ToolItem[] = [
     description: "Search and replace values or regex patterns across sheets or columns.",
     icon: "🪄",
     category: "Clean",
-    commingSoon: true,
+    commingSoon: false,
+    isNew: true,
   },
 
   // Analyze
