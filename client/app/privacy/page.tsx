@@ -5,6 +5,8 @@ export const metadata: Metadata = {
   description: "Learn how XLSX World handles your data, files, and privacy.",
 };
 
+const LAST_UPDATED = "April 4, 2026";
+
 export default function PrivacyPage() {
   return (
     <main className="max-w-3xl mx-auto px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
@@ -12,12 +14,43 @@ export default function PrivacyPage() {
         Privacy Policy
       </h1>
       <p className="mb-10 text-lg leading-relaxed text-muted text-center">
-        Last updated: {new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+        Last updated: {LAST_UPDATED}
       </p>
 
       <div className="space-y-8 text-base leading-relaxed text-muted">
         <section>
-          <h2 className="text-xl font-medium text-foreground mb-3">File Handling</h2>
+          <h2 className="text-xl font-medium text-foreground mb-3">Scope</h2>
+          <p>
+            This Privacy Policy explains how XLSX World collects, uses, stores,
+            and protects personal information when you use our website, account
+            features, and spreadsheet tools.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="text-xl font-medium text-foreground mb-3">
+            Information We Collect
+          </h2>
+          <ul className="list-disc pl-6 mt-2 space-y-1">
+            <li>
+              Account data, such as email address and optional profile details.
+            </li>
+            <li>Support data you submit through the contact form.</li>
+            <li>
+              Operational metadata, including request timestamps, route usage,
+              and basic diagnostic events.
+            </li>
+            <li>
+              Security and abuse-prevention data, such as IP address and
+              rate-limit signals.
+            </li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 className="text-xl font-medium text-foreground mb-3">
+            File Processing
+          </h2>
           <p>
             Files you upload are processed temporarily on our servers solely to
             perform the requested operation (convert, merge, split, inspect,
@@ -28,30 +61,50 @@ export default function PrivacyPage() {
         </section>
 
         <section>
-          <h2 className="text-xl font-medium text-foreground mb-3">Data We Collect</h2>
-          <p>
-            We collect only the minimum information needed to operate the
-            service:
-          </p>
+          <h2 className="text-xl font-medium text-foreground mb-3">
+            How We Use Information
+          </h2>
           <ul className="list-disc pl-6 mt-2 space-y-1">
-            <li>Contact form submissions (name, email, message) — used only to respond to you.</li>
-            <li>Basic server logs (IP address, request timestamps) — used for security and abuse prevention.</li>
+            <li>To provide and secure core product functionality.</li>
+            <li>To authenticate sessions and maintain account access.</li>
+            <li>
+              To measure reliability and performance of endpoints and tools.
+            </li>
+            <li>To respond to support requests and enforce acceptable use.</li>
           </ul>
         </section>
 
         <section>
-          <h2 className="text-xl font-medium text-foreground mb-3">Cookies</h2>
+          <h2 className="text-xl font-medium text-foreground mb-3">
+            Cookies and Session Storage
+          </h2>
           <p>
-            We use essential cookies required for the site to function. We do
-            not use tracking or advertising cookies.
+            We use essential cookies and secure session mechanisms required for
+            authentication, request continuity, and abuse prevention. We do not
+            use advertising cookies.
           </p>
         </section>
 
         <section>
-          <h2 className="text-xl font-medium text-foreground mb-3">Third-Party Services</h2>
+          <h2 className="text-xl font-medium text-foreground mb-3">
+            Data Sharing
+          </h2>
           <p>
-            We use Cloudflare Turnstile for CAPTCHA verification on our contact
-            form. Please refer to{" "}
+            We do not sell your personal data. We may share limited information
+            with service providers that help us operate the platform (for
+            example, hosting, authentication, and abuse protection), subject to
+            appropriate contractual safeguards.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="text-xl font-medium text-foreground mb-3">
+            Third-Party Services
+          </h2>
+          <p>
+            We use third-party services to deliver core product features,
+            including CAPTCHA, hosting infrastructure, and authentication.
+            Please refer to{" "}
             <a
               href="https://www.cloudflare.com/privacypolicy/"
               target="_blank"
@@ -60,19 +113,42 @@ export default function PrivacyPage() {
             >
               Cloudflare&apos;s Privacy Policy
             </a>{" "}
-            for details on their data handling.
+            and other provider terms for details on their data handling.
           </p>
         </section>
 
         <section>
-          <h2 className="text-xl font-medium text-foreground mb-3">Your Rights</h2>
+          <h2 className="text-xl font-medium text-foreground mb-3">
+            Data Retention
+          </h2>
+          <p>
+            We retain data only for as long as needed to provide the service,
+            comply with legal obligations, resolve disputes, and enforce our
+            agreements. Temporary processing artifacts are routinely deleted.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="text-xl font-medium text-foreground mb-3">
+            Your Rights and Choices
+          </h2>
           <p>
             You may contact us at any time to request deletion of any personal
-            data we may hold. Use our{" "}
+            data we may hold, subject to legal and security requirements. Use
+            our{" "}
             <a href="/contact" className="text-primary hover:underline">
               contact form
             </a>{" "}
-            to make a request.
+            to submit privacy requests.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="text-xl font-medium text-foreground mb-3">Security</h2>
+          <p>
+            We apply technical and organizational safeguards designed to protect
+            your information, but no system is completely secure. You are
+            responsible for safeguarding your account credentials.
           </p>
         </section>
 
