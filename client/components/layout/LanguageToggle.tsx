@@ -8,6 +8,8 @@ import { useRouter, usePathname } from "@/i18n/navigation";
 const locales = [
   { code: "en" as const, label: "English" },
   { code: "es" as const, label: "Español" },
+  { code: "fr" as const, label: "Français" },
+  { code: "pt" as const, label: "Português" },
 ];
 
 export default function LanguageToggle() {
