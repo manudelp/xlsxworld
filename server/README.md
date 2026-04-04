@@ -7,7 +7,8 @@ This folder contains the FastAPI backend for XLSX World.
 - Framework: FastAPI
 - Python: 3.13 (pinned for local development)
 - HTTP server: Uvicorn
-- DB: PostgreSQL (psycopg + SQLAlchemy planned)
+- DB: Supabase PostgreSQL (direct connection, async SQLAlchemy)
+- Migrations: Alembic
 
 ## Project structure
 
@@ -17,12 +18,26 @@ server/
 ├── Dockerfile
 ├── pyproject.toml
 ├── requirements.txt
+├── alembic.ini
+├── alembic/
+│   ├── env.py
+│   ├── script.py.mako
+│   └── versions/
 └── app/
     ├── core/                        # App-wide config & cross-cutting concerns
     │   ├── app_factory.py           # FastAPI app creation, middleware, router wiring
+  │   ├── config.py                # Typed environment settings (pydantic-settings)
     │   ├── security.py              # JWT, password hashing, auth dependencies
     │   ├── openapi_custom.py        # OpenAPI schema customization
     │   └── rate_limit.py            # Rate limiter instance
+  │
+  ├── db/                          # SQLAlchemy models, engine and session dependency
+  │   ├── base.py
+  │   ├── session.py
+  │   └── models/
+  │       ├── users.py
+  │       ├── analytics.py
+  │       └── billing.py
     │
     ├── middleware/                   # Future: billing guard, upload-limit, logging
     │
@@ -62,11 +77,21 @@ server/
 ## Environment
 
 Required variables:
-- `DATABASE_URL` (e.g. `postgresql://user:pass@host:5432/xlsxworld`)
+- `DATABASE_URL` (Supabase direct Postgres URL, e.g. `postgresql://postgres:<password>@<project-ref>.supabase.co:5432/postgres`)
 - `JWT_SECRET` (secure random string)
 - `JWT_EXP_MIN` (optional, default 60)
 
 Optional:
+- `APP_ENV` (`development`, `staging`, `production`)
+- `DB_POOL_SIZE` (default `10`)
+- `DB_MAX_OVERFLOW` (default `20`)
+- `DB_POOL_TIMEOUT` (default `30`)
+- `DB_POOL_RECYCLE` (default `1800`)
+- `DB_ECHO_SQL` (default `false`)
+- `SUPABASE_URL`
+- `SUPABASE_PUBLISHABLE_KEY`
+- `SUPABASE_SECRET_KEY`
+- `SUPABASE_JWT_SECRET`
 - `CORS_ORIGINS` (used by docker-compose as service env placeholder)
 - `CONTACT_WEBHOOK_URL` (if set, contact form submissions are forwarded as JSON)
 - `CONTACT_WEBHOOK_TIMEOUT` (optional seconds, default `10`)
@@ -107,11 +132,9 @@ curl -X POST 'http://localhost:8000/api/v1/contact/test?key=my-local-only-key'
 The test endpoint calls the same delivery code used by the contact form.
 
 Local dev:
-- To avoid hardcoding origins in source, you can create a `.env` in the
-	`server/` folder with `CORS_ORIGINS` set to a comma-separated list of
-	allowed origins (for example `http://localhost:3000`). The server loads
-	`server/.env` automatically during startup. Do NOT commit `.env` — it is
-	excluded by `server/.gitignore`.
+- Copy `.env.example` to `.env` and fill values.
+- The backend loads `server/.env` automatically.
+- Do NOT commit `.env` — it is excluded by `server/.gitignore`.
 
 ## Prerequisites
 
@@ -128,6 +151,20 @@ Notes:
 ```bash
 cd server
 uv sync
+```
+
+## Database migrations
+
+```bash
+cd server
+uv run alembic upgrade head
+```
+
+Create a new revision after schema changes:
+
+```bash
+cd server
+uv run alembic revision --autogenerate -m "describe-change"
 ```
 
 ## Run locally (development)
