@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   /* world palette (primary: rgb(95, 157, 51)) */
   --world-50: #f4f9ee;
@@ -87,8 +89,7 @@
   --color-info: var(--info);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
+.dark {
     /* dark semantic remap */
     --primary: var(--world-400);
     --primary-hover: var(--world-300);
@@ -123,7 +124,6 @@
     --tag-border: var(--border);
     --tag-selected-bg: var(--primary);
     --tag-selected-text: var(--primary-contrast);
-  }
 }
 
 @font-face {
@@ -277,30 +277,28 @@ body {
   background-color: var(--primary-active);
 }
 
-@media (prefers-color-scheme: dark) {
-  .tool-primary-action {
-    border-color: var(--border);
-    background-color: var(--surface-2);
-    color: var(--foreground);
-  }
+.dark .tool-primary-action {
+  border-color: var(--border);
+  background-color: var(--surface-2);
+  color: var(--foreground);
+}
 
-  .tool-primary-action:hover {
-    background-color: var(--world-800);
-    background-color: color-mix(
-      in srgb,
-      var(--surface-2) 85%,
-      var(--primary) 15%
-    );
-    border-color: color-mix(in srgb, var(--border) 70%, var(--primary) 30%);
-  }
+.dark .tool-primary-action:hover {
+  background-color: var(--world-800);
+  background-color: color-mix(
+    in srgb,
+    var(--surface-2) 85%,
+    var(--primary) 15%
+  );
+  border-color: color-mix(in srgb, var(--border) 70%, var(--primary) 30%);
+}
 
-  .tool-primary-action:active {
-    background-color: color-mix(
-      in srgb,
-      var(--surface-2) 78%,
-      var(--primary) 22%
-    );
-  }
+.dark .tool-primary-action:active {
+  background-color: color-mix(
+    in srgb,
+    var(--surface-2) 78%,
+    var(--primary) 22%
+  );
 }
 
 /* sensible button hover defaults that respect dark mode */
@@ -349,10 +347,8 @@ input[type="time"]:disabled,
   cursor: not-allowed;
 }
 
-@media (prefers-color-scheme: dark) {
-  button:hover {
-    background-color: rgba(255, 255, 255, 0.06);
-  }
+.dark button:hover {
+  background-color: rgba(255, 255, 255, 0.06);
 }
 
 /* Reusable themed scrollbars for tool tables */
