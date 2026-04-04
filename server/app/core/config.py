@@ -33,7 +33,6 @@ class Settings(BaseSettings):
     supabase_url: str | None = Field(default=None, alias="SUPABASE_URL")
     supabase_publishable_key: str | None = Field(default=None, alias="SUPABASE_PUBLISHABLE_KEY")
     supabase_secret_key: str | None = Field(default=None, alias="SUPABASE_SECRET_KEY")
-    supabase_jwt_secret: str | None = Field(default=None, alias="SUPABASE_JWT_SECRET")
 
     @property
     def async_database_url(self) -> str:
@@ -46,6 +45,28 @@ class Settings(BaseSettings):
         if self.database_url.startswith("postgres://"):
             return self.database_url.replace("postgres://", "postgresql+asyncpg://", 1)
         return self.database_url
+
+    @property
+    def supabase_auth_url(self) -> str:
+        """Return the Supabase Auth base URL."""
+
+        if not self.supabase_url:
+            raise RuntimeError("SUPABASE_URL is not configured")
+        return self.supabase_url.rstrip("/") + "/auth/v1"
+
+    @property
+    def supabase_jwks_url(self) -> str:
+        """Return the Supabase JWKS discovery URL."""
+
+        return self.supabase_auth_url + "/.well-known/jwks.json"
+
+    @property
+    def supabase_issuer(self) -> str:
+        """Return the expected JWT issuer for Supabase Auth."""
+
+        if not self.supabase_url:
+            raise RuntimeError("SUPABASE_URL is not configured")
+        return self.supabase_url.rstrip("/") + "/auth/v1"
 
 
 @lru_cache(maxsize=1)

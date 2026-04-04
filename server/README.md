@@ -45,7 +45,7 @@ server/
     │   ├── __init__.py              # Collects all platform routers
     │   ├── system.py                # /, /health
     │   ├── contact.py               # /api/v1/contact
-    │   └── auth.py                  # /api/v1/auth/*
+    │   └── auth.py                  # /auth/*
     │
     ├── tools/                       # Every tool lives here, grouped by category
     │   ├── __init__.py              # Collects all category routers
@@ -67,21 +67,23 @@ server/
     │       └── append_workbooks.py  # POST /api/v1/tools/append-workbooks
     │
     ├── services/                    # Business logic & external integrations
+    │   ├── auth_service.py          # Supabase Auth client and auth workflow
     │   ├── excel_reader.py          # Multi-format Excel parsing
     │   └── contact_delivery.py      # Webhook/Telegram delivery
     │
     └── schemas/                     # Pydantic data models
+      ├── auth.py
         └── schemas.py
 ```
 
 ## Environment
 
 Required variables:
+
 - `DATABASE_URL` (Supabase direct Postgres URL, e.g. `postgresql://postgres:<password>@<project-ref>.supabase.co:5432/postgres`)
-- `JWT_SECRET` (secure random string)
-- `JWT_EXP_MIN` (optional, default 60)
 
 Optional:
+
 - `APP_ENV` (`development`, `staging`, `production`)
 - `DB_POOL_SIZE` (default `10`)
 - `DB_MAX_OVERFLOW` (default `20`)
@@ -91,7 +93,6 @@ Optional:
 - `SUPABASE_URL`
 - `SUPABASE_PUBLISHABLE_KEY`
 - `SUPABASE_SECRET_KEY`
-- `SUPABASE_JWT_SECRET`
 - `CORS_ORIGINS` (used by docker-compose as service env placeholder)
 - `CONTACT_WEBHOOK_URL` (if set, contact form submissions are forwarded as JSON)
 - `CONTACT_WEBHOOK_TIMEOUT` (optional seconds, default `10`)
@@ -106,9 +107,10 @@ Telegram quick setup (free):
 2. Start a chat with the bot (send any message).
 3. Get your chat id by visiting in the browser:
 
-	https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getUpdates
+   https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getUpdates
 
-	Inspect the JSON and copy `message.chat.id` for your chat.
+   Inspect the JSON and copy `message.chat.id` for your chat.
+
 4. Add to `server/.env`:
 
 ```
@@ -132,6 +134,7 @@ curl -X POST 'http://localhost:8000/api/v1/contact/test?key=my-local-only-key'
 The test endpoint calls the same delivery code used by the contact form.
 
 Local dev:
+
 - Copy `.env.example` to `.env` and fill values.
 - The backend loads `server/.env` automatically.
 - Do NOT commit `.env` — it is excluded by `server/.gitignore`.
@@ -142,6 +145,7 @@ Local dev:
 - Python 3.13 available
 
 Notes:
+
 - This folder is pinned to Python `3.13` via `.python-version`.
 - Python `3.14` may fail in Windows with `httptools` build errors unless you
   install Microsoft C++ Build Tools.
@@ -193,16 +197,17 @@ uv run uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
 ## API endpoints
 
-All tool endpoints are under `/api/v1/`:
+All tool endpoints are under `/api/v1/` except auth, which is mounted at `/auth`:
 
 - `GET /` — status
 - `GET /health` — health check
-- `POST /api/v1/auth/signup`, `POST /api/v1/auth/login`, `GET /api/v1/auth/me`
+- `POST /auth/signup`, `POST /auth/login`, `POST /auth/refresh`, `POST /auth/logout`, `GET /auth/me`
 - `POST /api/v1/tools/inspect/preview`, `GET /api/v1/tools/inspect/sheet`
 - `POST /api/v1/tools/convert/csv-to-xlsx`, `POST /api/v1/tools/convert/xlsx-to-csv`, `POST /api/v1/tools/convert/xlsx-to-csv-zip`
 - `POST /api/v1/tools/merge-sheets`, `POST /api/v1/tools/split-sheet`, `POST /api/v1/tools/split-workbook`, `POST /api/v1/tools/append-workbooks`
 
 Supported Excel upload formats:
+
 - `.xlsx`, `.xls`, `.xlsm`, `.xlsb`, `.xltx`, `.xltm`, `.xlam`
 
 ## Adding a new tool

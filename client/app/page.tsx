@@ -1,8 +1,31 @@
 import Tools from "@/components/tools/Tools";
 
-export default function Home() {
+type HomeProps = {
+  searchParams?: Promise<{
+    welcome?: string;
+  }>;
+};
+
+export default async function Home({ searchParams }: HomeProps) {
+  const resolvedSearchParams = await searchParams;
+  const showWelcomeBanner = resolvedSearchParams?.welcome === "1";
+
   return (
-    <main>
+    <>
+      {showWelcomeBanner && (
+        <div className="mx-auto mt-4 max-w-[1200px] px-4 sm:px-[45px]">
+          <div
+            className="rounded-xl border px-4 py-3 text-sm"
+            style={{
+              borderColor: "var(--border)",
+              backgroundColor: "var(--primary-soft)",
+              color: "var(--foreground)",
+            }}
+          >
+            Welcome. Your account is ready.
+          </div>
+        </div>
+      )}
       <div className="relative p-[24px_16px] sm:p-[30px_45px] text-center">
         <h1 className="font-semibold text-[28px] leading-[36px] sm:text-[42px] sm:leading-[52px] text-center mx-auto mb-[4px] max-w-[95vw] sm:max-w-[1200px]">
           All your XLSX tools, all in one place
@@ -12,6 +35,6 @@ export default function Home() {
         </p>
       </div>
       <Tools />
-    </main>
+    </>
   );
 }

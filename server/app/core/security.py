@@ -1,109 +1,132 @@
 from __future__ import annotations
-import os
-import datetime as dt
-from typing import Optional
 
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
-from jose import jwt, JWTError
-from passlib.context import CryptContext
-from pydantic import BaseModel, EmailStr
-import psycopg
+import asyncio
+import time
+from typing import Any, Annotated
+from uuid import UUID
 
-JWT_SECRET = os.getenv("JWT_SECRET")
-JWT_ALG = "HS256"
-JWT_EXP_MIN = int(os.getenv("JWT_EXP_MIN", "60"))
+import httpx
+from fastapi import Depends, Header, HTTPException, status
+from pydantic import BaseModel, ConfigDict, EmailStr
+from jose import JWTError, jwk, jwt
 
-DATABASE_URL = os.getenv("DATABASE_URL")
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
+from app.core.config import get_settings
 
 
-class UserOut(BaseModel):
-    id: str
-    email: EmailStr
-    role: str
+class SupabaseTokenClaims(BaseModel):
+    model_config = ConfigDict(extra="allow")
+
+    sub: UUID
+    email: EmailStr | None = None
+    role: str | None = None
+    iss: str | None = None
+    aud: str | list[str] | None = None
+    exp: int
+    iat: int | None = None
+    session_id: str | None = None
 
 
-def get_db_conn():
-    if not DATABASE_URL:
-        raise RuntimeError("DATABASE_URL not configured")
-    return psycopg.connect(DATABASE_URL)
+class AuthenticatedPrincipal(BaseModel):
+    user_id: UUID
+    email: EmailStr | None = None
+    role: str | None = None
+    session_id: str | None = None
+    claims: dict[str, Any]
 
 
-def verify_password(plain: str, hashed: str) -> bool:
-    return pwd_context.verify(plain, hashed)
+class _JwksCache:
+    def __init__(self, ttl_seconds: int = 600) -> None:
+        self.ttl_seconds = ttl_seconds
+        self._jwks: dict[str, Any] | None = None
+        self._expires_at: float = 0.0
+        self._lock = asyncio.Lock()
+
+    async def _fetch_jwks(self) -> dict[str, Any]:
+        settings = get_settings()
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.get(settings.supabase_jwks_url)
+            response.raise_for_status()
+            return response.json()
+
+    async def get_jwks(self) -> dict[str, Any]:
+        now = time.monotonic()
+        if self._jwks is not None and now < self._expires_at:
+            return self._jwks
+
+        async with self._lock:
+            now = time.monotonic()
+            if self._jwks is not None and now < self._expires_at:
+                return self._jwks
+
+            jwks = await self._fetch_jwks()
+            self._jwks = jwks
+            self._expires_at = now + self.ttl_seconds
+            return jwks
+
+    async def get_signing_key(self, kid: str) -> Any:
+        try:
+            jwks = await self.get_jwks()
+        except (httpx.HTTPError, ValueError):
+            raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Unable to verify the authentication token")
+        for raw_key in jwks.get("keys", []):
+            if raw_key.get("kid") == kid:
+                return jwk.construct(raw_key, algorithm="ES256").to_pem().decode("utf-8")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
 
-def hash_password(plain: str) -> str:
-    return pwd_context.hash(plain)
+_jwks_cache = _JwksCache()
 
 
-def create_access_token(sub: str, role: str) -> str:
-    now = dt.datetime.utcnow()
-    payload = {"sub": sub, "role": role, "iat": int(now.timestamp()), "exp": int((now + dt.timedelta(minutes=JWT_EXP_MIN)).timestamp())}
-    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALG)
+def get_bearer_token(authorization: Annotated[str | None, Header(alias="Authorization")] = None) -> str:
+    if not authorization:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing bearer token")
+
+    prefix = "Bearer "
+    if not authorization.startswith(prefix):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing bearer token")
+
+    token = authorization[len(prefix) :].strip()
+    if not token:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing bearer token")
+    return token
 
 
-def get_user_by_email(email: str) -> Optional[dict]:
-    with get_db_conn() as conn:
-        with conn.cursor() as cur:
-            cur.execute("SELECT id::text, email, role, password_hash FROM users WHERE email = %s", (email,))
-            row = cur.fetchone()
-            if not row:
-                return None
-            return {"id": row[0], "email": row[1], "role": row[2], "password_hash": row[3]}
+async def get_current_user(token: str = Depends(get_bearer_token)) -> AuthenticatedPrincipal:
+    return await verify_supabase_token(token)
 
 
-def get_user_by_id(uid: str) -> Optional[dict]:
-    with get_db_conn() as conn:
-        with conn.cursor() as cur:
-            cur.execute("SELECT id::text, email, role FROM users WHERE id = %s", (uid,))
-            row = cur.fetchone()
-            if not row:
-                return None
-            return {"id": row[0], "email": row[1], "role": row[2]}
-
-
-def create_user(email: str, password: str, role: str = "user") -> dict:
-    hpw = hash_password(password)
-    with get_db_conn() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                INSERT INTO users (email, password_hash, role)
-                VALUES (%s, %s, %s)
-                ON CONFLICT (email) DO NOTHING
-                RETURNING id::text, email, role
-                """,
-                (email, hpw, role),
-            )
-            row = cur.fetchone()
-            if not row:
-                u = get_user_by_email(email)
-                if not u:
-                    raise HTTPException(status_code=500, detail="Failed to upsert user")
-                return {"id": u["id"], "email": u["email"], "role": u["role"]}
-            return {"id": row[0], "email": row[1], "role": row[2]}
-
-
-async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserOut:
+async def verify_supabase_token(token: str) -> AuthenticatedPrincipal:
     try:
-        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALG])
-        uid: str = payload.get("sub")
-        role: str = payload.get("role")
-        if uid is None or role is None:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+        header = jwt.get_unverified_header(token)
     except JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
-    user = get_user_by_id(uid)
-    if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
-    return UserOut(id=user["id"], email=user["email"], role=user["role"])  # type: ignore
 
+    if header.get("alg") != "ES256":
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
-def require_admin(user: UserOut = Depends(get_current_user)) -> UserOut:
-    if user.role != "admin":
-        raise HTTPException(status_code=403, detail="Admin only")
-    return user
+    kid = header.get("kid")
+    if not kid:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+
+    signing_key = await _jwks_cache.get_signing_key(kid)
+    settings = get_settings()
+
+    try:
+        decoded = jwt.decode(
+            token,
+            signing_key,
+            algorithms=["ES256"],
+            issuer=settings.supabase_issuer,
+            options={"verify_aud": False},
+        )
+        claims = SupabaseTokenClaims.model_validate(decoded)
+    except (JWTError, ValueError):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+
+    return AuthenticatedPrincipal(
+        user_id=claims.sub,
+        email=claims.email,
+        role=claims.role,
+        session_id=claims.session_id,
+        claims=claims.model_dump(mode="json"),
+    )

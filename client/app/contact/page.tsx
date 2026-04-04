@@ -5,12 +5,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { Turnstile } from "@marsidev/react-turnstile";
 
+import { api } from "@/lib/api";
+
 export default function ContactPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [turnstileToken, setTurnstileToken] = useState("");
-  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">(
+    "idle",
+  );
   const [statusMessage, setStatusMessage] = useState("");
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -36,29 +40,26 @@ export default function ContactPage() {
     setStatusMessage("");
 
     try {
-      const response = await fetch("/api/proxy/api/v1/contact", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      const payload = await api.postJson<{ detail?: string; ok?: boolean }>(
+        "/api/contact",
+        {
           name: trimmedName,
           email: trimmedEmail,
           message: trimmedMessage,
           cf_turnstile_response: turnstileToken,
-        }),
-      });
+        },
+      );
 
-      const payload = (await response.json().catch(() => null)) as
-        | { detail?: string; ok?: boolean }
-        | null;
-
-      if (!response.ok || payload?.ok === false) {
-        throw new Error(payload?.detail || "Unable to send your message right now.");
+      if (payload?.ok === false) {
+        throw new Error(
+          payload?.detail || "Unable to send your message right now.",
+        );
       }
 
       setStatus("sent");
-      setStatusMessage(payload?.detail || "Thanks! Your message has been sent.");
+      setStatusMessage(
+        payload?.detail || "Thanks! Your message has been sent.",
+      );
       setName("");
       setEmail("");
       setMessage("");
@@ -157,7 +158,10 @@ export default function ContactPage() {
 
           <div className="flex flex-col gap-2">
             <Turnstile
-              siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"}
+              siteKey={
+                process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ||
+                "1x00000000000000000000AA"
+              }
               onSuccess={(token) => setTurnstileToken(token)}
             />
           </div>

@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
+import { Analytics } from "@vercel/analytics/next";
+import Header from "../components/layout/Header";
+import Footer from "../components/layout/Footer";
+import { AuthProvider } from "../components/auth/AuthProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -66,9 +68,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Header />
-        <main className="pt-[60px] min-h-screen">{children}</main>
-        <Footer />
+        <AuthProvider>
+          <Header />
+          <main className="pt-[60px] min-h-screen">{children}</main>
+          <Footer />
+        </AuthProvider>
+        <Analytics />
       </body>
     </html>
   );

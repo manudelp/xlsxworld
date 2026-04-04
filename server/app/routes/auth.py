@@ -1,49 +1,62 @@
-from fastapi import APIRouter, Depends, HTTPException
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi import APIRouter, Depends, HTTPException, status
 
-from app.core.security import (
-    UserOut,
-    get_current_user,
-    require_admin,
-    get_user_by_email,
-    verify_password,
-    create_access_token,
-    create_user,
-    get_db_conn,
+from app.core.security import AuthenticatedPrincipal, get_bearer_token, get_current_user
+from app.schemas.auth import (
+    AuthLoginRequest,
+    AuthLogoutResponse,
+    AuthProfileResponse,
+    AuthRefreshRequest,
+    AuthSessionResponse,
+    AuthSignupRequest,
+    AuthUpdateProfileRequest,
 )
+from app.services.auth_service import AuthService, get_auth_service
 
-router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
-
-
-@router.post("/signup", response_model=UserOut)
-def signup(body: dict):
-    email = body.get("email")
-    password = body.get("password")
-    if not email or not password:
-        raise HTTPException(status_code=400, detail="email and password required")
-    with get_db_conn() as conn:
-        with conn.cursor() as cur:
-            cur.execute("SELECT COUNT(1) FROM users")
-            total = cur.fetchone()[0]
-    role = "admin" if total == 0 else "user"
-    u = create_user(email, password, role=role)
-    return UserOut(**u)
+router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-@router.post("/login")
-def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = get_user_by_email(form_data.username)
-    if not user or not verify_password(form_data.password, user["password_hash"]):
-        raise HTTPException(status_code=400, detail="Incorrect email or password")
-    token = create_access_token(user["id"], user["role"])  # type: ignore
-    return {"access_token": token, "token_type": "bearer"}
+@router.post("/signup", response_model=AuthSessionResponse)
+async def signup(body: AuthSignupRequest, auth_service: AuthService = Depends(get_auth_service)) -> AuthSessionResponse:
+    return await auth_service.signup(body)
 
 
-@router.get("/me", response_model=UserOut)
-def me(current: UserOut = Depends(get_current_user)):
-    return current
+@router.post("/login", response_model=AuthSessionResponse)
+async def login(body: AuthLoginRequest, auth_service: AuthService = Depends(get_auth_service)) -> AuthSessionResponse:
+    return await auth_service.login(body)
 
 
-@router.get("/admin/ping")
-def admin_ping(_: UserOut = Depends(require_admin)):
-    return {"pong": True}
+@router.post("/refresh", response_model=AuthSessionResponse)
+async def refresh(body: AuthRefreshRequest, auth_service: AuthService = Depends(get_auth_service)) -> AuthSessionResponse:
+    return await auth_service.refresh(body)
+
+
+@router.post("/logout", response_model=AuthLogoutResponse)
+async def logout(
+    _: AuthenticatedPrincipal = Depends(get_current_user),
+    token: str = Depends(get_bearer_token),
+    auth_service: AuthService = Depends(get_auth_service),
+) -> AuthLogoutResponse:
+    return await auth_service.logout(token)
+
+
+@router.get("/me", response_model=AuthProfileResponse)
+async def me(
+    current_user: AuthenticatedPrincipal = Depends(get_current_user),
+    auth_service: AuthService = Depends(get_auth_service),
+) -> AuthProfileResponse:
+    if current_user.email is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authenticated token is missing the email claim")
+    profile = await auth_service.me(current_user.user_id, current_user.email, None)
+    return profile
+
+
+@router.patch("/me", response_model=AuthProfileResponse)
+async def update_me(
+    body: AuthUpdateProfileRequest,
+    current_user: AuthenticatedPrincipal = Depends(get_current_user),
+    auth_service: AuthService = Depends(get_auth_service),
+) -> AuthProfileResponse:
+    if current_user.email is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authenticated token is missing the email claim")
+    profile = await auth_service.update_profile(current_user.user_id, current_user.email, body)
+    return profile

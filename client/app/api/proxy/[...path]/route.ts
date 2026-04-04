@@ -1,7 +1,11 @@
 import { NextResponse, NextRequest } from "next/server";
 
+import { AUTH_ACCESS_COOKIE } from "@/lib/auth/constants";
+
 const BACKEND =
-  process.env.API_BASE ?? process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
+  process.env.API_BASE ??
+  process.env.NEXT_PUBLIC_API_BASE ??
+  "http://localhost:8000";
 
 async function proxy(
   req: NextRequest,
@@ -18,6 +22,13 @@ async function proxy(
     if (key.toLowerCase() === "host") return;
     headers[key] = value;
   });
+
+  if (!headers.authorization) {
+    const accessToken = req.cookies.get(AUTH_ACCESS_COOKIE)?.value;
+    if (accessToken) {
+      headers.authorization = `Bearer ${accessToken}`;
+    }
+  }
 
   const init: RequestInit & { duplex?: "half" } = {
     method: req.method,
