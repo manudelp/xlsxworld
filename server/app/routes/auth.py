@@ -23,11 +23,19 @@ logger = logging.getLogger(__name__)
 @router.post("/signup", response_model=AuthSessionResponse)
 async def signup(request: Request, auth_service: AuthService = Depends(get_auth_service)) -> AuthSessionResponse:
     raw_body = await request.body()
-    logger.warning("[DEBUG] /auth/signup raw request body: %s", raw_body.decode("utf-8", errors="replace"))
+    raw_text = raw_body.decode("utf-8", errors="replace")
+    expected_fields = list(AuthSignupRequest.model_fields.keys())
+
+    logger.error("[SIGNUP_DEBUG] expected schema fields=%s", expected_fields)
+    logger.error("[SIGNUP_DEBUG] raw request body=%s", raw_text)
+
     try:
         body = AuthSignupRequest.model_validate_json(raw_body)
     except ValidationError as exc:
+        logger.error("[SIGNUP_DEBUG] validation errors=%s", exc.errors(include_url=True))
+        logger.error("[SIGNUP_DEBUG] validation error json=%s", exc.json())
         raise RequestValidationError(exc.errors())
+
     return await auth_service.signup(body)
 
 
