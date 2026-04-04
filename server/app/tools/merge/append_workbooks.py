@@ -61,5 +61,8 @@ async def append_workbooks(
     return StreamingResponse(
         iter([output.getvalue()]),
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={"Content-Disposition": "attachment; filename=appended.xlsx"},
+        headers={
+            "Content-Disposition": "attachment; filename=appended.xlsx",
+            "Content-Encoding": "identity",
+        },
     )

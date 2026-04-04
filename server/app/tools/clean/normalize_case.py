@@ -84,5 +84,8 @@ async def normalize_case(
     return StreamingResponse(
         iter([output_bytes]),
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={"Content-Disposition": "attachment; filename=normalized-case.xlsx"},
+        headers={
+            "Content-Disposition": "attachment; filename=normalize-case.xlsx",
+            "Content-Encoding": "identity",
+        },
     )

@@ -73,5 +73,8 @@ async def trim_spaces(
     return StreamingResponse(
         iter([output_bytes]),
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={"Content-Disposition": "attachment; filename=trimmed.xlsx"},
+        headers={
+            "Content-Disposition": "attachment; filename=trim-spaces.xlsx",
+            "Content-Encoding": "identity",
+        },
     )

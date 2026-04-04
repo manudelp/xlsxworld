@@ -67,5 +67,8 @@ async def split_workbook(
     return StreamingResponse(
         iter([zipped.getvalue()]),
         media_type="application/zip",
-        headers={"Content-Disposition": "attachment; filename=splitted_workbook.zip"},
+        headers={
+            "Content-Disposition": "attachment; filename=splitted_workbook.zip",
+            "Content-Encoding": "identity",
+        },
     )

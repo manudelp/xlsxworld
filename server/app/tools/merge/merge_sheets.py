@@ -60,5 +60,8 @@ async def merge_sheets(
     return StreamingResponse(
         iter([output.getvalue()]),
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={"Content-Disposition": "attachment; filename=merged.xlsx"},
+        headers={
+            "Content-Disposition": "attachment; filename=merged.xlsx",
+            "Content-Encoding": "identity",
+        },
     )

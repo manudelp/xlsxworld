@@ -84,5 +84,8 @@ async def remove_duplicates(
     return StreamingResponse(
         iter([output_bytes]),
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={"Content-Disposition": "attachment; filename=deduplicated.xlsx"},
+        headers={
+            "Content-Disposition": "attachment; filename=remove-duplicates.xlsx",
+            "Content-Encoding": "identity",
+        },
     )

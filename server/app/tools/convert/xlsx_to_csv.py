@@ -74,7 +74,10 @@ async def xlsx_to_csv(
     return StreamingResponse(
         gen(),
         media_type="text/csv; charset=utf-8",
-        headers={"Content-Disposition": f"attachment; filename={sheet}.csv"},
+        headers={
+            "Content-Disposition": f"attachment; filename={sheet}.csv",
+            "Content-Encoding": "identity",
+        },
     )
 
 
@@ -107,5 +110,8 @@ async def xlsx_to_csv_zip(
     return StreamingResponse(
         iter([zipped.getvalue()]),
         media_type="application/zip",
-        headers={"Content-Disposition": "attachment; filename=sheets-csv.zip"},
+        headers={
+            "Content-Disposition": "attachment; filename=sheets-csv.zip",
+            "Content-Encoding": "identity",
+        },
     )

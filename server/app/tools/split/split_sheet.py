@@ -141,5 +141,8 @@ async def split_sheet(
     return StreamingResponse(
         iter([output.getvalue()]),
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={"Content-Disposition": "attachment; filename=splitted.xlsx"},
+        headers={
+            "Content-Disposition": "attachment; filename=splitted.xlsx",
+            "Content-Encoding": "identity",
+        },
     )

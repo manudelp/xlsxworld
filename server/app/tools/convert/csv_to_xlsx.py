@@ -58,7 +58,10 @@ async def csv_to_xlsx(
         return StreamingResponse(
             iter([output.getvalue()]),
             media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            headers={"Content-Disposition": f"attachment; filename={filename}"},
+            headers={
+                "Content-Disposition": f"attachment; filename={filename}",
+                "Content-Encoding": "identity",
+            },
         )
     except csv.Error as e:
         raise HTTPException(status_code=400, detail=f"Failed to parse CSV: {e}")

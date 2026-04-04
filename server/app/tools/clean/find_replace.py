@@ -84,5 +84,8 @@ async def find_replace(
     return StreamingResponse(
         iter([output_bytes]),
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={"Content-Disposition": "attachment; filename=find-replace.xlsx"},
+        headers={
+            "Content-Disposition": "attachment; filename=find-replace.xlsx",
+            "Content-Encoding": "identity",
+        },
     )
