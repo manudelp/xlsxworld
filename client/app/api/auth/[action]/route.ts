@@ -100,7 +100,7 @@ async function handleMe(request: NextRequest, method: "GET" | "PATCH") {
       return failure;
     }
 
-    const refreshed = buildSessionResponse(refreshResponse.payload);
+    buildSessionResponse(refreshResponse.payload);
     response = await callBackend(refreshResponse.payload.access_token);
     if (response.status === 401) {
       const failure = jsonError(401, "Session expired");

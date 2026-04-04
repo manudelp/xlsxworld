@@ -1,9 +1,12 @@
 import type { NextConfig } from "next";
 import path from "path";
 import { fileURLToPath } from "url";
+import createNextIntlPlugin from "next-intl/plugin";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
 const nextConfig: NextConfig = {
   output: "standalone",
@@ -13,4 +16,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);

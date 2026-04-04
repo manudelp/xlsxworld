@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ArrowUp } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 type BackToTopButtonProps = {
   threshold?: number;
@@ -13,6 +14,7 @@ export default function BackToTopButton({
   className = "fixed bottom-6 right-6 z-30",
 }: BackToTopButtonProps) {
   const [isVisible, setIsVisible] = useState(false);
+  const t = useTranslations("backToTop");
 
   useEffect(() => {
     const onScroll = () => {
@@ -33,14 +35,14 @@ export default function BackToTopButton({
       <button
         type="button"
         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-        aria-label="Back to top"
+        aria-label={t("label")}
         className="cursor-pointer rounded-full border p-3 shadow-sm transition hover:shadow"
         style={{
           borderColor: "var(--tag-border)",
           backgroundColor: "var(--tag-selected-bg)",
           color: "var(--tag-selected-text)",
         }}
-        title="Back to top"
+        title={t("label")}
       >
         <ArrowUp size={18} aria-hidden="true" />
       </button>
@@ -54,7 +56,7 @@ export default function BackToTopButton({
           color: "var(--foreground)",
         }}
       >
-        Back to top
+        {t("label")}
       </span>
     </div>
   );

@@ -1,26 +1,31 @@
 import React from "react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 
 interface ToolProps {
   href: string;
-  title: string;
+  slug: string;
   icon: React.ReactNode | string;
-  heading: string;
-  description: string;
   category?: string;
   commingSoon?: boolean;
   isNew?: boolean;
 }
+
 export default function Tool({
   href,
-  title,
+  slug,
   icon,
-  heading,
-  description,
   category = "organize",
   commingSoon = false,
   isNew = false,
 }: ToolProps) {
+  const t = useTranslations("tools");
+  const td = useTranslations(`toolData.${slug}`);
+
+  const title = td("title");
+  const heading = td("heading");
+  const description = td("description");
+
   return (
     <div
       className={`tool-card h-[166px] sm:h-[174px] rounded-[16px] m-0 relative overflow-hidden z-[1] ${
@@ -34,7 +39,7 @@ export default function Tool({
       }}
     >
       <Link
-        href={commingSoon ? "#" : href}
+        href={commingSoon ? "#" : (href as "/")}
         title={title}
         className={`tool-card-link block h-full p-4 ${commingSoon ? "cursor-not-allowed" : ""}`}
         tabIndex={commingSoon ? -1 : undefined}
@@ -68,7 +73,7 @@ export default function Tool({
               color: "var(--tag-selected-text)",
             }}
           >
-            New
+            {t("new")}
           </span>
         )}
         {commingSoon && (
@@ -80,7 +85,7 @@ export default function Tool({
               border: "1px solid var(--tag-border)",
             }}
           >
-            Coming soon
+            {t("comingSoon")}
           </span>
         )}
       </Link>

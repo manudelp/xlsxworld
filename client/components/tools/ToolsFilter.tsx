@@ -1,8 +1,9 @@
 "use client";
 import React from "react";
+import { useTranslations } from "next-intl";
 
 interface ToolsFilterProps {
-  categories: string[]; // optional; will fallback to []
+  categories: string[];
   selected: string;
   onSelect: (category: string) => void;
 }
@@ -12,9 +13,11 @@ export default function ToolsFilter({
   selected,
   onSelect,
 }: ToolsFilterProps) {
-  // Ensure "All" is present as the first element if categories provided but missing it
+  const t = useTranslations("tools");
+  const tc = useTranslations("categories");
+
   const normalized = React.useMemo(() => {
-    if (categories.length === 0) return ["All"]; // still show All (no tools yet)
+    if (categories.length === 0) return ["All"];
     return categories[0] === "All"
       ? categories
       : ["All", ...categories.filter((c) => c !== "All")];
@@ -35,7 +38,7 @@ export default function ToolsFilter({
             borderColor: "var(--tag-border)",
           }}
         >
-          {cat}
+          {cat === "All" ? t("all") : tc(cat)}
         </button>
       ))}
     </div>

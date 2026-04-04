@@ -1,10 +1,13 @@
 "use client";
 import React, { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import ToolsFilter from "@/components/tools/ToolsFilter";
 import Tool from "@/components/tools/Tool";
+import SuggestTool from "@/components/tools/SuggestTool";
 import { toolItems } from "@/components/tools/toolsData";
 
 export default function Tools() {
+  const t = useTranslations("tools");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
 
   const categories = useMemo(
@@ -28,7 +31,7 @@ export default function Tools() {
   );
 
   return (
-    <div className="flex flex-col items-center relative px-4 sm:px-[48px] pb-[96px] mx-auto flex-wrap min-h-[200px]">
+    <div className="flex flex-col items-center relative px-4 sm:px-[48px] pb-8 mx-auto flex-wrap min-h-[200px]">
       <ToolsFilter
         categories={categories}
         selected={selectedCategory}
@@ -38,14 +41,15 @@ export default function Tools() {
       {/* TOOLS */}
       <div className="grid items-start grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 min-h-[200px] w-full relative">
         {filteredTools.map((tool) => (
-          <Tool key={tool.title} {...tool} />
+          <Tool key={tool.slug} {...tool} />
         ))}
+        <SuggestTool />
         {filteredTools.length === 0 && (
           <div
             className="col-span-full text-center text-sm py-8"
             style={{ color: "var(--muted)" }}
           >
-            No tools in this category.
+            {t("noTools")}
           </div>
         )}
       </div>

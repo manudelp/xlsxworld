@@ -2,14 +2,18 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronDown, LogOut, UserRound } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { useAuth } from "@/components/auth/AuthProvider";
+import { Link } from "@/i18n/navigation";
+import ThemeToggle from "@/components/theme/ThemeToggle";
+import LanguageToggle from "@/components/layout/LanguageToggle";
 
 export default function Header() {
   const { user, isAuthenticated, isLoading, logout } = useAuth();
+  const t = useTranslations();
   const router = useRouter();
   const menuRef = useRef<HTMLDivElement | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -32,7 +36,7 @@ export default function Header() {
     router.refresh();
   }
 
-  const label = user?.display_name?.trim() || user?.email || "Account";
+  const label = user?.display_name?.trim() || user?.email || t("account.myAccount");
 
   return (
     <header
@@ -58,6 +62,8 @@ export default function Header() {
       </Link>
 
       <div className="flex items-center gap-2" ref={menuRef}>
+        <LanguageToggle />
+        <ThemeToggle />
         {isLoading ? (
           <div className="h-9 w-24" />
         ) : isAuthenticated ? (
@@ -95,7 +101,7 @@ export default function Header() {
                   style={{ color: "var(--foreground)" }}
                 >
                   <UserRound className="h-4 w-4" />
-                  My account
+                  {t("account.myAccount")}
                 </Link>
                 <button
                   type="button"
@@ -105,7 +111,7 @@ export default function Header() {
                   role="menuitem"
                 >
                   <LogOut className="h-4 w-4" />
-                  Logout
+                  {t("account.logout")}
                 </button>
               </div>
             )}
@@ -115,7 +121,7 @@ export default function Header() {
             href="/login"
             className="inline-flex items-center rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground"
           >
-            Login
+            {t("header.login")}
           </Link>
         )}
       </div>

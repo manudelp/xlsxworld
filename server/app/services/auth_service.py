@@ -112,8 +112,10 @@ class SupabaseAuthClient:
             raise AuthServiceError("An account with that email already exists", status_code=409)
         if response.status_code == 422:
             raise AuthServiceError("Unable to process the authentication request", status_code=422)
+        if response.status_code == 400:
+            raise AuthServiceError("Invalid email or password", status_code=400)
 
-        raise AuthServiceError("Supabase auth request failed", status_code=502)
+        raise AuthServiceError("Something went wrong. Please try again.", status_code=502)
 
     async def create_user(self, email: str, password: str, display_name: str | None = None) -> _SupabaseAuthUser:
         payload: dict[str, Any] = {

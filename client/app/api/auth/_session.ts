@@ -99,7 +99,7 @@ export function buildSessionResponse(session: BackendSession): NextResponse {
   return response;
 }
 
-export async function backendJson<T>(
+export async function backendJson(
   path: string,
   init: RequestInit & { accessToken?: string | null } = {},
 ): Promise<Response> {
