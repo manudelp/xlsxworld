@@ -48,10 +48,6 @@
   --tag-border: var(--border);
   --tag-selected-bg: var(--primary);
   --tag-selected-text: var(--primary-contrast);
-
-  --ambient-bg-image: none;
-  --ambient-bg-size: 3400px auto;
-  --ambient-bg-position: center -420px;
 }
 
 @theme inline {
@@ -182,10 +178,9 @@
 body {
   font-family: "Alan Sans", sans-serif;
   background-color: var(--background);
-  background-image: var(--ambient-bg-image);
   background-repeat: no-repeat;
-  background-position: var(--ambient-bg-position);
-  background-size: var(--ambient-bg-size);
+  background-position: center top;
+  background-size: cover;
   color: var(--foreground);
   transition:
     background-color 200ms ease,
@@ -291,12 +286,20 @@ body {
 
   .tool-primary-action:hover {
     background-color: var(--world-800);
-    background-color: color-mix(in srgb, var(--surface-2) 85%, var(--primary) 15%);
+    background-color: color-mix(
+      in srgb,
+      var(--surface-2) 85%,
+      var(--primary) 15%
+    );
     border-color: color-mix(in srgb, var(--border) 70%, var(--primary) 30%);
   }
 
   .tool-primary-action:active {
-    background-color: color-mix(in srgb, var(--surface-2) 78%, var(--primary) 22%);
+    background-color: color-mix(
+      in srgb,
+      var(--surface-2) 78%,
+      var(--primary) 22%
+    );
   }
 }
 

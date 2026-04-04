@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import AmbientBackground from "@/components/layout/AmbientBackground";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -10,7 +9,7 @@ export const metadata: Metadata = {
     "Easily manipulate and edit Excel files with XLSX World. Our intuitive platform allows you to import, export, and transform spreadsheets with powerful tools designed for both beginners and professionals. Streamline your workflow, automate repetitive tasks, and unlock advanced features to make working with Excel files faster and more efficient.",
   applicationName: "XLSX World",
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL || "https://xlsx.world"
+    process.env.NEXT_PUBLIC_SITE_URL || "https://xlsx.world",
   ),
   keywords: [
     "excel",
@@ -67,7 +66,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <AmbientBackground />
         <Header />
         <main className="pt-[60px] min-h-screen">{children}</main>
         <Footer />
