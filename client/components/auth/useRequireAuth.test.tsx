@@ -2,10 +2,19 @@ import { render, waitFor } from "@testing-library/react";
 import React from "react";
 
 import { useRequireAuth } from "@/components/auth/useRequireAuth";
+import type { AuthProfile } from "@/lib/auth/types";
 
 const replaceMock = jest.fn();
 
-let authState = {
+let authState: {
+  user: AuthProfile | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  login: jest.Mock;
+  signup: jest.Mock;
+  logout: jest.Mock;
+  refresh: jest.Mock;
+} = {
   user: null,
   isAuthenticated: false,
   isLoading: false,
