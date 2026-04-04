@@ -149,7 +149,11 @@ function blobCandidate(
   };
 }
 
-function buildAmbientSvg(isDark: boolean, width: number, height: number): string {
+function buildAmbientSvg(
+  isDark: boolean,
+  width: number,
+  height: number,
+): string {
   const base = Math.min(width, height);
   const colors = isDark
     ? ["#b8db9d", "#d0e7bc", "#8fc465"]
@@ -175,34 +179,54 @@ function buildAmbientSvg(isDark: boolean, width: number, height: number): string
 
   // Two edge anchors (left and right) so the motif is always framed.
   placeShape(() =>
-    circleCandidate(
+    rectCandidate(
       randomIn(-Math.max(70, base * 0.12), Math.max(80, base * 0.1)),
       randomIn(base * 0.18, height - base * 0.18),
-      randomIn(base * 0.22, base * 0.38),
+      randomIn(base * 0.2, base * 0.36),
+      randomIn(base * 0.2, base * 0.36),
+      randomIn(base * 0.02, base * 0.06),
+      randomIn(-45, 45),
       pick(colors),
       randomIn(opacityMin, opacityMax),
     ),
   );
   placeShape(() =>
-    circleCandidate(
-      randomIn(width - Math.max(80, base * 0.1), width + Math.max(70, base * 0.12)),
+    rectCandidate(
+      randomIn(
+        width - Math.max(80, base * 0.1),
+        width + Math.max(70, base * 0.12),
+      ),
       randomIn(base * 0.14, height - base * 0.24),
-      randomIn(base * 0.2, base * 0.34),
+      randomIn(base * 0.18, base * 0.32),
+      randomIn(base * 0.18, base * 0.32),
+      randomIn(base * 0.02, base * 0.06),
+      randomIn(-45, 45),
       pick(colors),
       randomIn(opacityMin, opacityMax),
     ),
   );
 
-  // Lighter set of extra shapes for less work per render.
-  for (let i = 0; i < 2; i += 1) {
+  // Mix of circles and rectangles for variety.
+  for (let i = 0; i < 3; i += 1) {
     placeShape(() =>
-      circleCandidate(
-        edgeAnchoredX(width),
-        randomIn(base * 0.14, height - base * 0.14),
-        randomIn(base * 0.16, base * 0.3),
-        pick(colors),
-        randomIn(opacityMin, opacityMax),
-      ),
+      Math.random() < 0.5
+        ? circleCandidate(
+            edgeAnchoredX(width),
+            randomIn(base * 0.14, height - base * 0.14),
+            randomIn(base * 0.12, base * 0.26),
+            pick(colors),
+            randomIn(opacityMin, opacityMax),
+          )
+        : rectCandidate(
+            randomIn(base * 0.1, width - base * 0.1),
+            randomIn(base * 0.14, height - base * 0.14),
+            randomIn(base * 0.14, base * 0.28),
+            randomIn(base * 0.14, base * 0.28),
+            randomIn(base * 0.02, base * 0.04),
+            randomIn(-30, 30),
+            pick(colors),
+            randomIn(opacityMin, opacityMax),
+          ),
     );
   }
 
@@ -219,13 +243,14 @@ function buildAmbientSvg(isDark: boolean, width: number, height: number): string
     ),
   );
 
-  for (let i = 0; i < 2; i += 1) {
+  for (let i = 0; i < 3; i += 1) {
     placeShape(() => {
       const w = randomIn(base * 0.24, base * 0.64);
       const h = randomIn(base * 0.16, base * 0.4);
-      const x = Math.random() < 0.5
-        ? randomIn(-w * 0.35, base * 0.12)
-        : randomIn(width - base * 0.2, width - w * 0.08);
+      const x =
+        Math.random() < 0.5
+          ? randomIn(-w * 0.35, base * 0.12)
+          : randomIn(width - base * 0.2, width - w * 0.08);
 
       return rectCandidate(
         x,
@@ -261,7 +286,10 @@ function bucketViewport(value: number): number {
 function applyAmbientBackground(signatureRef: MutableRefObject<string>): void {
   const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
   const width = Math.max(bucketViewport(window.innerWidth), 900);
-  const height = Math.max(bucketViewport(window.innerHeight), 760);
+  const height = Math.max(
+    bucketViewport(document.documentElement.scrollHeight),
+    760,
+  );
   const signature = `${prefersDark ? "dark" : "light"}:${width}x${height}`;
 
   if (signatureRef.current === signature) {
@@ -285,6 +313,7 @@ function applyAmbientBackground(signatureRef: MutableRefObject<string>): void {
     "center top",
   );
 }
+
 
 export default function AmbientBackground(): null {
   const signatureRef = useRef("");
