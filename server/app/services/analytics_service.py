@@ -25,20 +25,9 @@ from app.schemas.analytics import EndpointPerformanceEvent, FileUploadEvent, Too
 logger = logging.getLogger(__name__)
 
 
-def _mask_database_url(url: str) -> str:
-    try:
-        return make_url(url).render_as_string(hide_password=True)
-    except Exception:
-        return "<invalid-database-url>"
-
-
 def _build_analytics_session_factory() -> async_sessionmaker[AsyncSession]:
     settings = get_settings()
     analytics_database_url = settings.async_database_pool_url
-    logger.warning(
-        "Analytics engine DB URL source=DATABASE_POOL_URL url=%s",
-        _mask_database_url(analytics_database_url),
-    )
 
     engine = create_async_engine(
         analytics_database_url,
@@ -79,7 +68,7 @@ class AnalyticsService:
         try:
             asyncio.create_task(self._guard(task_name, coro))
         except RuntimeError:
-            self.logger.debug("Skipping analytics task %s because no event loop is running", task_name)
+            pass
 
     async def _guard(self, task_name: str, coro: Any) -> None:
         try:
