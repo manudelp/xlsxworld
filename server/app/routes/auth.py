@@ -1,8 +1,4 @@
-import logging
-
-from fastapi import APIRouter, Depends, HTTPException, Request, status
-from fastapi.exceptions import RequestValidationError
-from pydantic import ValidationError
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.core.security import AuthenticatedPrincipal, get_bearer_token, get_current_user
 from app.schemas.auth import (
@@ -17,25 +13,10 @@ from app.schemas.auth import (
 from app.services.auth_service import AuthService, get_auth_service
 
 router = APIRouter(prefix="/auth", tags=["auth"])
-logger = logging.getLogger(__name__)
 
 
 @router.post("/signup", response_model=AuthSessionResponse)
-async def signup(request: Request, auth_service: AuthService = Depends(get_auth_service)) -> AuthSessionResponse:
-    raw_body = await request.body()
-    raw_text = raw_body.decode("utf-8", errors="replace")
-    expected_fields = list(AuthSignupRequest.model_fields.keys())
-
-    logger.error("[SIGNUP_DEBUG] expected schema fields=%s", expected_fields)
-    logger.error("[SIGNUP_DEBUG] raw request body=%s", raw_text)
-
-    try:
-        body = AuthSignupRequest.model_validate_json(raw_body)
-    except ValidationError as exc:
-        logger.error("[SIGNUP_DEBUG] validation errors=%s", exc.errors(include_url=True))
-        logger.error("[SIGNUP_DEBUG] validation error json=%s", exc.json())
-        raise RequestValidationError(exc.errors())
-
+async def signup(body: AuthSignupRequest, auth_service: AuthService = Depends(get_auth_service)) -> AuthSessionResponse:
     return await auth_service.signup(body)
 
 
