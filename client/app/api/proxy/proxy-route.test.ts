@@ -29,6 +29,7 @@ describe("proxy route", () => {
     const options = fetchMock.mock.calls[0][1] as RequestInit;
     const headers = options.headers as Record<string, string>;
     expect(headers.authorization).toBe("Bearer token-123");
+    expect(headers["accept-encoding"]).toBe("identity");
 
     fetchMock.mockRestore();
   });
@@ -47,12 +48,6 @@ describe("proxy route", () => {
       0x08,
       0x00, // ZIP/XLSX header
     ]);
-    const mockReadableStream = {
-      getReader: () => ({
-        read: async () => ({ done: true, value: undefined }),
-      }),
-    };
-
     const fetchMock = jest.spyOn(global, "fetch").mockResolvedValue(
       new Response(binaryData, {
         status: 200,
@@ -131,6 +126,37 @@ describe("proxy route", () => {
 
     // Verify important headers are preserved
     expect(response.headers.get("Content-Type")).toBe("application/json");
+
+    fetchMock.mockRestore();
+  });
+
+  it("drops stale content-encoding for JSON responses", async () => {
+    const fetchMock = jest.spyOn(global, "fetch").mockResolvedValue(
+      new Response(JSON.stringify({ ok: true }), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+          "Content-Encoding": "gzip",
+          "Content-Length": "999",
+        },
+      }),
+    );
+
+    const request = new NextRequest(
+      "http://localhost:3000/api/proxy/inspect/preview",
+      {
+        method: "GET",
+      },
+    );
+
+    const response = await GET(request, {
+      params: Promise.resolve({ path: ["inspect", "preview"] }),
+    });
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Content-Type")).toBe("application/json");
+    expect(response.headers.get("Content-Encoding")).toBeNull();
+    expect(response.headers.get("Content-Length")).toBeNull();
 
     fetchMock.mockRestore();
   });

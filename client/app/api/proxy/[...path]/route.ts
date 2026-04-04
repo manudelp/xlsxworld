@@ -20,8 +20,13 @@ async function proxy(
   const headers: Record<string, string> = {};
   req.headers.forEach((value, key) => {
     if (key.toLowerCase() === "host") return;
+    if (key.toLowerCase() === "accept-encoding") return;
     headers[key] = value;
   });
+
+  // Force identity to avoid upstream compression that can be transparently
+  // decoded by fetch while still carrying a Content-Encoding header.
+  headers["accept-encoding"] = "identity";
 
   if (!headers.authorization) {
     const accessToken = req.cookies.get(AUTH_ACCESS_COOKIE)?.value;
@@ -41,6 +46,15 @@ async function proxy(
 
   const res = await fetch(dest, init);
 
+  const contentType = res.headers.get("content-type")?.toLowerCase() ?? "";
+  const isBinaryResponse =
+    contentType.includes(
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ) ||
+    contentType.startsWith("text/csv") ||
+    contentType.startsWith("application/zip") ||
+    contentType.startsWith("application/octet-stream");
+
   // Build response headers to return to client
   // Use NextResponse's Headers to properly handle header values
   const resHeaders = new Headers();
@@ -58,6 +72,15 @@ async function proxy(
         "upgrade",
         "te",
       ].includes(lowerKey)
+    ) {
+      return;
+    }
+
+    // For non-binary payloads, avoid forwarding encoding/length metadata
+    // that may no longer match if runtime decoding/rechunking happened.
+    if (
+      !isBinaryResponse &&
+      ["content-encoding", "content-length"].includes(lowerKey)
     ) {
       return;
     }
