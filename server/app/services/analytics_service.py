@@ -12,16 +12,38 @@ from uuid import UUID
 
 from fastapi import Depends, Request
 from sqlalchemy import case, func, insert, update
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 
+from app.core.config import get_settings
 from app.core.security import AuthenticatedPrincipal
 from app.db.models.analytics import MetricDataPoint, MetricEvent, UserActivityDaily
 from app.db.models.users import AppUser
-from app.db.session import AsyncSessionFactory
 from app.schemas.analytics import EndpointPerformanceEvent, FileUploadEvent, ToolUsageEvent, UserActivityEvent
 
 logger = logging.getLogger(__name__)
+
+
+def _build_analytics_session_factory() -> async_sessionmaker[AsyncSession]:
+    settings = get_settings()
+    engine = create_async_engine(
+        settings.async_database_pool_url,
+        echo=settings.db_echo_sql,
+        connect_args={"prepared_statement_cache_size": 0},
+        pool_pre_ping=True,
+        pool_size=settings.db_pool_size,
+        max_overflow=settings.db_max_overflow,
+        pool_timeout=settings.db_pool_timeout,
+        pool_recycle=settings.db_pool_recycle,
+    )
+    return async_sessionmaker(
+        bind=engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
+    )
+
+
+AnalyticsSessionFactory = _build_analytics_session_factory()
 
 
 @dataclass(slots=True)
@@ -33,7 +55,7 @@ class _AnalyticsTaskContext:
 class AnalyticsService:
     def __init__(
         self,
-        session_factory: async_sessionmaker[AsyncSession] = AsyncSessionFactory,
+        session_factory: async_sessionmaker[AsyncSession] = AnalyticsSessionFactory,
         logger_: logging.Logger | None = None,
     ) -> None:
         self.session_factory = session_factory

@@ -81,6 +81,12 @@ server/
 Required variables:
 
 - `DATABASE_URL` (Supabase direct Postgres URL, e.g. `postgresql://postgres:<password>@<project-ref>.supabase.co:5432/postgres`)
+- `DATABASE_POOL_URL` (Supabase pooler URL for hosted/background services, e.g. `postgresql+asyncpg://postgres.<project-ref>:<password>@<pooler-host>.supabase.com:6543/postgres`)
+
+Connection usage:
+
+- `DATABASE_URL`: main request session + Alembic migrations (direct connection)
+- `DATABASE_POOL_URL`: analytics/background services on hosted environments (pooled connection)
 
 Optional:
 

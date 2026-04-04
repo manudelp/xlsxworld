@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     app_env: str = Field(default="development", alias="APP_ENV")
 
     database_url: str = Field(alias="DATABASE_URL")
+    database_pool_url: str | None = Field(default=None, alias="DATABASE_POOL_URL")
     db_pool_size: int = Field(default=10, alias="DB_POOL_SIZE")
     db_max_overflow: int = Field(default=20, alias="DB_MAX_OVERFLOW")
     db_pool_timeout: int = Field(default=30, alias="DB_POOL_TIMEOUT")
@@ -38,13 +39,26 @@ class Settings(BaseSettings):
     def async_database_url(self) -> str:
         """Return SQLAlchemy-compatible async URL for asyncpg."""
 
-        if self.database_url.startswith("postgresql+asyncpg://"):
-            return self.database_url
-        if self.database_url.startswith("postgresql://"):
-            return self.database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
-        if self.database_url.startswith("postgres://"):
-            return self.database_url.replace("postgres://", "postgresql+asyncpg://", 1)
-        return self.database_url
+        return self._to_asyncpg_url(self.database_url)
+
+    @property
+    def async_database_pool_url(self) -> str:
+        """Return async DB URL for pooled/background services.
+
+        Uses DATABASE_POOL_URL when provided, otherwise falls back to DATABASE_URL.
+        """
+
+        return self._to_asyncpg_url(self.database_pool_url or self.database_url)
+
+    @staticmethod
+    def _to_asyncpg_url(url: str) -> str:
+        if url.startswith("postgresql+asyncpg://"):
+            return url
+        if url.startswith("postgresql://"):
+            return url.replace("postgresql://", "postgresql+asyncpg://", 1)
+        if url.startswith("postgres://"):
+            return url.replace("postgres://", "postgresql+asyncpg://", 1)
+        return url
 
     @property
     def supabase_auth_url(self) -> str:
