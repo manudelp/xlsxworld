@@ -42,15 +42,38 @@ async function proxy(
   const res = await fetch(dest, init);
 
   // Build response headers to return to client
-  const resHeaders: Record<string, string> = {};
-  res.headers.forEach((v, k) => {
-    resHeaders[k] = v;
+  // Use NextResponse's Headers to properly handle header values
+  const resHeaders = new Headers();
+  res.headers.forEach((value, key) => {
+    // Skip headers that should not be forwarded from backend to client
+    // or that will cause issues with response proxying
+    const lowerKey = key.toLowerCase();
+
+    // Skip proxy and server-specific headers
+    if (
+      [
+        "connection",
+        "keep-alive",
+        "transfer-encoding",
+        "upgrade",
+        "te",
+      ].includes(lowerKey)
+    ) {
+      return;
+    }
+
+    // Forward all other headers (including Content-Encoding, Content-Type, Content-Disposition, etc.)
+    resHeaders.set(key, value);
   });
 
-  return new NextResponse(res.body, {
+  // Create response with proper streaming support for binary data
+  // Pass res.body directly to stream the response without buffering
+  const response = new NextResponse(res.body, {
     status: res.status,
     headers: resHeaders,
   });
+
+  return response;
 }
 
 export const GET = proxy;
