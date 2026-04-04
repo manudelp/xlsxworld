@@ -304,8 +304,49 @@ body {
 }
 
 /* sensible button hover defaults that respect dark mode */
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
 button:hover {
   background-color: rgba(0, 0, 0, 0.04);
+}
+
+/* Use pointer on selectable controls, but keep text-entry fields unchanged. */
+select,
+input[type="checkbox"],
+input[type="radio"],
+input[type="file"],
+input[type="range"],
+input[type="color"],
+input[type="date"],
+input[type="datetime-local"],
+input[type="month"],
+input[type="week"],
+input[type="time"],
+[aria-haspopup="menu"],
+[role="menuitem"] {
+  cursor: pointer;
+}
+
+select:disabled,
+input[type="checkbox"]:disabled,
+input[type="radio"]:disabled,
+input[type="file"]:disabled,
+input[type="range"]:disabled,
+input[type="color"]:disabled,
+input[type="date"]:disabled,
+input[type="datetime-local"]:disabled,
+input[type="month"]:disabled,
+input[type="week"]:disabled,
+input[type="time"]:disabled,
+[aria-haspopup="menu"]:disabled,
+[role="menuitem"]:disabled {
+  cursor: not-allowed;
 }
 
 @media (prefers-color-scheme: dark) {
