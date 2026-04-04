@@ -45,10 +45,12 @@ class Settings(BaseSettings):
     def async_database_pool_url(self) -> str:
         """Return async DB URL for pooled/background services.
 
-        Uses DATABASE_POOL_URL when provided, otherwise falls back to DATABASE_URL.
+        Uses DATABASE_POOL_URL and raises when missing to avoid silent fallback.
         """
 
-        return self._to_asyncpg_url(self.database_pool_url or self.database_url)
+        if not self.database_pool_url:
+            raise RuntimeError("DATABASE_POOL_URL is not configured")
+        return self._to_asyncpg_url(self.database_pool_url)
 
     @staticmethod
     def _to_asyncpg_url(url: str) -> str:

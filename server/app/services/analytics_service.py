@@ -11,6 +11,7 @@ from typing import Any, AsyncIterator
 from uuid import UUID
 
 from fastapi import Depends, Request
+from sqlalchemy.engine import make_url
 from sqlalchemy import case, func, insert, update
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.dialects.postgresql import insert as pg_insert
@@ -24,10 +25,23 @@ from app.schemas.analytics import EndpointPerformanceEvent, FileUploadEvent, Too
 logger = logging.getLogger(__name__)
 
 
+def _mask_database_url(url: str) -> str:
+    try:
+        return make_url(url).render_as_string(hide_password=True)
+    except Exception:
+        return "<invalid-database-url>"
+
+
 def _build_analytics_session_factory() -> async_sessionmaker[AsyncSession]:
     settings = get_settings()
+    analytics_database_url = settings.async_database_pool_url
+    logger.warning(
+        "Analytics engine DB URL source=DATABASE_POOL_URL url=%s",
+        _mask_database_url(analytics_database_url),
+    )
+
     engine = create_async_engine(
-        settings.async_database_pool_url,
+        analytics_database_url,
         echo=settings.db_echo_sql,
         connect_args={"prepared_statement_cache_size": 0},
         pool_pre_ping=True,
