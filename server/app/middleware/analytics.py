@@ -40,7 +40,7 @@ class AnalyticsMiddleware(BaseHTTPMiddleware):
             error_type = exc.__class__.__name__
             raise
         finally:
-            if not self._should_skip_tracking(path):
+            if not self._should_skip_tracking(path, request.method, route_name):
                 if status_code >= 400 and error_type is None:
                     error_type = f"HTTP_{status_code}"
 
@@ -95,8 +95,14 @@ class AnalyticsMiddleware(BaseHTTPMiddleware):
                         )
 
     @staticmethod
-    def _should_skip_tracking(path: str) -> bool:
-        return path in {"/health", "/api/health"} or path.startswith(("/docs", "/redoc", "/openapi"))
+    def _should_skip_tracking(path: str, method: str, route_name: str | None) -> bool:
+        if path in {"/health", "/api/health"} or path.startswith(("/docs", "/redoc", "/openapi")):
+            return True
+
+        if method.upper() == "GET" and path == "/auth/me":
+            return True
+
+        return route_name == "me" and method.upper() == "GET"
 
     async def _resolve_principal(self, request: Request) -> AuthenticatedPrincipal | None:
         authorization = request.headers.get("authorization")

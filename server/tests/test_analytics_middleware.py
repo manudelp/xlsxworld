@@ -49,6 +49,10 @@ def app(monkeypatch: pytest.MonkeyPatch) -> FastAPI:
     async def preview():
         return {"ok": True}
 
+    @app.get("/auth/me")
+    async def auth_me():
+        return {"ok": True}
+
     @app.get("/ok")
     async def ok():
         return {"ok": True}
@@ -84,6 +88,20 @@ async def test_tool_path_emits_endpoint_and_tool_events(app: FastAPI):
     assert response.status_code == 200
     assert len(spy.endpoint_events) == 1
     assert len(spy.tool_events) == 1
+
+
+@pytest.mark.asyncio
+async def test_auth_me_get_is_not_tracked(app: FastAPI):
+    spy = SpyAnalyticsService()
+    app.state.analytics_service = spy
+
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        response = await client.get("/auth/me")
+
+    assert response.status_code == 200
+    assert spy.endpoint_events == []
+    assert spy.tool_events == []
+    assert spy.file_events == []
 
 
 @pytest.mark.asyncio
