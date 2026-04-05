@@ -36,7 +36,8 @@ export default function Header() {
     router.refresh();
   }
 
-  const label = user?.display_name?.trim() || user?.email || t("account.myAccount");
+  const label =
+    user?.display_name?.trim() || user?.email || t("account.myAccount");
 
   return (
     <header
@@ -82,39 +83,48 @@ export default function Header() {
             >
               <UserRound className="h-4 w-4" />
               <span className="max-w-[180px] truncate">{label}</span>
-              <ChevronDown className="h-4 w-4" />
+              <ChevronDown
+                className={`h-4 w-4 transition-transform duration-150 ease-out ${
+                  menuOpen ? "rotate-180" : "rotate-0"
+                }`}
+              />
             </button>
 
-            {menuOpen && (
-              <div
-                className="absolute right-0 mt-2 w-48 rounded-md border p-1 shadow-lg"
-                style={{
-                  borderColor: "var(--border)",
-                  backgroundColor: "var(--surface-2)",
-                }}
-                role="menu"
+            <div
+              className={`absolute right-0 mt-2 w-48 origin-top-right rounded-md border p-1 shadow-lg transition-all duration-150 ease-out ${
+                menuOpen
+                  ? "pointer-events-auto translate-y-0 scale-100 opacity-100"
+                  : "pointer-events-none -translate-y-1 scale-95 opacity-0"
+              }`}
+              style={{
+                borderColor: "var(--border)",
+                backgroundColor: "var(--surface-2)",
+              }}
+              role="menu"
+              aria-hidden={!menuOpen}
+            >
+              <Link
+                href="/my-account"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-2 rounded px-3 py-2 text-sm hover:bg-black/5"
+                style={{ color: "var(--foreground)" }}
+                tabIndex={menuOpen ? 0 : -1}
               >
-                <Link
-                  href="/my-account"
-                  onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-2 rounded px-3 py-2 text-sm hover:bg-black/5"
-                  style={{ color: "var(--foreground)" }}
-                >
-                  <UserRound className="h-4 w-4" />
-                  {t("account.myAccount")}
-                </Link>
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="flex w-full items-center gap-2 rounded px-3 py-2 text-sm hover:bg-black/5"
-                  style={{ color: "var(--foreground)" }}
-                  role="menuitem"
-                >
-                  <LogOut className="h-4 w-4" />
-                  {t("account.logout")}
-                </button>
-              </div>
-            )}
+                <UserRound className="h-4 w-4" />
+                {t("account.myAccount")}
+              </Link>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex w-full items-center gap-2 rounded px-3 py-2 text-sm hover:bg-black/5"
+                style={{ color: "var(--foreground)" }}
+                role="menuitem"
+                tabIndex={menuOpen ? 0 : -1}
+              >
+                <LogOut className="h-4 w-4" />
+                {t("account.logout")}
+              </button>
+            </div>
           </div>
         ) : (
           <Link

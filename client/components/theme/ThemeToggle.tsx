@@ -40,41 +40,47 @@ export default function ThemeToggle() {
           color: "var(--foreground)",
         }}
         aria-label={t("toggleTheme")}
+        aria-haspopup="menu"
+        aria-expanded={open}
       >
         <ActiveIcon className="h-4 w-4" />
       </button>
 
-      {open && (
-        <div
-          className="absolute right-0 mt-2 w-36 rounded-md border p-1 shadow-lg"
-          style={{
-            borderColor: "var(--border)",
-            backgroundColor: "var(--surface-2)",
-          }}
-          role="menu"
-        >
-          {options.map(({ value, icon: Icon }) => (
-            <button
-              key={value}
-              type="button"
-              role="menuitem"
-              onClick={() => {
-                setTheme(value);
-                setOpen(false);
-              }}
-              className="flex w-full items-center gap-2 rounded px-3 py-2 text-sm"
-              style={{
-                color: "var(--foreground)",
-                backgroundColor:
-                  theme === value ? "var(--primary-soft)" : "transparent",
-              }}
-            >
-              <Icon className="h-4 w-4" />
-              {t(value)}
-            </button>
-          ))}
-        </div>
-      )}
+      <div
+        className={`absolute right-0 mt-2 w-36 origin-top-right rounded-md border p-1 shadow-lg transition-all duration-150 ease-out ${
+          open
+            ? "pointer-events-auto translate-y-0 scale-100 opacity-100"
+            : "pointer-events-none -translate-y-1 scale-95 opacity-0"
+        }`}
+        style={{
+          borderColor: "var(--border)",
+          backgroundColor: "var(--surface-2)",
+        }}
+        role="menu"
+        aria-hidden={!open}
+      >
+        {options.map(({ value, icon: Icon }) => (
+          <button
+            key={value}
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              setTheme(value);
+              setOpen(false);
+            }}
+            className="flex w-full items-center gap-2 rounded px-3 py-2 text-sm"
+            style={{
+              color: "var(--foreground)",
+              backgroundColor:
+                theme === value ? "var(--primary-soft)" : "transparent",
+            }}
+            tabIndex={open ? 0 : -1}
+          >
+            <Icon className="h-4 w-4" />
+            {t(value)}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

@@ -72,9 +72,7 @@ export default function ContactPage() {
       setMessage("");
     } catch (error) {
       setStatus("error");
-      setStatusMessage(
-        error instanceof Error ? error.message : t("error"),
-      );
+      setStatusMessage(error instanceof Error ? error.message : t("error"));
     }
   }
 
@@ -135,9 +133,7 @@ export default function ContactPage() {
                 disabled={status === "sending" || !!user}
                 className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-muted shadow-sm transition-colors duration-150 focus:border-primary focus:ring-2 focus:ring-primary/25 outline-none disabled:opacity-60"
               />
-              <p className="mt-1 text-xs text-primary">
-                {t("emailNote")}
-              </p>
+              <p className="mt-1 text-xs text-primary">{t("emailNote")}</p>
             </div>
           </div>
 
@@ -197,7 +193,9 @@ export default function ContactPage() {
 
       <section className="mt-10 grid gap-5 sm:grid-cols-2">
         <div className="rounded-xl border border-border bg-primary-soft p-5">
-          <h2 className="text-lg font-medium text-foreground">{t("faqTitle")}</h2>
+          <h2 className="text-lg font-medium text-foreground">
+            {t("faqTitle")}
+          </h2>
           <p className="text-sm text-muted mt-1">
             {t.rich("faqDescription", {
               link: (chunks) => (
@@ -216,9 +214,7 @@ export default function ContactPage() {
           <h2 className="text-lg font-medium text-foreground">
             {t("communityTitle")}
           </h2>
-          <p className="text-sm text-muted mt-1">
-            {t("communityDescription")}
-          </p>
+          <p className="text-sm text-muted mt-1">{t("communityDescription")}</p>
         </div>
       </section>
     </main>

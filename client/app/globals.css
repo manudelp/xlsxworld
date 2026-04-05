@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "flag-icons/css/flag-icons.min.css";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -90,40 +91,40 @@
 }
 
 .dark {
-    /* dark semantic remap */
-    --primary: var(--world-400);
-    --primary-hover: var(--world-300);
-    --primary-active: var(--world-200);
-    --primary-soft: rgba(143, 196, 101, 0.16);
-    --primary-contrast: #102008;
+  /* dark semantic remap */
+  --primary: var(--world-400);
+  --primary-hover: var(--world-300);
+  --primary-active: var(--world-200);
+  --primary-soft: rgba(143, 196, 101, 0.16);
+  --primary-contrast: #102008;
 
-    --secondary: #76b8d2;
-    --secondary-soft: rgba(118, 184, 210, 0.18);
-    --accent: #e39a5f;
-    --accent-soft: rgba(227, 154, 95, 0.18);
+  --secondary: #76b8d2;
+  --secondary-soft: rgba(118, 184, 210, 0.18);
+  --accent: #e39a5f;
+  --accent-soft: rgba(227, 154, 95, 0.18);
 
-    --success: #54b874;
-    --warning: #e0b15e;
-    --danger: #e17676;
-    --danger-soft: rgba(225, 118, 118, 0.2);
-    --info: #7eaee6;
+  --success: #54b874;
+  --warning: #e0b15e;
+  --danger: #e17676;
+  --danger-soft: rgba(225, 118, 118, 0.2);
+  --info: #7eaee6;
 
-    --reorder-highlight-bg: rgba(143, 196, 101, 0.24);
-    --reorder-highlight-border: var(--world-300);
+  --reorder-highlight-bg: rgba(143, 196, 101, 0.24);
+  --reorder-highlight-border: var(--world-300);
 
-    --background: #1f2329;
-    --surface: #262b32;
-    --surface-2: #2a3038;
-    --foreground: #e4e7eb;
-    --border: #3a414a;
-    --muted: #a8b0bb; /* lighter muted for dark backgrounds */
-    --muted-2: #a8b0bb;
-    /* tag / filter tokens (dark) */
-    --tag-bg: #2a3038;
-    --tag-text: #e4e7eb;
-    --tag-border: var(--border);
-    --tag-selected-bg: var(--primary);
-    --tag-selected-text: var(--primary-contrast);
+  --background: #1f2329;
+  --surface: #262b32;
+  --surface-2: #2a3038;
+  --foreground: #e4e7eb;
+  --border: #3a414a;
+  --muted: #a8b0bb; /* lighter muted for dark backgrounds */
+  --muted-2: #a8b0bb;
+  /* tag / filter tokens (dark) */
+  --tag-bg: #2a3038;
+  --tag-text: #e4e7eb;
+  --tag-border: var(--border);
+  --tag-selected-bg: var(--primary);
+  --tag-selected-text: var(--primary-contrast);
 }
 
 @font-face {

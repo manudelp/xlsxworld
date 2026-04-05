@@ -81,8 +81,8 @@
     "genericError": "Unable to create your account right now."
   },
   "contact": {
-    "title": "Contact XLSX",
-    "titleSuffix": "World",
+    "title": "Contact the XLSX",
+    "titleSuffix": "World Team",
     "subtitle": "We'd love to hear from you. Send us feedback, ask a question, or report a bug.",
     "name": "Name",
     "namePlaceholder": "Your name",
