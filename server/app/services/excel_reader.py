@@ -3,6 +3,8 @@ from __future__ import annotations
 from io import BytesIO
 from tempfile import NamedTemporaryFile
 from typing import Any
+import zipfile
+import xml.etree.ElementTree as ET
 
 import xlrd
 from fastapi import HTTPException
@@ -22,6 +24,11 @@ SUPPORTED_EXCEL_EXTENSIONS = (
 _OPENPYXL_EXTENSIONS = {".xlsx", ".xlsm", ".xltx", ".xltm", ".xlam"}
 _XLRD_EXTENSIONS = {".xls"}
 _PYXLSB_EXTENSIONS = {".xlsb"}
+_DRAWING_PREFIXES = (
+    "xl/drawings/",
+    "xl/charts/",
+    "xl/media/",
+)
 
 
 def _extract_extension(filename: str | None) -> str:
@@ -38,17 +45,88 @@ def ensure_supported_excel_filename(filename: str | None):
         raise HTTPException(status_code=400, detail=f"Unsupported file type, expected one of: {expected}")
 
 
+def _read_openpyxl_values(raw: bytes) -> dict[str, list[list[Any]]]:
+    workbook = load_workbook(
+        filename=BytesIO(raw),
+        read_only=True,
+        data_only=True,
+        keep_links=False,
+    )
+    data: dict[str, list[list[Any]]] = {}
+    for sheet in workbook.worksheets:
+        data[sheet.title] = [list(row) for row in sheet.iter_rows(values_only=True)]
+    return data
+
+
+def _strip_visual_relationships(xml_bytes: bytes) -> bytes:
+    try:
+        root = ET.fromstring(xml_bytes)
+    except ET.ParseError:
+        return xml_bytes
+
+    namespace = "http://schemas.openxmlformats.org/package/2006/relationships"
+    rel_tag = f"{{{namespace}}}Relationship"
+    removed = False
+
+    for rel in list(root.findall(rel_tag)):
+        target = (rel.attrib.get("Target") or "").replace("\\", "/").lower()
+        rel_type = (rel.attrib.get("Type") or "").lower()
+
+        is_visual_target = (
+            "/drawings/" in target
+            or "/charts/" in target
+            or "/media/" in target
+            or target.startswith("../drawings/")
+            or target.startswith("../charts/")
+            or target.startswith("../media/")
+        )
+        is_visual_type = any(
+            marker in rel_type
+            for marker in ("/drawing", "/chart", "/image")
+        )
+
+        if is_visual_target or is_visual_type:
+            root.remove(rel)
+            removed = True
+
+    if not removed:
+        return xml_bytes
+
+    return ET.tostring(root, encoding="utf-8", xml_declaration=True)
+
+
+def _sanitize_openxml_for_data_read(raw: bytes) -> bytes:
+    source = BytesIO(raw)
+    output = BytesIO()
+
+    with zipfile.ZipFile(source, "r") as zin, zipfile.ZipFile(output, "w", zipfile.ZIP_DEFLATED) as zout:
+        for item in zin.infolist():
+            name = item.filename.replace("\\", "/")
+            lower_name = name.lower()
+
+            if lower_name.startswith(_DRAWING_PREFIXES):
+                continue
+
+            payload = zin.read(item.filename)
+            if lower_name.endswith(".rels"):
+                payload = _strip_visual_relationships(payload)
+
+            zout.writestr(name, payload)
+
+    return output.getvalue()
+
+
 def parse_excel_bytes(raw: bytes, filename: str | None) -> dict[str, list[list[Any]]]:
     extension = _extract_extension(filename)
     ensure_supported_excel_filename(filename)
 
     try:
         if extension in _OPENPYXL_EXTENSIONS:
-            workbook = load_workbook(filename=BytesIO(raw), read_only=True, data_only=True)
-            data: dict[str, list[list[Any]]] = {}
-            for sheet in workbook.worksheets:
-                data[sheet.title] = [list(row) for row in sheet.iter_rows(values_only=True)]
-            return data
+            try:
+                return _read_openpyxl_values(raw)
+            except Exception:
+                sanitized = _sanitize_openxml_for_data_read(raw)
+                return _read_openpyxl_values(sanitized)
 
         if extension in _XLRD_EXTENSIONS:
             workbook = xlrd.open_workbook(file_contents=raw)

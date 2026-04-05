@@ -383,7 +383,9 @@ export default function InspectSheets() {
       let widest = context.measureText(header).width;
       const sampleRows = tableModel.rows.slice(0, 300);
       for (const row of sampleRows) {
-        const width = context.measureText(formatCell(row.cells[colIndex])).width;
+        const width = context.measureText(
+          formatCell(row.cells[colIndex]),
+        ).width;
         if (width > widest) widest = width;
       }
 
@@ -425,8 +427,7 @@ export default function InspectSheets() {
     setBaseRowHeight(DEFAULT_ROW_HEIGHT);
   };
 
-  const rowNumberPaddingClass =
-    rowDensity === "comfortable" ? "py-2" : "py-1";
+  const rowNumberPaddingClass = rowDensity === "comfortable" ? "py-2" : "py-1";
   const cellPaddingClass = rowDensity === "comfortable" ? "py-3" : "py-1.5";
 
   const hasSizedColumns = Object.keys(columnWidths).length > 0;
@@ -588,7 +589,10 @@ export default function InspectSheets() {
       getExcelColumnLabel(i),
     );
 
-    const indexedRows: TableRow[] = sourceRows.map((row, sourceIndex) => ({
+    const rowsForGrid =
+      sourceHeader.length > 0 ? [sourceHeader, ...sourceRows] : sourceRows;
+
+    const indexedRows: TableRow[] = rowsForGrid.map((row, sourceIndex) => ({
       sourceIndex,
       cells: Array.from(
         { length: totalColumns },
@@ -1283,7 +1287,9 @@ export default function InspectSheets() {
                           whiteSpace: "nowrap",
                         }}
                       >
-                        {columnWidthMode === "fixed" ? t("fitWidth") : t("fixedWidth")}
+                        {columnWidthMode === "fixed"
+                          ? t("fitWidth")
+                          : t("fixedWidth")}
                       </span>
                     </div>
 
@@ -1320,7 +1326,9 @@ export default function InspectSheets() {
                           whiteSpace: "nowrap",
                         }}
                       >
-                        {rowDensity === "comfortable" ? t("compactRows") : t("comfortableRows")}
+                        {rowDensity === "comfortable"
+                          ? t("compactRows")
+                          : t("comfortableRows")}
                       </span>
                     </div>
 
@@ -1364,7 +1372,9 @@ export default function InspectSheets() {
                         type="button"
                         onClick={() => setShowRowNumbers((prev) => !prev)}
                         aria-label={
-                          showRowNumbers ? t("hideRowNumbers") : t("showRowNumbers")
+                          showRowNumbers
+                            ? t("hideRowNumbers")
+                            : t("showRowNumbers")
                         }
                         className="cursor-pointer rounded-md border p-2.5 text-sm inline-flex items-center justify-center"
                         style={{
@@ -1392,7 +1402,9 @@ export default function InspectSheets() {
                           whiteSpace: "nowrap",
                         }}
                       >
-                        {showRowNumbers ? t("hideRowNumbers") : t("showRowNumbers")}
+                        {showRowNumbers
+                          ? t("hideRowNumbers")
+                          : t("showRowNumbers")}
                       </span>
                     </div>
 
@@ -1472,9 +1484,7 @@ export default function InspectSheets() {
 
                 <div
                   className={`relative left-1/2 -translate-x-1/2 will-change-[width] transition-[width] duration-300 ease-out ${
-                    fullWidthPreview
-                      ? "w-[calc(100vw-2rem)]"
-                      : "w-full"
+                    fullWidthPreview ? "w-[calc(100vw-2rem)]" : "w-full"
                   }`}
                 >
                   <div
@@ -1497,165 +1507,169 @@ export default function InspectSheets() {
                       maxHeight: stickyHeader ? "65vh" : "none",
                     }}
                   >
-                  <table
-                    ref={tableElementRef}
-                    className="w-max min-w-full table-fixed text-left text-sm"
-                  >
-                    <colgroup>
-                      {showRowNumbers && <col style={{ width: "56px" }} />}
-                      {Array.from(
-                        { length: tableModel.totalColumns },
-                        (_, colIndex) => colIndex,
-                      ).map((colIndex) => (
-                        <col
-                          key={`col-${colIndex}`}
-                          style={{ width: `${getColumnWidth(colIndex)}px` }}
-                        />
-                      ))}
-                    </colgroup>
-                    <thead style={{ backgroundColor: "var(--surface-2)" }}>
-                      <tr>
-                        {showRowNumbers && (
-                          <th
-                            className={`${stickyHeader ? "sticky top-0 z-20" : ""} border-r px-2 py-2 text-center text-xs font-medium`}
-                            style={{
-                              color: "var(--muted)",
-                              borderColor: "var(--border)",
-                              backgroundColor: "var(--surface-2)",
-                            }}
-                          >
-                            #
-                          </th>
-                        )}
-                        {tableModel.totalColumns > 0 ? (
-                          tableModel.headers.map((header, headerIndex) => (
+                    <table
+                      ref={tableElementRef}
+                      className="w-max min-w-full table-fixed text-left text-sm"
+                    >
+                      <colgroup>
+                        {showRowNumbers && <col style={{ width: "56px" }} />}
+                        {Array.from(
+                          { length: tableModel.totalColumns },
+                          (_, colIndex) => colIndex,
+                        ).map((colIndex) => (
+                          <col
+                            key={`col-${colIndex}`}
+                            style={{ width: `${getColumnWidth(colIndex)}px` }}
+                          />
+                        ))}
+                      </colgroup>
+                      <thead style={{ backgroundColor: "var(--surface-2)" }}>
+                        <tr>
+                          {showRowNumbers && (
                             <th
-                              key={headerIndex}
-                              className={`${stickyHeader ? "sticky top-0 z-20" : ""} relative border-r px-3 py-3 align-middle font-medium whitespace-nowrap`}
+                              className={`${stickyHeader ? "sticky top-0 z-20" : ""} border-r px-2 py-2 text-center text-xs font-medium`}
                               style={{
                                 color: "var(--muted)",
                                 borderColor: "var(--border)",
-                                width: `${getColumnWidth(headerIndex)}px`,
-                                maxWidth: `${getColumnWidth(headerIndex)}px`,
                                 backgroundColor: "var(--surface-2)",
                               }}
                             >
-                              <button
-                                type="button"
-                                onClick={() => toggleSort(headerIndex)}
-                                className="block w-full cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-left"
-                                style={{ color: "inherit" }}
-                              >
-                                {header}
-                                {sortColumnIndex === headerIndex &&
-                                  (sortDirection === "asc" ? " ↑" : " ↓")}
-                              </button>
-                              <div
-                                role="separator"
-                                aria-label={`Resize column ${header}`}
-                                onPointerDown={(event) =>
-                                  startColumnResize(headerIndex, event)
-                                }
-                                onDoubleClick={(event) => {
-                                  event.preventDefault();
-                                  event.stopPropagation();
-                                  autofitColumnWidth(headerIndex, header);
-                                }}
-                                className="absolute right-0 top-0 h-full w-2 cursor-col-resize"
-                                style={{ touchAction: "none" }}
-                              />
+                              #
                             </th>
-                          ))
-                        ) : (
-                          <th
-                            className="px-3 py-2 font-medium"
-                            style={{ color: "var(--muted)" }}
-                          >
-                            {t("noHeaderDetected")}
-                          </th>
-                        )}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {tableModel.rows.length > 0 ? (
-                        tableModel.rows.map((row, rowIndex) => (
-                          <tr
-                            key={row.sourceIndex}
-                            className="border-t"
-                            style={{
-                              borderColor: "var(--border)",
-                              height: `${getRowHeight(rowIndex)}px`,
-                            }}
-                          >
-                            {showRowNumbers && (
-                              <td
-                                className={`relative border-r px-2 ${rowNumberPaddingClass} text-right text-xs`}
+                          )}
+                          {tableModel.totalColumns > 0 ? (
+                            tableModel.headers.map((header, headerIndex) => (
+                              <th
+                                key={headerIndex}
+                                className={`${stickyHeader ? "sticky top-0 z-20" : ""} relative border-r px-3 py-3 align-middle font-medium whitespace-nowrap`}
                                 style={{
+                                  color: "var(--muted)",
                                   borderColor: "var(--border)",
-                                  color: "var(--muted-2)",
+                                  width: `${getColumnWidth(headerIndex)}px`,
+                                  maxWidth: `${getColumnWidth(headerIndex)}px`,
                                   backgroundColor: "var(--surface-2)",
-                                  userSelect: "none",
                                 }}
                               >
-                                {hideEmptyRows
-                                  ? row.sourceIndex + 1
-                                  : rowIndex + 1}
+                                <button
+                                  type="button"
+                                  onClick={() => toggleSort(headerIndex)}
+                                  className="block w-full cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-left"
+                                  style={{ color: "inherit" }}
+                                >
+                                  {header}
+                                  {sortColumnIndex === headerIndex &&
+                                    (sortDirection === "asc" ? " ↑" : " ↓")}
+                                </button>
                                 <div
                                   role="separator"
-                                  aria-label={`Resize row ${rowIndex + 1}`}
+                                  aria-label={`Resize column ${header}`}
                                   onPointerDown={(event) =>
-                                    startRowResize(rowIndex, event)
+                                    startColumnResize(headerIndex, event)
                                   }
-                                  className="absolute bottom-0 left-0 h-2 w-full cursor-row-resize"
+                                  onDoubleClick={(event) => {
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                    autofitColumnWidth(headerIndex, header);
+                                  }}
+                                  className="absolute right-0 top-0 h-full w-2 cursor-col-resize"
                                   style={{ touchAction: "none" }}
                                 />
-                              </td>
-                            )}
-                            {Array.from(
-                              { length: tableModel.totalColumns },
-                              (_, colIndex) => colIndex,
-                            ).map((colIndex) => (
-                              <td
-                                key={colIndex}
-                                className={`border-r px-3 ${cellPaddingClass} align-middle overflow-hidden whitespace-nowrap`}
-                                style={{
-                                  borderColor: "var(--border)",
-                                  width: `${getColumnWidth(colIndex)}px`,
-                                  maxWidth: `${getColumnWidth(colIndex)}px`,
-                                  backgroundColor:
-                                    highlightEmptyCells &&
-                                    isEmptyCell(row.cells[colIndex])
-                                      ? "var(--primary-soft)"
-                                      : zebraRows && rowIndex % 2 === 1
-                                        ? "var(--surface-2)"
-                                        : "var(--surface)",
-                                }}
-                              >
-                                <span
-                                  className="block w-full overflow-hidden text-ellipsis whitespace-nowrap"
-                                  title={
-                                    formatCell(row.cells[colIndex]) || undefined
-                                  }
-                                >
-                                  {renderCell(row.cells[colIndex])}
-                                </span>
-                              </td>
-                            ))}
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td
-                            colSpan={tableModel.totalColumns + (showRowNumbers ? 1 : 0)}
-                            className="px-3 py-3 text-sm"
-                            style={{ color: "var(--muted-2)" }}
-                          >
-                            {t("noRowsMatch")}
-                          </td>
+                              </th>
+                            ))
+                          ) : (
+                            <th
+                              className="px-3 py-2 font-medium"
+                              style={{ color: "var(--muted)" }}
+                            >
+                              {t("noHeaderDetected")}
+                            </th>
+                          )}
                         </tr>
-                      )}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {tableModel.rows.length > 0 ? (
+                          tableModel.rows.map((row, rowIndex) => (
+                            <tr
+                              key={row.sourceIndex}
+                              className="border-t"
+                              style={{
+                                borderColor: "var(--border)",
+                                height: `${getRowHeight(rowIndex)}px`,
+                              }}
+                            >
+                              {showRowNumbers && (
+                                <td
+                                  className={`relative border-r px-2 ${rowNumberPaddingClass} text-right text-xs`}
+                                  style={{
+                                    borderColor: "var(--border)",
+                                    color: "var(--muted-2)",
+                                    backgroundColor: "var(--surface-2)",
+                                    userSelect: "none",
+                                  }}
+                                >
+                                  {hideEmptyRows
+                                    ? row.sourceIndex + 1
+                                    : rowIndex + 1}
+                                  <div
+                                    role="separator"
+                                    aria-label={`Resize row ${rowIndex + 1}`}
+                                    onPointerDown={(event) =>
+                                      startRowResize(rowIndex, event)
+                                    }
+                                    className="absolute bottom-0 left-0 h-2 w-full cursor-row-resize"
+                                    style={{ touchAction: "none" }}
+                                  />
+                                </td>
+                              )}
+                              {Array.from(
+                                { length: tableModel.totalColumns },
+                                (_, colIndex) => colIndex,
+                              ).map((colIndex) => (
+                                <td
+                                  key={colIndex}
+                                  className={`border-r px-3 ${cellPaddingClass} align-middle overflow-hidden whitespace-nowrap`}
+                                  style={{
+                                    borderColor: "var(--border)",
+                                    width: `${getColumnWidth(colIndex)}px`,
+                                    maxWidth: `${getColumnWidth(colIndex)}px`,
+                                    backgroundColor:
+                                      highlightEmptyCells &&
+                                      isEmptyCell(row.cells[colIndex])
+                                        ? "var(--primary-soft)"
+                                        : zebraRows && rowIndex % 2 === 1
+                                          ? "var(--surface-2)"
+                                          : "var(--surface)",
+                                  }}
+                                >
+                                  <span
+                                    className="block w-full overflow-hidden text-ellipsis whitespace-nowrap"
+                                    title={
+                                      formatCell(row.cells[colIndex]) ||
+                                      undefined
+                                    }
+                                  >
+                                    {renderCell(row.cells[colIndex])}
+                                  </span>
+                                </td>
+                              ))}
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td
+                              colSpan={
+                                tableModel.totalColumns +
+                                (showRowNumbers ? 1 : 0)
+                              }
+                              className="px-3 py-3 text-sm"
+                              style={{ color: "var(--muted-2)" }}
+                            >
+                              {t("noRowsMatch")}
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
 

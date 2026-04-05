@@ -6,6 +6,8 @@ import { Link } from "@/i18n/navigation";
 import InspectSheets from "@/app/[locale]/tools/[slug]/inspect/InspectSheets";
 import ConvertXlsxToCsv from "./convert/ConvertXlsxToCsv";
 import ConvertCsvToXlsx from "./convert/ConvertCsvToXlsx";
+import ConvertXlsxToJson from "./convert/ConvertXlsxToJson";
+import ConvertJsonToXlsx from "./convert/ConvertJsonToXlsx";
 import MergeSheets from "./merge/MergeSheets";
 import SplitSheet from "./split/SplitSheet";
 import AppendWorkbooks from "./merge/AppendWorkbooks";
@@ -19,6 +21,8 @@ const specialComponents: Record<string, React.ReactNode> = {
   "inspect-sheets": <InspectSheets />,
   "xlsx-to-csv": <ConvertXlsxToCsv />,
   "csv-to-xlsx": <ConvertCsvToXlsx />,
+  "xlsx-to-json": <ConvertXlsxToJson />,
+  "json-to-xlsx": <ConvertJsonToXlsx />,
   "merge-sheets": <MergeSheets />,
   "append-workbooks": <AppendWorkbooks />,
   "split-sheet": <SplitSheet />,
