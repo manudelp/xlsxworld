@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from datetime import date, datetime, time
 
 from fastapi import APIRouter, File, HTTPException, Query, UploadFile
 
@@ -24,25 +25,46 @@ def _safe_identifier(raw: str) -> str:
     return name.lower()
 
 
-def _infer_sql_type(values: list) -> str:
-    for v in values:
-        if v is None or (isinstance(v, str) and not v.strip()):
-            continue
-        if isinstance(v, bool):
-            return "BOOLEAN"
-        if isinstance(v, int):
-            return "INTEGER"
-        if isinstance(v, float):
-            return "REAL"
-        return "TEXT"
+_SQL_TYPE_RANK = {"BOOLEAN": 0, "INTEGER": 1, "REAL": 2, "DATE": 3, "TEXT": 4}
+
+
+def _cell_sql_type(v) -> str | None:
+    if v is None or (isinstance(v, str) and not v.strip()):
+        return None
+    if isinstance(v, bool):
+        return "BOOLEAN"
+    if isinstance(v, int):
+        return "INTEGER"
+    if isinstance(v, float):
+        return "REAL" if v != int(v) else "INTEGER"
+    if isinstance(v, (datetime, date, time)):
+        return "DATE"
     return "TEXT"
 
 
-def _escape_sql_value(value) -> str:
+def _infer_sql_type(values: list) -> str:
+    best = -1
+    for v in values:
+        t = _cell_sql_type(v)
+        if t is None:
+            continue
+        rank = _SQL_TYPE_RANK[t]
+        if rank == 4:
+            return "TEXT"
+        if rank > best:
+            best = rank
+    return {0: "BOOLEAN", 1: "INTEGER", 2: "REAL", 3: "DATE"}.get(best, "TEXT")
+
+
+def _escape_sql_value(value, sql_type: str) -> str:
     if value is None:
         return "NULL"
     if isinstance(value, bool):
         return "TRUE" if value else "FALSE"
+    if isinstance(value, (datetime, date, time)):
+        return "'" + str(value) + "'"
+    if isinstance(value, float) and sql_type == "INTEGER" and value == int(value):
+        return str(int(value))
     if isinstance(value, (int, float)):
         return str(value)
     return "'" + str(value).replace("'", "''") + "'"
@@ -72,7 +94,7 @@ def _sheet_to_sql(table_name: str, rows: list[list]) -> str:
     lines.append(f"CREATE TABLE {table_name} ({col_defs});\n")
 
     for row in data_rows:
-        vals = [_escape_sql_value(row[i] if i < len(row) else None) for i in range(len(unique_headers))]
+        vals = [_escape_sql_value(row[i] if i < len(row) else None, types[i]) for i in range(len(unique_headers))]
         lines.append(f"INSERT INTO {table_name} ({', '.join(unique_headers)}) VALUES ({', '.join(vals)});")
 
     return "\n".join(lines) + "\n"
