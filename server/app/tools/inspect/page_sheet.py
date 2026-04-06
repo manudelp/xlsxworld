@@ -1,7 +1,9 @@
 from __future__ import annotations
+
+from typing import Any, List
+
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
-from typing import List, Any
 
 from app.tools.inspect._store import load_workbook, get_sheet_total_rows
 
@@ -30,12 +32,12 @@ async def page_sheet(
     offset: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=2000),
 ):
-    workbook_data = load_workbook(token)
+    workbook_data = await load_workbook(token)
     if sheet not in workbook_data:
         raise HTTPException(status_code=404, detail="Sheet not found")
     rows = workbook_data[sheet]
 
-    sheet_total = get_sheet_total_rows(token, sheet)
+    sheet_total = await get_sheet_total_rows(token, sheet)
     total_rows = sheet_total if sheet_total is not None else 0
     known_data_rows = sheet_total - 1 if sheet_total is not None and sheet_total > 0 else None
 

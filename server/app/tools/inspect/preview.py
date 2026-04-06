@@ -1,11 +1,13 @@
 from __future__ import annotations
-from fastapi import APIRouter, UploadFile, File, HTTPException, Query
-from pydantic import BaseModel
-from typing import List, Any, Dict
+
 import secrets
+from typing import Any, Dict, List
+
+from fastapi import APIRouter, File, Query, UploadFile
+from pydantic import BaseModel
 
 from app.services.excel_reader import ensure_supported_excel_filename, parse_excel_bytes
-from app.tools._common import MAX_UPLOAD_SIZE_BYTES
+from app.tools._common import read_with_limit
 from app.tools.inspect._store import store_workbook
 
 router = APIRouter()
@@ -35,13 +37,7 @@ async def preview_workbook(
     sample_rows: int = Query(25, ge=1, le=500),
 ):
     ensure_supported_excel_filename(file.filename)
-    raw = await file.read()
-
-    if len(raw) > MAX_UPLOAD_SIZE_BYTES:
-        raise HTTPException(
-            status_code=400,
-            detail=f"File too large (max {MAX_UPLOAD_SIZE_BYTES // 1024 // 1024}MB)",
-        )
+    raw = await read_with_limit(file)
 
     workbook_data = parse_excel_bytes(raw, file.filename)
     token = secrets.token_urlsafe(16)
@@ -63,5 +59,5 @@ async def preview_workbook(
             )
         )
 
-    store_workbook(token, workbook_data, sheet_totals)
+    await store_workbook(token, workbook_data, sheet_totals)
     return WorkbookPreview(token=token, sheets=sheets, sheet_count=len(sheets))
