@@ -45,6 +45,19 @@ def ensure_supported_excel_filename(filename: str | None):
         raise HTTPException(status_code=400, detail=f"Unsupported file type, expected one of: {expected}")
 
 
+_ZIP_MAGIC = b"PK\x03\x04"
+_OLE_MAGIC = b"\xd0\xcf\x11\xe0"
+
+
+def _validate_magic_bytes(raw: bytes, extension: str):
+    if extension in _OPENPYXL_EXTENSIONS | _PYXLSB_EXTENSIONS:
+        if not raw[:4].startswith(_ZIP_MAGIC):
+            raise HTTPException(status_code=400, detail="File content does not match expected format")
+    elif extension in _XLRD_EXTENSIONS:
+        if not raw[:4].startswith(_OLE_MAGIC):
+            raise HTTPException(status_code=400, detail="File content does not match expected format")
+
+
 def _read_openpyxl_values(raw: bytes) -> dict[str, list[list[Any]]]:
     workbook = load_workbook(
         filename=BytesIO(raw),
@@ -119,6 +132,7 @@ def _sanitize_openxml_for_data_read(raw: bytes) -> bytes:
 def parse_excel_bytes(raw: bytes, filename: str | None) -> dict[str, list[list[Any]]]:
     extension = _extract_extension(filename)
     ensure_supported_excel_filename(filename)
+    _validate_magic_bytes(raw, extension)
 
     try:
         if extension in _OPENPYXL_EXTENSIONS:
