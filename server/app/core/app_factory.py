@@ -13,6 +13,7 @@ from app.tools import tool_routers
 from app.core.openapi_custom import attach_custom_openapi
 from app.core.rate_limit import limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 
 try:
     from dotenv import load_dotenv  # type: ignore
@@ -26,6 +27,7 @@ def create_app() -> FastAPI:
     app.state.analytics_service = AnalyticsService()
 
     app.state.limiter = limiter
+    app.add_middleware(SlowAPIMiddleware)
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
     app.add_exception_handler(AuthServiceError, _auth_service_exception_handler)
 
