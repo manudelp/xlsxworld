@@ -23,41 +23,34 @@ function backendUrl(path: string): string {
   return `${BACKEND_BASE.replace(/\/$/, "")}${path}`;
 }
 
-function cookieOptions(maxAge: number) {
+function cookieBase() {
   return {
     httpOnly: true,
     sameSite: "lax" as const,
     secure: IS_PRODUCTION,
     path: "/",
-    maxAge,
   };
 }
 
 export function setSessionCookies(
   response: NextResponse,
   session: BackendSession,
+  remember = true,
 ): void {
-  response.cookies.set(
-    AUTH_ACCESS_COOKIE,
-    session.access_token,
-    cookieOptions(session.expires_in ?? ACCESS_MAX_AGE_SECONDS),
-  );
-  response.cookies.set(
-    AUTH_REFRESH_COOKIE,
-    session.refresh_token,
-    cookieOptions(REFRESH_MAX_AGE_SECONDS),
-  );
+  const accessAge = session.expires_in ?? ACCESS_MAX_AGE_SECONDS;
+  response.cookies.set(AUTH_ACCESS_COOKIE, session.access_token, {
+    ...cookieBase(),
+    ...(remember ? { maxAge: accessAge } : {}),
+  });
+  response.cookies.set(AUTH_REFRESH_COOKIE, session.refresh_token, {
+    ...cookieBase(),
+    ...(remember ? { maxAge: REFRESH_MAX_AGE_SECONDS } : {}),
+  });
 }
 
 export function clearSessionCookies(response: NextResponse): void {
-  response.cookies.set(AUTH_ACCESS_COOKIE, "", {
-    ...cookieOptions(0),
-    maxAge: 0,
-  });
-  response.cookies.set(AUTH_REFRESH_COOKIE, "", {
-    ...cookieOptions(0),
-    maxAge: 0,
-  });
+  response.cookies.set(AUTH_ACCESS_COOKIE, "", { ...cookieBase(), maxAge: 0 });
+  response.cookies.set(AUTH_REFRESH_COOKIE, "", { ...cookieBase(), maxAge: 0 });
 }
 
 export function getSessionTokens(request: Request): {
@@ -93,9 +86,12 @@ async function readErrorDetail(response: Response): Promise<string> {
   }
 }
 
-export function buildSessionResponse(session: BackendSession): NextResponse {
+export function buildSessionResponse(
+  session: BackendSession,
+  remember = true,
+): NextResponse {
   const response = NextResponse.json({ user: session.user });
-  setSessionCookies(response, session);
+  setSessionCookies(response, session, remember);
   return response;
 }
 

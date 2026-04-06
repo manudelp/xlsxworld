@@ -19,6 +19,7 @@ export interface AuthSessionResponse {
 export interface AuthLoginInput {
   email: string;
   password: string;
+  remember?: boolean;
 }
 
 export interface AuthSignupInput extends AuthLoginInput {
