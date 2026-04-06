@@ -53,3 +53,30 @@ class AuthSessionResponse(BaseModel):
 
 class AuthLogoutResponse(BaseModel):
     detail: str = "Signed out"
+
+
+class AuthForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+class AuthResetPasswordRequest(BaseModel):
+    access_token: str = Field(min_length=1)
+    new_password: str = Field(min_length=8, max_length=256)
+
+
+class AuthGoogleRequest(BaseModel):
+    id_token: str | None = None
+    access_token: str | None = None
+
+
+class AuthVerifyRecoveryRequest(BaseModel):
+    token_hash: str = Field(min_length=1)
+    type: str = Field(default="recovery")
+
+
+class AuthVerifyRecoveryResponse(BaseModel):
+    access_token: str
+
+
+class AuthMessageResponse(BaseModel):
+    detail: str

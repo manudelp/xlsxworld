@@ -1,14 +1,21 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 
+from app.core.rate_limit import limiter
 from app.core.security import AuthenticatedPrincipal, get_bearer_token, get_current_user
 from app.schemas.auth import (
+    AuthForgotPasswordRequest,
+    AuthGoogleRequest,
     AuthLoginRequest,
     AuthLogoutResponse,
+    AuthMessageResponse,
     AuthProfileResponse,
     AuthRefreshRequest,
+    AuthResetPasswordRequest,
     AuthSessionResponse,
     AuthSignupRequest,
     AuthUpdateProfileRequest,
+    AuthVerifyRecoveryRequest,
+    AuthVerifyRecoveryResponse,
 )
 from app.services.auth_service import AuthService, get_auth_service
 
@@ -37,6 +44,44 @@ async def logout(
     auth_service: AuthService = Depends(get_auth_service),
 ) -> AuthLogoutResponse:
     return await auth_service.logout(token)
+
+
+@router.post("/forgot-password", response_model=AuthMessageResponse)
+@limiter.limit("5/minute")
+async def forgot_password(
+    request: Request,
+    body: AuthForgotPasswordRequest,
+    auth_service: AuthService = Depends(get_auth_service),
+) -> AuthMessageResponse:
+    return await auth_service.forgot_password(body)
+
+
+@router.post("/reset-password", response_model=AuthMessageResponse)
+@limiter.limit("5/minute")
+async def reset_password(
+    request: Request,
+    body: AuthResetPasswordRequest,
+    auth_service: AuthService = Depends(get_auth_service),
+) -> AuthMessageResponse:
+    return await auth_service.reset_password(body)
+
+
+@router.post("/google", response_model=AuthSessionResponse)
+async def google_login(
+    body: AuthGoogleRequest,
+    auth_service: AuthService = Depends(get_auth_service),
+) -> AuthSessionResponse:
+    return await auth_service.google_login(body)
+
+
+@router.post("/verify-recovery", response_model=AuthVerifyRecoveryResponse)
+@limiter.limit("10/minute")
+async def verify_recovery(
+    request: Request,
+    body: AuthVerifyRecoveryRequest,
+    auth_service: AuthService = Depends(get_auth_service),
+) -> AuthVerifyRecoveryResponse:
+    return await auth_service.verify_recovery(body)
 
 
 @router.get("/me", response_model=AuthProfileResponse)

@@ -14,13 +14,19 @@ from app.core.config import Settings, get_settings
 from app.db.models.users import AppUser, UserRole, UserStatus
 from app.db.session import get_db_session
 from app.schemas.auth import (
+    AuthForgotPasswordRequest,
+    AuthGoogleRequest,
     AuthLoginRequest,
     AuthLogoutResponse,
+    AuthMessageResponse,
     AuthProfileResponse,
     AuthRefreshRequest,
+    AuthResetPasswordRequest,
     AuthSessionResponse,
     AuthSignupRequest,
     AuthUpdateProfileRequest,
+    AuthVerifyRecoveryRequest,
+    AuthVerifyRecoveryResponse,
 )
 
 
@@ -156,6 +162,47 @@ class SupabaseAuthClient:
     async def sign_out(self, access_token: str) -> None:
         await self._request("POST", "/logout", params={"scope": "local"}, auth_token=access_token)
 
+    async def reset_password_for_email(self, email: str, redirect_to: str | None = None) -> None:
+        payload: dict[str, Any] = {"email": email}
+        params: dict[str, Any] = {}
+        if redirect_to:
+            params["redirect_to"] = redirect_to
+        await self._request("POST", "/recover", json_body=payload, params=params or None)
+
+    async def update_user_password(self, access_token: str, new_password: str) -> None:
+        await self._request(
+            "PUT",
+            "/user",
+            json_body={"password": new_password},
+            auth_token=access_token,
+        )
+
+    async def sign_in_with_id_token(self, provider: str, id_token: str | None = None, access_token: str | None = None) -> _SupabaseSession:
+        payload: dict[str, Any] = {"provider": provider}
+        if id_token:
+            payload["id_token"] = id_token
+        if access_token:
+            payload["access_token"] = access_token
+        data = await self._request(
+            "POST",
+            "/token",
+            params={"grant_type": "id_token"},
+            json_body=payload,
+        )
+        if not isinstance(data, dict):
+            raise AuthServiceError("Supabase auth id_token login returned an unexpected response", status_code=502)
+        return _SupabaseSession.model_validate(data)
+
+    async def verify_otp(self, token_hash: str, otp_type: str) -> _SupabaseSession:
+        data = await self._request(
+            "POST",
+            "/verify",
+            json_body={"token_hash": token_hash, "type": otp_type},
+        )
+        if not isinstance(data, dict):
+            raise AuthServiceError("Supabase OTP verification returned an unexpected response", status_code=502)
+        return _SupabaseSession.model_validate(data)
+
 
 class AuthService:
     def __init__(self, db: AsyncSession, settings: Settings | None = None) -> None:
@@ -187,8 +234,8 @@ class AuthService:
         insert_stmt = insert(AppUser).values(**profile_values)
         update_values: dict[str, Any] = {
             "email": insert_stmt.excluded.email,
-            "display_name": func.coalesce(insert_stmt.excluded.display_name, AppUser.display_name),
-            "avatar_url": func.coalesce(insert_stmt.excluded.avatar_url, AppUser.avatar_url),
+            "display_name": func.coalesce(AppUser.display_name, insert_stmt.excluded.display_name),
+            "avatar_url": func.coalesce(AppUser.avatar_url, insert_stmt.excluded.avatar_url),
             "status": UserStatus.ACTIVE,
         }
         if touch_last_seen:
@@ -257,6 +304,44 @@ class AuthService:
         await self.auth_client.sign_out(access_token)
         return AuthLogoutResponse()
 
+    async def forgot_password(self, body: AuthForgotPasswordRequest, redirect_to: str | None = None) -> AuthMessageResponse:
+        try:
+            await self.auth_client.reset_password_for_email(body.email, redirect_to=redirect_to)
+        except AuthServiceError:
+            pass  # Always return success to prevent email enumeration
+        return AuthMessageResponse(detail="If an account exists with that email, a reset link has been sent.")
+
+    async def reset_password(self, body: AuthResetPasswordRequest) -> AuthMessageResponse:
+        await self.auth_client.update_user_password(body.access_token, body.new_password)
+        return AuthMessageResponse(detail="Password updated successfully.")
+
+    async def google_login(self, body: AuthGoogleRequest) -> AuthSessionResponse:
+        session = await self.auth_client.sign_in_with_id_token(
+            provider="google",
+            id_token=body.id_token,
+            access_token=body.access_token,
+        )
+        display_name = session.user.user_metadata.get("full_name") or session.user.user_metadata.get("name")
+        avatar_url = session.user.user_metadata.get("avatar_url") or session.user.user_metadata.get("picture")
+        profile = await self._ensure_profile(
+            user_id=UUID(session.user.id),
+            email=session.user.email,
+            display_name=display_name,
+            avatar_url=avatar_url,
+            touch_last_seen=True,
+        )
+        return AuthSessionResponse(
+            access_token=session.access_token,
+            refresh_token=session.refresh_token,
+            token_type=session.token_type,
+            expires_in=session.expires_in,
+            user=profile,
+        )
+
+    async def verify_recovery(self, body: AuthVerifyRecoveryRequest) -> AuthVerifyRecoveryResponse:
+        session = await self.auth_client.verify_otp(body.token_hash, body.type)
+        return AuthVerifyRecoveryResponse(access_token=session.access_token)
+
     async def me(self, user_id: UUID, email: str, display_name: str | None = None) -> AuthProfileResponse:
         return await self._ensure_profile(user_id=user_id, email=email, display_name=display_name)
 
@@ -270,34 +355,18 @@ class AuthService:
         if display_name == "":
             display_name = None
 
-        profile_values: dict[str, Any] = {
-            "id": user_id,
-            "email": email,
-            "display_name": display_name,
-            "avatar_url": None,
-            "role": UserRole.MEMBER,
-            "status": UserStatus.ACTIVE,
-            "metadata_json": {},
-            "updated_at": func.now(),
-        }
-
-        insert_stmt = insert(AppUser).values(**profile_values)
-        update_values: dict[str, Any] = {
-            "email": insert_stmt.excluded.email,
-            "display_name": insert_stmt.excluded.display_name,
-            "avatar_url": insert_stmt.excluded.avatar_url,
-            "status": UserStatus.ACTIVE,
-            "updated_at": func.now(),
-        }
-
-        upsert_stmt = insert_stmt.on_conflict_do_update(index_elements=[AppUser.id], set_=update_values)
-        await self.db.execute(upsert_stmt)
-        await self.db.commit()
-
         result = await self.db.execute(select(AppUser).where(AppUser.id == user_id))
         user = result.scalar_one_or_none()
+
         if user is None:
             raise AuthServiceError("Unable to load the authenticated user profile", status_code=500)
+
+        user.display_name = display_name
+        user.email = email
+        user.updated_at = func.now()  # type: ignore[assignment]
+        await self.db.commit()
+        await self.db.refresh(user)
+
         return AuthProfileResponse.model_validate(user)
 
 
