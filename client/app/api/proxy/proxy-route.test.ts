@@ -109,12 +109,17 @@ describe("proxy route", () => {
       }),
     );
 
-    const request = new NextRequest("http://localhost:3000/api/proxy/test", {
-      method: "GET",
-    });
+    const request = new NextRequest(
+      "http://localhost:3000/api/proxy/api/v1/tools/inspect/preview",
+      {
+        method: "GET",
+      },
+    );
 
     const response = await GET(request, {
-      params: Promise.resolve({ path: ["test"] }),
+      params: Promise.resolve({
+        path: ["api", "v1", "tools", "inspect", "preview"],
+      }),
     });
 
     expect(response.status).toBe(200);
@@ -143,14 +148,16 @@ describe("proxy route", () => {
     );
 
     const request = new NextRequest(
-      "http://localhost:3000/api/proxy/inspect/preview",
+      "http://localhost:3000/api/proxy/api/v1/tools/inspect/preview",
       {
         method: "GET",
       },
     );
 
     const response = await GET(request, {
-      params: Promise.resolve({ path: ["inspect", "preview"] }),
+      params: Promise.resolve({
+        path: ["api", "v1", "tools", "inspect", "preview"],
+      }),
     });
 
     expect(response.status).toBe(200);
