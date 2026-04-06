@@ -78,6 +78,18 @@ export default async function ToolPage({
   const td = await getTranslations({ locale, namespace: `toolData.${slug}` });
 
   const seo = TOOL_SEO[slug];
+  const hasSeoKeys = seo && td.has("seoHowItWorks1");
+
+  const howSteps = hasSeoKeys
+    ? [td("seoHowItWorks1"), td("seoHowItWorks2"), td("seoHowItWorks3")]
+    : [];
+  const faqItems = hasSeoKeys
+    ? [
+        { q: td("seoFaq1Q"), a: td("seoFaq1A") },
+        { q: td("seoFaq2Q"), a: td("seoFaq2A") },
+        { q: td("seoFaq3Q"), a: td("seoFaq3A") },
+      ]
+    : [];
 
   const softwareJsonLd = seo
     ? {
@@ -92,12 +104,12 @@ export default async function ToolPage({
       }
     : null;
 
-  const howToJsonLd = seo
+  const howToJsonLd = hasSeoKeys
     ? {
         "@context": "https://schema.org",
         "@type": "HowTo",
-        name: `How to use ${td("heading")}`,
-        step: seo.howItWorks.map((text, i) => ({
+        name: `${td("seoHowItWorksTitle")} — ${td("heading")}`,
+        step: howSteps.map((text, i) => ({
           "@type": "HowToStep",
           position: i + 1,
           text,
@@ -105,11 +117,11 @@ export default async function ToolPage({
       }
     : null;
 
-  const faqJsonLd = seo
+  const faqJsonLd = hasSeoKeys
     ? {
         "@context": "https://schema.org",
         "@type": "FAQPage",
-        mainEntity: seo.faq.map((item) => ({
+        mainEntity: faqItems.map((item) => ({
           "@type": "Question",
           name: item.q,
           acceptedAnswer: { "@type": "Answer", text: item.a },
@@ -172,37 +184,43 @@ export default async function ToolPage({
           </div>
         </div>
 
-        {seo && (
+        {hasSeoKeys && (
           <div
             className="border-t mt-12 pt-10 space-y-10"
             style={{ borderTopColor: "var(--border)" }}
           >
             <section>
-              <h2 className="text-xl font-semibold mb-4">How it works</h2>
+              <h2 className="text-xl font-semibold mb-4">
+                {td("seoHowItWorksTitle")}
+              </h2>
               <ol
                 className="list-decimal list-inside space-y-2 text-[15px]"
                 style={{ color: "var(--muted)" }}
               >
-                {seo.howItWorks.map((step, i) => (
+                {howSteps.map((step, i) => (
                   <li key={i}>{step}</li>
                 ))}
               </ol>
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold mb-3">Why use this tool</h2>
+              <h2 className="text-xl font-semibold mb-3">
+                {td("seoWhyUseTitle")}
+              </h2>
               <p
                 className="text-[15px] max-w-3xl"
                 style={{ color: "var(--muted)" }}
               >
-                {seo.whyUse}
+                {td("seoWhyUse")}
               </p>
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold mb-4">FAQ</h2>
+              <h2 className="text-xl font-semibold mb-4">
+                {td("seoFaqTitle")}
+              </h2>
               <div className="space-y-4">
-                {seo.faq.map((item, i) => (
+                {faqItems.map((item, i) => (
                   <details
                     key={i}
                     className="group rounded-xl border p-3 sm:p-5 [&_summary::-webkit-details-marker]:hidden"
