@@ -71,12 +71,6 @@ export default function Footer() {
           <Link href="/faq" className="hover:underline">
             {t("faq")}
           </Link>
-          <a
-            href="https://link.clashroyale.com/invite/clan/es/?platform=android&tag=RUPQ8RQR&token=x8e92r9f"
-            className="hover:underline"
-          >
-            {t("gameDesk")}
-          </a>
           <Link href="/contact" className="hover:underline">
             {t("contact")}
           </Link>

@@ -9,19 +9,22 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import { BASE_URL, buildAlternates } from "@/lib/seo";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
 export const metadata: Metadata = {
-  title: "XLSX World | Excel files made easy",
+  title: {
+    default: "XLSX World | Excel files made easy",
+    template: "%s | XLSX World",
+  },
   description:
-    "Easily manipulate and edit Excel files with XLSX World. Our intuitive platform allows you to import, export, and transform spreadsheets with powerful tools designed for both beginners and professionals. Streamline your workflow, automate repetitive tasks, and unlock advanced features to make working with Excel files faster and more efficient.",
+    "Free online Excel tools — convert, merge, split, clean, and inspect XLSX files instantly. No signup, no installation required.",
   applicationName: "XLSX World",
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL || "https://xlsx.world",
-  ),
+  metadataBase: new URL(BASE_URL),
+  alternates: buildAlternates(""),
   keywords: [
     "excel",
     "xlsx",
@@ -35,11 +38,17 @@ export const metadata: Metadata = {
   openGraph: {
     title: "XLSX World | Excel files made easy",
     description:
-      "Manipulate, convert, inspect and process Excel (XLSX) files easily online with powerful, fast tools.",
-    url: "https://xlsx.world/",
+      "Free online tools to convert, merge, split, clean, and inspect Excel files. No signup required.",
+    url: `${BASE_URL}/`,
     siteName: "XLSX World",
     locale: "en_US",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "XLSX World | Excel files made easy",
+    description:
+      "Free online tools to convert, merge, split, clean, and inspect Excel files.",
   },
   icons: {
     icon: [
@@ -78,6 +87,18 @@ export default async function LocaleLayout({
   setRequestLocale(locale);
   const messages = await getMessages();
 
+  const websiteJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "XLSX World",
+    url: BASE_URL,
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${BASE_URL}/tools/{search_term_string}`,
+      "query-input": "required name=search_term_string",
+    },
+  };
+
   return (
     <html lang={locale} suppressHydrationWarning>
       <head>
@@ -85,6 +106,10 @@ export default async function LocaleLayout({
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var t=localStorage.getItem("xlsxworld-theme");var d=t==="dark"||(!t||t==="system")&&matchMedia("(prefers-color-scheme:dark)").matches;if(d)document.documentElement.classList.add("dark")}catch(e){}})()`,
           }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
         />
       </head>
       <body>

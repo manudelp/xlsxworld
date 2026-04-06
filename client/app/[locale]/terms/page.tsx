@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { useTranslations } from "next-intl";
+import { buildAlternates } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -10,7 +11,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "terms" });
-  return { title: t("metaTitle"), description: t("metaDescription") };
+  return {
+    title: "Terms of Service",
+    description: t("metaDescription"),
+    alternates: buildAlternates("/terms"),
+  };
 }
 
 const LAST_UPDATED = "April 5, 2025";

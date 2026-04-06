@@ -53,7 +53,7 @@ export default function Header() {
           XLSX
           <Image
             src="/icon.svg"
-            alt="World Icon"
+            alt="XLSX World"
             width={32}
             height={32}
             style={{ display: "inline", verticalAlign: "middle" }}

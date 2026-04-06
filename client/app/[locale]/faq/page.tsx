@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { useTranslations } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import { buildAlternates } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -11,8 +12,9 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "faq" });
   return {
-    title: t("metaTitle"),
+    title: "Frequently Asked Questions",
     description: t("metaDescription"),
+    alternates: buildAlternates("/faq"),
   };
 }
 
