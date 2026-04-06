@@ -1,11 +1,19 @@
 from __future__ import annotations
-from fastapi import APIRouter, UploadFile, File, HTTPException
-from fastapi.responses import StreamingResponse
+
 from io import BytesIO
+
+from fastapi import APIRouter, File, HTTPException, UploadFile
 from openpyxl import Workbook
 
 from app.services.excel_reader import parse_excel_bytes
-from app.tools._common import MAX_UPLOAD_SIZE_BYTES, check_excel_file, safe_sheet_title, unique_sheet_title, _INVALID_SHEET_CHARS
+from app.tools._common import (
+    _INVALID_SHEET_CHARS,
+    check_excel_file,
+    file_response,
+    read_with_limit,
+    safe_sheet_title,
+    unique_sheet_title,
+)
 
 router = APIRouter()
 
@@ -32,9 +40,7 @@ async def append_workbooks(
         source_name = _INVALID_SHEET_CHARS.sub("_", source_name)
 
         check_excel_file(file)
-        raw = await file.read()
-        if len(raw) > MAX_UPLOAD_SIZE_BYTES:
-            raise HTTPException(status_code=400, detail="One of the files is too large")
+        raw = await read_with_limit(file)
 
         workbook_data = parse_excel_bytes(raw, file.filename)
         for sheet_name, rows in workbook_data.items():
@@ -56,13 +62,9 @@ async def append_workbooks(
 
     output = BytesIO()
     out_wb.save(output)
-    output.seek(0)
 
-    return StreamingResponse(
-        iter([output.getvalue()]),
-        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={
-            "Content-Disposition": "attachment; filename=appended.xlsx",
-            "Content-Encoding": "identity",
-        },
+    return file_response(
+        output.getvalue(),
+        "appended.xlsx",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )

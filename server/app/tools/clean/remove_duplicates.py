@@ -3,10 +3,9 @@ from __future__ import annotations
 from typing import Any
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
-from fastapi.responses import StreamingResponse
 
 from app.services.excel_reader import parse_excel_bytes
-from app.tools._common import MAX_UPLOAD_SIZE_BYTES, check_excel_file
+from app.tools._common import check_excel_file, file_response, read_with_limit
 from app.tools.clean._utils import (
     get_cell,
     parse_columns_arg,
@@ -31,9 +30,7 @@ async def remove_duplicates(
     keep: str = Form("first", description="Duplicate retention strategy: first or last"),
 ):
     check_excel_file(file)
-    raw = await file.read()
-    if len(raw) > MAX_UPLOAD_SIZE_BYTES:
-        raise HTTPException(status_code=400, detail="File too large")
+    raw = await read_with_limit(file)
 
     if keep not in {"first", "last"}:
         raise HTTPException(status_code=400, detail="keep must be either 'first' or 'last'")
@@ -81,11 +78,8 @@ async def remove_duplicates(
 
     output_bytes = workbook_bytes_from_data(workbook_data)
 
-    return StreamingResponse(
-        iter([output_bytes]),
-        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={
-            "Content-Disposition": "attachment; filename=remove-duplicates.xlsx",
-            "Content-Encoding": "identity",
-        },
+    return file_response(
+        output_bytes,
+        "remove-duplicates.xlsx",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )

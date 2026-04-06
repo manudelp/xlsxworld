@@ -3,10 +3,9 @@ from __future__ import annotations
 import re
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
-from fastapi.responses import StreamingResponse
 
 from app.services.excel_reader import parse_excel_bytes
-from app.tools._common import MAX_UPLOAD_SIZE_BYTES, check_excel_file
+from app.tools._common import check_excel_file, file_response, read_with_limit
 from app.tools.clean._utils import (
     get_cell,
     parse_columns_arg,
@@ -22,7 +21,6 @@ _VALID_MODES = {"lower", "upper", "title"}
 
 
 def _title_case(value: str) -> str:
-    # Keep punctuation and spacing while normalizing each word token.
     return re.sub(r"[A-Za-z0-9]+", lambda m: m.group(0)[:1].upper() + m.group(0)[1:].lower(), value)
 
 
@@ -39,9 +37,7 @@ async def normalize_case(
     columns: str = Form("", description="Comma-separated column names (empty=all columns)"),
 ):
     check_excel_file(file)
-    raw = await file.read()
-    if len(raw) > MAX_UPLOAD_SIZE_BYTES:
-        raise HTTPException(status_code=400, detail="File too large")
+    raw = await read_with_limit(file)
 
     if mode not in _VALID_MODES:
         raise HTTPException(status_code=400, detail="mode must be one of: lower, upper, title")
@@ -81,11 +77,8 @@ async def normalize_case(
 
     output_bytes = workbook_bytes_from_data(workbook_data)
 
-    return StreamingResponse(
-        iter([output_bytes]),
-        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={
-            "Content-Disposition": "attachment; filename=normalize-case.xlsx",
-            "Content-Encoding": "identity",
-        },
+    return file_response(
+        output_bytes,
+        "normalize-case.xlsx",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )

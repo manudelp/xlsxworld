@@ -4,10 +4,15 @@ import re
 from io import BytesIO
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
-from fastapi.responses import StreamingResponse
 from openpyxl import Workbook
 
-from app.tools._common import MAX_UPLOAD_SIZE_BYTES, safe_sheet_title, unique_sheet_title
+from app.tools._common import (
+    file_response,
+    read_with_limit,
+    safe_base_filename,
+    safe_sheet_title,
+    unique_sheet_title,
+)
 
 router = APIRouter()
 
@@ -59,14 +64,6 @@ def _split_values(values_str: str) -> list[str]:
     return parts
 
 
-def _safe_base_filename(filename: str | None, fallback: str) -> str:
-    if not filename:
-        return fallback
-    base = filename.rsplit(".", 1)[0] if "." in filename else filename
-    safe = re.sub(r"[^A-Za-z0-9._-]+", "-", base).strip("-._")
-    return safe or fallback
-
-
 @router.post(
     "/sql-to-xlsx",
     summary="SQL to XLSX",
@@ -81,9 +78,7 @@ async def sql_to_xlsx(
     if not filename.endswith(".sql") and content_type not in _SQL_CONTENT_TYPES:
         raise HTTPException(status_code=400, detail="Unsupported file type, expected SQL")
 
-    raw = await file.read()
-    if len(raw) > MAX_UPLOAD_SIZE_BYTES:
-        raise HTTPException(status_code=400, detail="File too large")
+    raw = await read_with_limit(file)
 
     try:
         text = raw.decode("utf-8-sig")
@@ -120,20 +115,12 @@ async def sql_to_xlsx(
             ws.append(padded)
 
     output = BytesIO()
-    try:
-        wb.save(output)
-        result = output.getvalue()
-    finally:
-        output.close()
+    wb.save(output)
 
-    out_name = f"{_safe_base_filename(file.filename, 'converted')}.xlsx"
+    out_name = f"{safe_base_filename(file.filename, 'converted')}.xlsx"
 
-    return StreamingResponse(
-        iter([result]),
-        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={
-            "Content-Disposition": f'attachment; filename="{out_name}"',
-            "Content-Encoding": "identity",
-            "X-Content-Type-Options": "nosniff",
-        },
+    return file_response(
+        output.getvalue(),
+        out_name,
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )

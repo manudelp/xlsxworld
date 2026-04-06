@@ -1,11 +1,12 @@
 from __future__ import annotations
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException
-from fastapi.responses import StreamingResponse
-from io import BytesIO, TextIOWrapper
+
 import csv
+from io import BytesIO, TextIOWrapper
+
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from openpyxl import Workbook
 
-from app.tools._common import MAX_UPLOAD_SIZE_BYTES
+from app.tools._common import file_response, read_with_limit, safe_base_filename
 
 router = APIRouter()
 
@@ -23,12 +24,7 @@ async def csv_to_xlsx(
     if not file.filename.lower().endswith(".csv") and ".csv" not in file.content_type:
         raise HTTPException(status_code=400, detail="Unsupported file type, expected CSV")
 
-    raw = await file.read()
-    if len(raw) > MAX_UPLOAD_SIZE_BYTES:
-        raise HTTPException(
-            status_code=400,
-            detail=f"File too large (max {MAX_UPLOAD_SIZE_BYTES // 1024 // 1024} MB)",
-        )
+    raw = await read_with_limit(file)
 
     if len(delimiter) != 1:
         raise HTTPException(status_code=400, detail="Delimiter must be a single character")
@@ -51,19 +47,17 @@ async def csv_to_xlsx(
 
         output = BytesIO()
         wb.save(output)
-        output.seek(0)
 
-        filename = f"{file.filename.rsplit('.', 1)[0] if '.' in file.filename else 'converted'}.xlsx"
+        out_name = f"{safe_base_filename(file.filename, 'converted')}.xlsx"
 
-        return StreamingResponse(
-            iter([output.getvalue()]),
-            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            headers={
-                "Content-Disposition": f"attachment; filename={filename}",
-                "Content-Encoding": "identity",
-            },
+        return file_response(
+            output.getvalue(),
+            out_name,
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
     except csv.Error as e:
         raise HTTPException(status_code=400, detail=f"Failed to parse CSV: {e}")
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Conversion error: {e}")

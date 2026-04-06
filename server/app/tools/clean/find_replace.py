@@ -3,10 +3,9 @@ from __future__ import annotations
 import re
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
-from fastapi.responses import StreamingResponse
 
 from app.services.excel_reader import parse_excel_bytes
-from app.tools._common import MAX_UPLOAD_SIZE_BYTES, check_excel_file
+from app.tools._common import check_excel_file, file_response, read_with_limit
 from app.tools.clean._utils import (
     get_cell,
     parse_columns_arg,
@@ -35,9 +34,7 @@ async def find_replace(
     match_case: bool = Form(False, description="Case-sensitive matching"),
 ):
     check_excel_file(file)
-    raw = await file.read()
-    if len(raw) > MAX_UPLOAD_SIZE_BYTES:
-        raise HTTPException(status_code=400, detail="File too large")
+    raw = await read_with_limit(file)
 
     if not find_text:
         raise HTTPException(status_code=400, detail="find_text is required")
@@ -81,11 +78,8 @@ async def find_replace(
 
     output_bytes = workbook_bytes_from_data(workbook_data)
 
-    return StreamingResponse(
-        iter([output_bytes]),
-        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={
-            "Content-Disposition": "attachment; filename=find-replace.xlsx",
-            "Content-Encoding": "identity",
-        },
+    return file_response(
+        output_bytes,
+        "find-replace.xlsx",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )

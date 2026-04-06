@@ -1,29 +1,25 @@
 from __future__ import annotations
 
+import json
 from collections.abc import Iterable
 from datetime import date, datetime, time
 from io import BytesIO
-import json
-import re
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
-from fastapi.responses import StreamingResponse
 from openpyxl import Workbook
 
-from app.tools._common import MAX_UPLOAD_SIZE_BYTES, safe_sheet_title, unique_sheet_title
+from app.tools._common import (
+    dedupe_headers,
+    file_response,
+    read_with_limit,
+    safe_base_filename,
+    safe_sheet_title,
+    unique_sheet_title,
+)
 
 router = APIRouter()
 
-
 _JSON_CONTENT_TYPES = {"application/json", "text/json", "application/ld+json"}
-
-
-def _safe_base_filename(filename: str | None, fallback: str) -> str:
-    if not filename:
-        return fallback
-    base = filename.rsplit(".", 1)[0] if "." in filename else filename
-    safe = re.sub(r"[^A-Za-z0-9._-]+", "-", base).strip("-._")
-    return safe or fallback
 
 
 def _normalize_cell(value):
@@ -36,21 +32,6 @@ def _normalize_cell(value):
     if isinstance(value, (list, tuple, set)):
         return json.dumps(list(value), ensure_ascii=False)
     return str(value)
-
-
-def _dedupe_headers(raw_headers: list) -> list[str]:
-    headers: list[str] = []
-    used: set[str] = set()
-    for index, raw in enumerate(raw_headers):
-        name = (str(raw).strip() if raw is not None else "") or f"column_{index + 1}"
-        candidate = name
-        i = 2
-        while candidate in used:
-            candidate = f"{name}_{i}"
-            i += 1
-        used.add(candidate)
-        headers.append(candidate)
-    return headers
 
 
 def _records_to_rows(records: list[dict], include_headers: bool = True) -> list[list]:
@@ -66,7 +47,7 @@ def _records_to_rows(records: list[dict], include_headers: bool = True) -> list[
                 seen.add(header)
                 headers_raw.append(header)
 
-    headers = _dedupe_headers(headers_raw)
+    headers = dedupe_headers(headers_raw)
 
     rows: list[list] = [headers] if include_headers else []
     for record in records:
@@ -79,7 +60,7 @@ def _headers_and_rows_to_rows(
     rows_like: list,
     include_headers: bool = True,
 ) -> list[list]:
-    headers = _dedupe_headers(headers_like)
+    headers = dedupe_headers(headers_like)
     if not headers:
         headers = ["column_1"]
 
@@ -124,9 +105,7 @@ def _list_rows_to_rows(rows_like: list, include_headers: bool = True) -> list[li
 
     table_rows: list[list] = []
     for item in rows_like:
-        if isinstance(item, list):
-            table_rows.append([_normalize_cell(cell) for cell in item])
-        elif isinstance(item, tuple):
+        if isinstance(item, (list, tuple)):
             table_rows.append([_normalize_cell(cell) for cell in item])
         elif isinstance(item, dict):
             table_rows.append([json.dumps(item, ensure_ascii=False)])
@@ -206,9 +185,7 @@ async def json_to_xlsx(
     if not filename.endswith(".json") and content_type not in _JSON_CONTENT_TYPES:
         raise HTTPException(status_code=400, detail="Unsupported file type, expected JSON")
 
-    raw = await file.read()
-    if len(raw) > MAX_UPLOAD_SIZE_BYTES:
-        raise HTTPException(status_code=400, detail="File too large")
+    raw = await read_with_limit(file)
 
     try:
         payload = json.loads(raw.decode("utf-8-sig"))
@@ -234,15 +211,11 @@ async def json_to_xlsx(
 
     output = BytesIO()
     wb.save(output)
-    output.seek(0)
 
-    out_name = f"{_safe_base_filename(file.filename, 'converted')}.xlsx"
+    out_name = f"{safe_base_filename(file.filename, 'converted')}.xlsx"
 
-    return StreamingResponse(
-        iter([output.getvalue()]),
-        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={
-            "Content-Disposition": f"attachment; filename={out_name}",
-            "Content-Encoding": "identity",
-        },
+    return file_response(
+        output.getvalue(),
+        out_name,
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )

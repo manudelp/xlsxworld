@@ -3,10 +3,14 @@ from __future__ import annotations
 import re
 
 from fastapi import APIRouter, File, HTTPException, Query, UploadFile
-from fastapi.responses import StreamingResponse
 
 from app.services.excel_reader import ensure_supported_excel_filename, parse_excel_bytes
-from app.tools._common import MAX_UPLOAD_SIZE_BYTES
+from app.tools._common import (
+    file_response,
+    normalize_sheet_selection,
+    read_with_limit,
+    safe_base_filename,
+)
 
 router = APIRouter()
 
@@ -74,26 +78,6 @@ def _sheet_to_sql(table_name: str, rows: list[list]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def _normalize_sheet_selection(sheets: list[str] | None) -> list[str] | None:
-    if not sheets:
-        return None
-    normalized: list[str] = []
-    for entry in sheets:
-        for part in entry.split(","):
-            value = part.strip()
-            if value:
-                normalized.append(value)
-    return normalized or None
-
-
-def _safe_base_filename(filename: str | None, fallback: str) -> str:
-    if not filename:
-        return fallback
-    base = filename.rsplit(".", 1)[0] if "." in filename else filename
-    safe = re.sub(r"[^A-Za-z0-9._-]+", "-", base).strip("-._")
-    return safe or fallback
-
-
 @router.post(
     "/xlsx-to-sql",
     summary="Export XLSX to SQL",
@@ -105,13 +89,11 @@ async def xlsx_to_sql(
     table_prefix: str = Query(default="", description="Prefix for table names"),
 ):
     ensure_supported_excel_filename(file.filename)
-    raw = await file.read()
-    if len(raw) > MAX_UPLOAD_SIZE_BYTES:
-        raise HTTPException(status_code=400, detail="File too large")
+    raw = await read_with_limit(file)
 
     workbook_data = parse_excel_bytes(raw, file.filename)
 
-    selected = _normalize_sheet_selection(sheets)
+    selected = normalize_sheet_selection(sheets)
     if selected:
         missing = [name for name in selected if name not in workbook_data]
         if missing:
@@ -127,14 +109,6 @@ async def xlsx_to_sql(
 
     sql_text = "\n".join(parts)
     encoded = sql_text.encode("utf-8")
-    download_name = f"{_safe_base_filename(file.filename, 'workbook')}.sql"
+    download_name = f"{safe_base_filename(file.filename, 'workbook')}.sql"
 
-    return StreamingResponse(
-        iter([encoded]),
-        media_type="application/sql; charset=utf-8",
-        headers={
-            "Content-Disposition": f'attachment; filename="{download_name}"',
-            "Content-Encoding": "identity",
-            "X-Content-Type-Options": "nosniff",
-        },
-    )
+    return file_response(encoded, download_name, "application/sql; charset=utf-8")

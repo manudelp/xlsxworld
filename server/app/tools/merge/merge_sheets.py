@@ -1,11 +1,12 @@
 from __future__ import annotations
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException
-from fastapi.responses import StreamingResponse
+
 from io import BytesIO
+
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from openpyxl import Workbook
 
 from app.services.excel_reader import parse_excel_bytes
-from app.tools._common import MAX_UPLOAD_SIZE_BYTES, check_excel_file
+from app.tools._common import check_excel_file, file_response, read_with_limit
 
 router = APIRouter()
 
@@ -21,9 +22,7 @@ async def merge_sheets(
     output_sheet: str = Form("Merged", description="Output sheet name"),
 ):
     check_excel_file(file)
-    raw = await file.read()
-    if len(raw) > MAX_UPLOAD_SIZE_BYTES:
-        raise HTTPException(status_code=400, detail="File too large")
+    raw = await read_with_limit(file)
 
     workbook_data = parse_excel_bytes(raw, file.filename)
     sheet_order = list(workbook_data.keys())
@@ -55,13 +54,9 @@ async def merge_sheets(
 
     output = BytesIO()
     out_wb.save(output)
-    output.seek(0)
 
-    return StreamingResponse(
-        iter([output.getvalue()]),
-        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={
-            "Content-Disposition": "attachment; filename=merged.xlsx",
-            "Content-Encoding": "identity",
-        },
+    return file_response(
+        output.getvalue(),
+        "merged.xlsx",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )

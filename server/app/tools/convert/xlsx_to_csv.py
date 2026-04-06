@@ -1,13 +1,14 @@
 from __future__ import annotations
-from fastapi import APIRouter, UploadFile, File, HTTPException, Query
-from fastapi.responses import StreamingResponse
-from io import BytesIO, StringIO
+
 import csv
 import re
 import zipfile
+from io import BytesIO, StringIO
+
+from fastapi import APIRouter, File, HTTPException, Query, UploadFile
 
 from app.services.excel_reader import ensure_supported_excel_filename, parse_excel_bytes
-from app.tools._common import MAX_UPLOAD_SIZE_BYTES
+from app.tools._common import file_response, read_with_limit, safe_base_filename
 
 router = APIRouter()
 
@@ -26,7 +27,7 @@ def _build_unique_csv_name(raw_name: str, used_names: set[str]) -> str:
     return filename
 
 
-def _sheets_to_csv_zip(workbook_data: dict, sheet_names: list[str]) -> BytesIO:
+def _sheets_to_csv_zip(workbook_data: dict, sheet_names: list[str]) -> bytes:
     zipped = BytesIO()
     used_names: set[str] = set()
     with zipfile.ZipFile(zipped, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
@@ -37,8 +38,7 @@ def _sheets_to_csv_zip(workbook_data: dict, sheet_names: list[str]) -> BytesIO:
             for r in rows:
                 writer.writerow(["" if c is None else c for c in r])
             zf.writestr(_build_unique_csv_name(sheet_name, used_names), output.getvalue().encode("utf-8"))
-    zipped.seek(0)
-    return zipped
+    return zipped.getvalue()
 
 
 @router.post(
@@ -51,34 +51,22 @@ async def xlsx_to_csv(
     sheet: str = Query(..., description="Sheet name to export"),
 ):
     ensure_supported_excel_filename(file.filename)
-    raw = await file.read()
-    if len(raw) > MAX_UPLOAD_SIZE_BYTES:
-        raise HTTPException(status_code=400, detail="File too large")
+    raw = await read_with_limit(file)
 
     workbook_data = parse_excel_bytes(raw, file.filename)
     if sheet not in workbook_data:
         raise HTTPException(status_code=404, detail="Sheet not found")
     rows = workbook_data[sheet]
 
-    def gen():
-        output = StringIO()
-        writer = csv.writer(output)
-        for r in rows:
-            writer.writerow(["" if c is None else c for c in r])
-            data = output.getvalue()
-            if data:
-                yield data.encode("utf-8")
-            output.seek(0)
-            output.truncate(0)
+    output = StringIO()
+    writer = csv.writer(output)
+    for r in rows:
+        writer.writerow(["" if c is None else c for c in r])
 
-    return StreamingResponse(
-        gen(),
-        media_type="text/csv; charset=utf-8",
-        headers={
-            "Content-Disposition": f"attachment; filename={sheet}.csv",
-            "Content-Encoding": "identity",
-        },
-    )
+    encoded = output.getvalue().encode("utf-8")
+    download_name = f"{safe_base_filename(file.filename, sheet)}.csv"
+
+    return file_response(encoded, download_name, "text/csv; charset=utf-8")
 
 
 @router.post(
@@ -91,9 +79,7 @@ async def xlsx_to_csv_zip(
     sheets: list[str] = Query(default=None, description="Sheet names to export (empty=all)"),
 ):
     ensure_supported_excel_filename(file.filename)
-    raw = await file.read()
-    if len(raw) > MAX_UPLOAD_SIZE_BYTES:
-        raise HTTPException(status_code=400, detail="File too large")
+    raw = await read_with_limit(file)
 
     workbook_data = parse_excel_bytes(raw, file.filename)
 
@@ -106,12 +92,6 @@ async def xlsx_to_csv_zip(
         selected = list(workbook_data.keys())
 
     zipped = _sheets_to_csv_zip(workbook_data, selected)
+    download_name = f"{safe_base_filename(file.filename, 'sheets-csv')}.zip"
 
-    return StreamingResponse(
-        iter([zipped.getvalue()]),
-        media_type="application/zip",
-        headers={
-            "Content-Disposition": "attachment; filename=sheets-csv.zip",
-            "Content-Encoding": "identity",
-        },
-    )
+    return file_response(zipped, download_name, "application/zip")

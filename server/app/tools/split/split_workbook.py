@@ -1,12 +1,13 @@
 from __future__ import annotations
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException
-from fastapi.responses import StreamingResponse
-from io import BytesIO
+
 import zipfile
+from io import BytesIO
+
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from openpyxl import Workbook
 
 from app.services.excel_reader import parse_excel_bytes
-from app.tools._common import MAX_UPLOAD_SIZE_BYTES, check_excel_file
+from app.tools._common import check_excel_file, file_response, read_with_limit
 
 router = APIRouter()
 
@@ -21,9 +22,7 @@ async def split_workbook(
     sheet_names: str = Form("", description="Comma-separated sheet names to split (empty=all)"),
 ):
     check_excel_file(file)
-    raw = await file.read()
-    if len(raw) > MAX_UPLOAD_SIZE_BYTES:
-        raise HTTPException(status_code=400, detail="File too large")
+    raw = await read_with_limit(file)
 
     workbook_data = parse_excel_bytes(raw, file.filename)
     if not workbook_data:
@@ -59,16 +58,7 @@ async def split_workbook(
 
             child_bytes = BytesIO()
             child_wb.save(child_bytes)
-            child_bytes.seek(0)
             member_name = f"{sheet_name.replace(' ', '_') or 'sheet'}.xlsx"
             zf.writestr(member_name, child_bytes.getvalue())
 
-    zipped.seek(0)
-    return StreamingResponse(
-        iter([zipped.getvalue()]),
-        media_type="application/zip",
-        headers={
-            "Content-Disposition": "attachment; filename=splitted_workbook.zip",
-            "Content-Encoding": "identity",
-        },
-    )
+    return file_response(zipped.getvalue(), "split_workbook.zip", "application/zip")

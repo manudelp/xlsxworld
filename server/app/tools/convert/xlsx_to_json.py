@@ -1,17 +1,20 @@
 from __future__ import annotations
 
-from datetime import date, datetime, time
-from decimal import Decimal
-from io import BytesIO
 import json
 import math
-import re
+from datetime import date, datetime, time
+from decimal import Decimal
 
 from fastapi import APIRouter, File, HTTPException, Query, UploadFile
-from fastapi.responses import StreamingResponse
 
 from app.services.excel_reader import ensure_supported_excel_filename, parse_excel_bytes
-from app.tools._common import MAX_UPLOAD_SIZE_BYTES
+from app.tools._common import (
+    dedupe_headers,
+    file_response,
+    normalize_sheet_selection,
+    read_with_limit,
+    safe_base_filename,
+)
 
 router = APIRouter()
 
@@ -22,9 +25,7 @@ def _safe_json_value(value):
     if isinstance(value, (str, int, bool)):
         return value
     if isinstance(value, float):
-        if math.isfinite(value):
-            return value
-        return None
+        return value if math.isfinite(value) else None
     if isinstance(value, Decimal):
         return float(value)
     if isinstance(value, (datetime, date, time)):
@@ -34,26 +35,11 @@ def _safe_json_value(value):
     return str(value)
 
 
-def _dedupe_headers(raw_headers: list) -> list[str]:
-    headers: list[str] = []
-    used: set[str] = set()
-    for index, raw in enumerate(raw_headers):
-        name = (str(raw).strip() if raw is not None else "") or f"column_{index + 1}"
-        candidate = name
-        i = 2
-        while candidate in used:
-            candidate = f"{name}_{i}"
-            i += 1
-        used.add(candidate)
-        headers.append(candidate)
-    return headers
-
-
 def _sheet_rows_to_records(rows: list[list]) -> list[dict[str, object | None]]:
     if not rows:
         return []
 
-    headers = _dedupe_headers(rows[0])
+    headers = dedupe_headers(rows[0])
     records: list[dict[str, object | None]] = []
     for row in rows[1:]:
         record: dict[str, object | None] = {}
@@ -62,27 +48,6 @@ def _sheet_rows_to_records(rows: list[list]) -> list[dict[str, object | None]]:
             record[header] = _safe_json_value(value)
         records.append(record)
     return records
-
-
-def _safe_base_filename(filename: str | None, fallback: str) -> str:
-    if not filename:
-        return fallback
-    base = filename.rsplit(".", 1)[0] if "." in filename else filename
-    safe = re.sub(r"[^A-Za-z0-9._-]+", "-", base).strip("-._")
-    return safe or fallback
-
-
-def _normalize_sheet_selection(sheets: list[str] | None) -> list[str] | None:
-    if not sheets:
-        return None
-
-    normalized: list[str] = []
-    for entry in sheets:
-        for part in entry.split(","):
-            value = part.strip()
-            if value:
-                normalized.append(value)
-    return normalized or None
 
 
 @router.post(
@@ -95,13 +60,11 @@ async def xlsx_to_json(
     sheets: list[str] = Query(default=None, description="Sheet names to export (empty=all)"),
 ):
     ensure_supported_excel_filename(file.filename)
-    raw = await file.read()
-    if len(raw) > MAX_UPLOAD_SIZE_BYTES:
-        raise HTTPException(status_code=400, detail="File too large")
+    raw = await read_with_limit(file)
 
     workbook_data = parse_excel_bytes(raw, file.filename)
 
-    selected = _normalize_sheet_selection(sheets)
+    selected = normalize_sheet_selection(sheets)
     if selected:
         missing = [name for name in selected if name not in workbook_data]
         if missing:
@@ -117,17 +80,8 @@ async def xlsx_to_json(
         payload = {
             sheet_name: _sheet_rows_to_records(workbook_data[sheet_name]) for sheet_name in targets
         }
-        download_name = f"{_safe_base_filename(file.filename, 'workbook')}.json"
+        download_name = f"{safe_base_filename(file.filename, 'workbook')}.json"
 
     encoded = json.dumps(payload, ensure_ascii=False, indent=2, allow_nan=False).encode("utf-8")
-    stream = BytesIO(encoded)
-    stream.seek(0)
 
-    return StreamingResponse(
-        iter([stream.getvalue()]),
-        media_type="application/json; charset=utf-8",
-        headers={
-            "Content-Disposition": f"attachment; filename={download_name}",
-            "Content-Encoding": "identity",
-        },
-    )
+    return file_response(encoded, download_name, "application/json; charset=utf-8")
