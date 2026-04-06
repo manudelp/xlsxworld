@@ -6,7 +6,7 @@ import { useLocale } from "next-intl";
 import { useRouter, usePathname } from "@/i18n/navigation";
 
 const locales = [
-  { code: "en" as const, label: "English", flag: "us" },
+  { code: "en" as const, label: "English", flag: "gb" },
   { code: "es" as const, label: "Español", flag: "ar" },
   { code: "fr" as const, label: "Français", flag: "fr" },
   { code: "pt" as const, label: "Português", flag: "br" },
@@ -56,7 +56,7 @@ export default function LanguageToggle() {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm"
+        className="inline-flex items-center justify-center rounded-md border p-2"
         style={{
           borderColor: "var(--border)",
           backgroundColor: "var(--surface)",
@@ -67,10 +67,6 @@ export default function LanguageToggle() {
         aria-expanded={open}
       >
         <Globe className="h-4 w-4" />
-        <LocaleFlag
-          code={currentLocale.code}
-          className="h-3.5 w-5 shrink-0 rounded-[2px]"
-        />
       </button>
 
       <div
