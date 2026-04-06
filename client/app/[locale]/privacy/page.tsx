@@ -13,7 +13,7 @@ export async function generateMetadata({
   return { title: t("metaTitle"), description: t("metaDescription") };
 }
 
-const LAST_UPDATED = "April 4, 2026";
+const LAST_UPDATED = "April 5, 2025";
 
 export default async function PrivacyPage({
   params,
@@ -39,27 +39,36 @@ function PrivacyContent() {
 
       <div className="space-y-8 text-base leading-relaxed text-muted">
         <section>
-          <h2 className="text-xl font-medium text-foreground mb-3">{t("scopeTitle")}</h2>
+          <h2 className="text-xl font-medium text-foreground mb-3">
+            {t("scopeTitle")}
+          </h2>
           <p>{t("scopeText")}</p>
         </section>
 
         <section>
-          <h2 className="text-xl font-medium text-foreground mb-3">{t("infoCollectTitle")}</h2>
+          <h2 className="text-xl font-medium text-foreground mb-3">
+            {t("infoCollectTitle")}
+          </h2>
           <ul className="list-disc pl-6 mt-2 space-y-1">
             <li>{t("infoCollect1")}</li>
             <li>{t("infoCollect2")}</li>
             <li>{t("infoCollect3")}</li>
             <li>{t("infoCollect4")}</li>
+            <li>{t("infoCollect5")}</li>
           </ul>
         </section>
 
         <section>
-          <h2 className="text-xl font-medium text-foreground mb-3">{t("fileProcessingTitle")}</h2>
+          <h2 className="text-xl font-medium text-foreground mb-3">
+            {t("fileProcessingTitle")}
+          </h2>
           <p>{t("fileProcessingText")}</p>
         </section>
 
         <section>
-          <h2 className="text-xl font-medium text-foreground mb-3">{t("howWeUseTitle")}</h2>
+          <h2 className="text-xl font-medium text-foreground mb-3">
+            {t("howWeUseTitle")}
+          </h2>
           <ul className="list-disc pl-6 mt-2 space-y-1">
             <li>{t("howWeUse1")}</li>
             <li>{t("howWeUse2")}</li>
@@ -69,17 +78,23 @@ function PrivacyContent() {
         </section>
 
         <section>
-          <h2 className="text-xl font-medium text-foreground mb-3">{t("cookiesTitle")}</h2>
+          <h2 className="text-xl font-medium text-foreground mb-3">
+            {t("cookiesTitle")}
+          </h2>
           <p>{t("cookiesText")}</p>
         </section>
 
         <section>
-          <h2 className="text-xl font-medium text-foreground mb-3">{t("dataSharingTitle")}</h2>
+          <h2 className="text-xl font-medium text-foreground mb-3">
+            {t("dataSharingTitle")}
+          </h2>
           <p>{t("dataSharingText")}</p>
         </section>
 
         <section>
-          <h2 className="text-xl font-medium text-foreground mb-3">{t("thirdPartyTitle")}</h2>
+          <h2 className="text-xl font-medium text-foreground mb-3">
+            {t("thirdPartyTitle")}
+          </h2>
           <p>
             {t.rich("thirdPartyText", {
               cloudflareLink: (chunks) => (
@@ -92,17 +107,31 @@ function PrivacyContent() {
                   {chunks}
                 </a>
               ),
+              googleLink: (chunks) => (
+                <a
+                  href="https://policies.google.com/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  {chunks}
+                </a>
+              ),
             })}
           </p>
         </section>
 
         <section>
-          <h2 className="text-xl font-medium text-foreground mb-3">{t("retentionTitle")}</h2>
+          <h2 className="text-xl font-medium text-foreground mb-3">
+            {t("retentionTitle")}
+          </h2>
           <p>{t("retentionText")}</p>
         </section>
 
         <section>
-          <h2 className="text-xl font-medium text-foreground mb-3">{t("rightsTitle")}</h2>
+          <h2 className="text-xl font-medium text-foreground mb-3">
+            {t("rightsTitle")}
+          </h2>
           <p>
             {t.rich("rightsText", {
               contactLink: (chunks) => (
@@ -115,12 +144,16 @@ function PrivacyContent() {
         </section>
 
         <section>
-          <h2 className="text-xl font-medium text-foreground mb-3">{t("securityTitle")}</h2>
+          <h2 className="text-xl font-medium text-foreground mb-3">
+            {t("securityTitle")}
+          </h2>
           <p>{t("securityText")}</p>
         </section>
 
         <section>
-          <h2 className="text-xl font-medium text-foreground mb-3">{t("changesTitle")}</h2>
+          <h2 className="text-xl font-medium text-foreground mb-3">
+            {t("changesTitle")}
+          </h2>
           <p>{t("changesText")}</p>
         </section>
       </div>
