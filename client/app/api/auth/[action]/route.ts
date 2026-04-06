@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import type { AuthProfileUpdateInput } from "@/lib/auth/types";
-
 import {
   backendJson,
   backendJsonWithError,
