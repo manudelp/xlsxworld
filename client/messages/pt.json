@@ -487,7 +487,28 @@
     "couldNotNormalizeCase": "Não foi possível normalizar maiúsculas",
     "couldNotFindReplace": "Não foi possível executar localizar e substituir",
     "noSheetsDetected": "Nenhuma planilha detectada nesta pasta de trabalho.",
-    "couldNotLoadPreview": "Não foi possível carregar as linhas de visualização"
+    "couldNotLoadPreview": "Não foi possível carregar as linhas de visualização",
+    "dropExcelConvertSql": "Drop or select an Excel file (.xlsx, .xls, .xlsb, etc.) to convert to SQL",
+    "dropExcelConvertXml": "Drop or select an Excel file (.xlsx, .xls, .xlsb, etc.) to convert to XML",
+    "dropSqlConvertXlsx": "Drop or select a SQL file to convert to XLSX",
+    "dropXmlConvertXlsx": "Drop or select an XML file to convert to XLSX",
+    "selectSheetsToExportSql": "Select sheets to export as SQL",
+    "selectSheetsToExportXml": "Select sheets to export as XML",
+    "tablePrefixLabel": "Table name prefix (optional)",
+    "sqlExportNote": "First row is used as column names. Types are inferred from data.",
+    "downloadSql": "Download SQL",
+    "sqlToXlsxInfo": "How SQL is parsed",
+    "sqlInsertStatementsParsed": "INSERT INTO statements are extracted and grouped by table name",
+    "sqlOneSheetPerTable": "One sheet per table, columns from the INSERT column list",
+    "sqlToXlsxNote": "Only INSERT statements are parsed. CREATE TABLE, SELECT, and other statements are ignored.",
+    "rootTagLabel": "Root element tag",
+    "rowTagLabel": "Row element tag",
+    "xmlExportNote": "First row is used as element names. Each data row becomes an XML element.",
+    "downloadXml": "Download XML",
+    "xmlToXlsxInfo": "How XML is parsed",
+    "xmlRowElementsStructure": "Repeated child elements are treated as rows, their sub-elements as columns",
+    "xmlSheetPerGroup": "Grouped elements or named sections become separate sheets",
+    "xmlToXlsxNote": "Tabular XML structures are detected automatically. Deeply nested XML may not convert as expected."
   },
   "theme": {
     "light": "Claro",
@@ -636,7 +657,7 @@
     "sql-to-xlsx": {
       "title": "SQL → XLSX",
       "heading": "SQL → XLSX",
-      "description": "Execute consultas SQL e exporte conjuntos de resultados para XLSX."
+      "description": "Parse INSERT statements from a SQL file into an XLSX workbook."
     },
     "xlsx-to-xml": {
       "title": "XLSX → XML",

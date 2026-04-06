@@ -8,6 +8,10 @@ import ConvertXlsxToCsv from "./convert/ConvertXlsxToCsv";
 import ConvertCsvToXlsx from "./convert/ConvertCsvToXlsx";
 import ConvertXlsxToJson from "./convert/ConvertXlsxToJson";
 import ConvertJsonToXlsx from "./convert/ConvertJsonToXlsx";
+import ConvertXlsxToSql from "./convert/ConvertXlsxToSql";
+import ConvertSqlToXlsx from "./convert/ConvertSqlToXlsx";
+import ConvertXlsxToXml from "./convert/ConvertXlsxToXml";
+import ConvertXmlToXlsx from "./convert/ConvertXmlToXlsx";
 import MergeSheets from "./merge/MergeSheets";
 import SplitSheet from "./split/SplitSheet";
 import AppendWorkbooks from "./merge/AppendWorkbooks";
@@ -23,6 +27,10 @@ const specialComponents: Record<string, React.ReactNode> = {
   "csv-to-xlsx": <ConvertCsvToXlsx />,
   "xlsx-to-json": <ConvertXlsxToJson />,
   "json-to-xlsx": <ConvertJsonToXlsx />,
+  "xlsx-to-sql": <ConvertXlsxToSql />,
+  "sql-to-xlsx": <ConvertSqlToXlsx />,
+  "xlsx-to-xml": <ConvertXlsxToXml />,
+  "xml-to-xlsx": <ConvertXmlToXlsx />,
   "merge-sheets": <MergeSheets />,
   "append-workbooks": <AppendWorkbooks />,
   "split-sheet": <SplitSheet />,

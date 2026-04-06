@@ -1,4 +1,4 @@
-import { api, buildUrlWithArrayParams } from "../api";
+import { api, buildUrl, buildUrlWithArrayParams } from "../api";
 
 export async function csvToXlsx(
   file: File,
@@ -61,4 +61,64 @@ export async function jsonToXlsx(
   fd.append("file", file);
   fd.append("include_headers", String(includeHeaders));
   return api.postForm<ArrayBuffer>("/api/v1/tools/convert/json-to-xlsx", fd);
+}
+
+export async function xlsxToSql(
+  file: File,
+  sheets?: string[],
+  tablePrefix = "",
+): Promise<ArrayBuffer> {
+  const fd = new FormData();
+  fd.append("file", file);
+  const qs: Record<string, string> = {};
+  if (tablePrefix) qs.table_prefix = tablePrefix;
+  const path =
+    sheets && sheets.length > 0
+      ? buildUrlWithArrayParams("/api/v1/tools/convert/xlsx-to-sql", {
+          sheets,
+          ...qs,
+        })
+      : buildUrl("/api/v1/tools/convert/xlsx-to-sql", qs);
+  return api.postForm<ArrayBuffer>(path, fd);
+}
+
+export async function sqlToXlsx(
+  file: File,
+  includeHeaders = true,
+): Promise<ArrayBuffer> {
+  const fd = new FormData();
+  fd.append("file", file);
+  fd.append("include_headers", String(includeHeaders));
+  return api.postForm<ArrayBuffer>("/api/v1/tools/convert/sql-to-xlsx", fd);
+}
+
+export async function xlsxToXml(
+  file: File,
+  sheets?: string[],
+  rootTag = "workbook",
+  rowTag = "row",
+): Promise<ArrayBuffer> {
+  const fd = new FormData();
+  fd.append("file", file);
+  const qs: Record<string, string> = {};
+  if (rootTag !== "workbook") qs.root_tag = rootTag;
+  if (rowTag !== "row") qs.row_tag = rowTag;
+  const path =
+    sheets && sheets.length > 0
+      ? buildUrlWithArrayParams("/api/v1/tools/convert/xlsx-to-xml", {
+          sheets,
+          ...qs,
+        })
+      : buildUrl("/api/v1/tools/convert/xlsx-to-xml", qs);
+  return api.postForm<ArrayBuffer>(path, fd);
+}
+
+export async function xmlToXlsx(
+  file: File,
+  includeHeaders = true,
+): Promise<ArrayBuffer> {
+  const fd = new FormData();
+  fd.append("file", file);
+  fd.append("include_headers", String(includeHeaders));
+  return api.postForm<ArrayBuffer>("/api/v1/tools/convert/xml-to-xlsx", fd);
 }

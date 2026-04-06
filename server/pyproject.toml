@@ -70,6 +70,7 @@ dependencies = [
   "cryptography==44.0.3",
   "slowapi>=0.1.9",
   "greenlet>=3.3.2",
+  "defusedxml>=0.7.1",
 ]
 
 [tool.setuptools.packages.find]
