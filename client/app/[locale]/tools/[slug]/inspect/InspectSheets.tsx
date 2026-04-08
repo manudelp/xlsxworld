@@ -9,6 +9,7 @@ import {
   CaseSensitive,
   Eye,
   EyeOff,
+  Hash,
   Highlighter,
   ListFilter,
   Maximize2,
@@ -98,8 +99,11 @@ export default function InspectSheets() {
   const [highlightEmptyCells, setHighlightEmptyCells] = useState(false);
   const [zebraRows, setZebraRows] = useState(false);
   const [fullWidthPreview, setFullWidthPreview] = useState(false);
+  const [decimalPlaces, setDecimalPlaces] = useState<number | null>(null);
+  const [showDecimalMenu, setShowDecimalMenu] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const statsMenuContainerRef = useRef<HTMLDivElement | null>(null);
+  const decimalMenuRef = useRef<HTMLDivElement | null>(null);
   const tableScrollRef = useRef<HTMLDivElement | null>(null);
   const tableElementRef = useRef<HTMLTableElement | null>(null);
   const resizeStateRef = useRef<ResizeState>(null);
@@ -139,8 +143,15 @@ export default function InspectSheets() {
   const isEmptyCell = (value: unknown) =>
     value === null || value === undefined || value === "";
 
+  const displayCell = (value: unknown) => {
+    if (decimalPlaces !== null && typeof value === "number") {
+      return value.toFixed(decimalPlaces);
+    }
+    return formatCell(value);
+  };
+
   const renderCell = (value: unknown) => {
-    const formatted = formatCell(value);
+    const formatted = displayCell(value);
     return formatted === "" ? "\u00A0" : formatted;
   };
 
@@ -152,6 +163,7 @@ export default function InspectSheets() {
     setSortColumnIndex(null);
     setSortDirection("desc");
     setShowStatsMenu(false);
+    setShowDecimalMenu(false);
     setPagedRows([]);
     setPagedHeader(null);
     setPagedDone(false);
@@ -245,6 +257,12 @@ export default function InspectSheets() {
       if (!clickedInsideStats) {
         setShowStatsMenu(false);
       }
+
+      const clickedInsideDecimal =
+        decimalMenuRef.current?.contains(target) ?? false;
+      if (!clickedInsideDecimal) {
+        setShowDecimalMenu(false);
+      }
     };
 
     document.addEventListener("mousedown", onPointerDown);
@@ -255,6 +273,8 @@ export default function InspectSheets() {
       document.removeEventListener("touchstart", onPointerDown);
     };
   }, []);
+
+
 
   const stopTablePan = () => {
     const container = tableScrollRef.current;
@@ -356,7 +376,7 @@ export default function InspectSheets() {
     let widest = context.measureText(headerLabel).width;
     const sampleRows = tableModel.rows.slice(0, 300);
     for (const row of sampleRows) {
-      const width = context.measureText(formatCell(row.cells[index])).width;
+      const width = context.measureText(displayCell(row.cells[index])).width;
       if (width > widest) widest = width;
     }
 
@@ -384,7 +404,7 @@ export default function InspectSheets() {
       const sampleRows = tableModel.rows.slice(0, 300);
       for (const row of sampleRows) {
         const width = context.measureText(
-          formatCell(row.cells[colIndex]),
+          displayCell(row.cells[colIndex]),
         ).width;
         if (width > widest) widest = width;
       }
@@ -447,7 +467,8 @@ export default function InspectSheets() {
     hideEmptyRows ||
     highlightEmptyCells ||
     zebraRows ||
-    fullWidthPreview;
+    fullWidthPreview ||
+    decimalPlaces !== null;
 
   const resetView = () => {
     setGlobalQuery("");
@@ -465,6 +486,7 @@ export default function InspectSheets() {
     setHighlightEmptyCells(false);
     setZebraRows(false);
     setFullWidthPreview(false);
+    setDecimalPlaces(null);
     tableScrollRef.current?.scrollTo({ top: 0, left: 0, behavior: "smooth" });
   };
 
@@ -1408,6 +1430,112 @@ export default function InspectSheets() {
                       </span>
                     </div>
 
+                    <div className="relative" ref={decimalMenuRef}>
+                      <div className="group relative">
+                        <button
+                          type="button"
+                          onClick={() => setShowDecimalMenu((prev) => !prev)}
+                          aria-label="Format number decimals"
+                          className="cursor-pointer rounded-md border p-2.5 text-sm inline-flex items-center justify-center"
+                          style={{
+                            borderColor: "var(--tag-border)",
+                            backgroundColor:
+                              decimalPlaces !== null
+                                ? "var(--tag-selected-bg)"
+                                : "var(--tag-bg)",
+                            color:
+                              decimalPlaces !== null
+                                ? "var(--tag-selected-text)"
+                                : "var(--tag-text)",
+                          }}
+                        >
+                          <Hash size={16} aria-hidden="true" />
+                        </button>
+                        <span
+                          className="pointer-events-none absolute left-1/2 top-full z-30 mt-1 -translate-x-1/2 rounded border px-2 py-1 text-xs opacity-0 shadow-sm transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
+                          style={{
+                            borderColor: "var(--border)",
+                            backgroundColor: "var(--surface)",
+                            color: "var(--foreground)",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          Decimal Places{decimalPlaces !== null ? ` (${decimalPlaces})` : ""}
+                        </span>
+                      </div>
+
+                      {showDecimalMenu && (
+                        <div
+                          className="absolute right-0 z-20 mt-2 rounded-lg border p-3"
+                          style={{
+                            borderColor: "var(--border)",
+                            backgroundColor: "var(--surface-2)",
+                            minWidth: "11rem",
+                          }}
+                        >
+                          <div
+                            className="mb-2 text-xs font-medium"
+                            style={{ color: "var(--muted)" }}
+                          >
+                            Decimal places{decimalPlaces !== null ? `: ${decimalPlaces}` : ""}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setDecimalPlaces((prev) =>
+                                  prev === null ? 0 : prev <= 0 ? null : prev - 1,
+                                )
+                              }
+                              aria-label="Decrease decimal places"
+                              className="cursor-pointer rounded-md border px-3 py-1.5 text-sm inline-flex items-center gap-1.5"
+                              style={{
+                                borderColor: "var(--tag-border)",
+                                backgroundColor: "var(--tag-bg)",
+                                color: "var(--tag-text)",
+                              }}
+                            >
+                              <span className="text-xs font-semibold leading-none">.00→.0</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setDecimalPlaces((prev) =>
+                                  prev === null ? 1 : Math.min(prev + 1, 10),
+                                )
+                              }
+                              aria-label="Increase decimal places"
+                              className="cursor-pointer rounded-md border px-3 py-1.5 text-sm inline-flex items-center gap-1.5"
+                              style={{
+                                borderColor: "var(--tag-border)",
+                                backgroundColor: "var(--tag-bg)",
+                                color: "var(--tag-text)",
+                              }}
+                            >
+                              <span className="text-xs font-semibold leading-none">.0→.00</span>
+                            </button>
+                          </div>
+                          {decimalPlaces !== null && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setDecimalPlaces(null);
+                                setShowDecimalMenu(false);
+                              }}
+                              className="mt-2 w-full cursor-pointer rounded-md border px-2 py-1 text-xs"
+                              style={{
+                                borderColor: "var(--tag-border)",
+                                backgroundColor: "var(--tag-bg)",
+                                color: "var(--tag-text)",
+                              }}
+                            >
+                              Reset
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
                     <div className="group relative ml-auto">
                       <button
                         type="button"
@@ -1644,7 +1772,7 @@ export default function InspectSheets() {
                                   <span
                                     className="block w-full overflow-hidden text-ellipsis whitespace-nowrap"
                                     title={
-                                      formatCell(row.cells[colIndex]) ||
+                                      displayCell(row.cells[colIndex]) ||
                                       undefined
                                     }
                                   >
