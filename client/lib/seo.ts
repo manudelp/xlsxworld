@@ -67,6 +67,19 @@ export const ACTIVE_TOOL_SLUGS = [
   "trim-spaces",
   "normalize-case",
   "find-replace",
+  "scan-formula-errors",
+  "compare-workbooks",
+  "remove-empty-rows",
+  "summary-stats",
+  "freeze-header",
+  "auto-size-columns",
+  "sort-rows",
+  "transpose-sheet",
+  "split-column",
+  "validate-emails",
+  "detect-blanks",
+  "password-protect",
+  "remove-password",
 ] as const;
 
 export const TOOL_SEO: Record<string, ToolSeo> = {
@@ -164,5 +177,70 @@ export const TOOL_SEO: Record<string, ToolSeo> = {
     metaTitle: "Find and Replace in Excel Online Free",
     metaDescription:
       "Search and replace text or regex patterns across Excel sheets and columns. Free online find-and-replace tool — no signup, instant results.",
+  },
+  "scan-formula-errors": {
+    metaTitle: "Scan Formula Errors in Excel Online Free",
+    metaDescription:
+      "Find broken formulas in Excel files instantly. Detect #REF!, #VALUE!, #DIV/0!, #N/A, #NAME?, #NULL!, and #NUM! errors across all sheets — free Excel formula error checker.",
+  },
+  "compare-workbooks": {
+    metaTitle: "Compare Two Excel Files Online Free",
+    metaDescription:
+      "Compare two Excel workbooks cell by cell. Detect added, removed, and modified cells across sheets — free Excel workbook diff tool, no signup required.",
+  },
+  "remove-empty-rows": {
+    metaTitle: "Remove Empty Rows from Excel Online Free",
+    metaDescription:
+      "Delete blank rows from Excel files instantly. Clean all sheets or selected sheets — free online tool, no signup or installation needed.",
+  },
+  "summary-stats": {
+    metaTitle: "Excel Column Statistics Summary Online Free",
+    metaDescription:
+      "Get count, min, max, mean, median, standard deviation, and sum for every numeric column. Download a formatted XLSX stats report — free online.",
+  },
+  "freeze-header": {
+    metaTitle: "Freeze Header Row in Excel Online Free",
+    metaDescription:
+      "Freeze the first row or multiple rows so headers stay visible when scrolling. Free online tool — upload, set rows, download instantly.",
+  },
+  "auto-size-columns": {
+    metaTitle: "Auto Fit Column Width in Excel Online Free",
+    metaDescription:
+      "Auto-size all column widths based on cell content across every sheet. Free online tool — upload your file and download with fitted columns.",
+  },
+  "sort-rows": {
+    metaTitle: "Sort Excel Rows by Column Online Free",
+    metaDescription:
+      "Sort rows in an Excel sheet by one or more columns. Choose ascending or descending order — free online tool, no signup required.",
+  },
+  "transpose-sheet": {
+    metaTitle: "Transpose Excel Sheet Rows to Columns Online Free",
+    metaDescription:
+      "Swap rows and columns in an Excel sheet instantly. Select a sheet, transpose, and download — free online tool, no installation needed.",
+  },
+  "split-column": {
+    metaTitle: "Split Column in Excel by Delimiter Online Free",
+    metaDescription:
+      "Split a single Excel column into multiple columns by comma, space, dash, or custom delimiter. Free online tool — no signup required.",
+  },
+  "validate-emails": {
+    metaTitle: "Validate Email Addresses in Excel Online Free",
+    metaDescription:
+      "Scan Excel columns for email addresses and validate their format. Get a color-coded report with Valid, Invalid, and Empty status — free online.",
+  },
+  "detect-blanks": {
+    metaTitle: "Find Blank Cells in Excel Online Free",
+    metaDescription:
+      "Scan all sheets for blank cells and get a detailed report with summary and cell references. Free online blank cell detector — instant download.",
+  },
+  "password-protect": {
+    metaTitle: "Protect Excel Sheet with Password Online Free",
+    metaDescription:
+      "Lock Excel sheets from editing with a password. Protect structure, content, and formatting to prevent accidental changes — free online tool.",
+  },
+  "remove-password": {
+    metaTitle: "Remove Excel Sheet Protection Online Free",
+    metaDescription:
+      "Remove editing protection from all sheets in your Excel file instantly. Free online tool — no password needed, upload and download.",
   },
 };

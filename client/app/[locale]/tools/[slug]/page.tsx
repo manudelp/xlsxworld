@@ -30,6 +30,19 @@ import RemoveDuplicates from "./clean/RemoveDuplicates";
 import TrimSpaces from "./clean/TrimSpaces";
 import NormalizeCase from "./clean/NormalizeCase";
 import FindReplace from "./clean/FindReplace";
+import RemoveEmptyRows from "./clean/RemoveEmptyRows";
+import ScanFormulaErrors from "./analyze/ScanFormulaErrors";
+import CompareWorkbooks from "./analyze/CompareWorkbooks";
+import SummaryStats from "./analyze/SummaryStats";
+import FreezeHeader from "./format/FreezeHeader";
+import AutoSizeColumns from "./format/AutoSizeColumns";
+import SortRows from "./data/SortRows";
+import TransposeSheet from "./data/TransposeSheet";
+import SplitColumn from "./data/SplitColumn";
+import ValidateEmails from "./validate/ValidateEmails";
+import DetectBlanks from "./validate/DetectBlanks";
+import PasswordProtect from "./security/PasswordProtect";
+import RemovePassword from "./security/RemovePassword";
 
 const specialComponents: Record<string, React.ReactNode> = {
   "inspect-sheets": <InspectSheets />,
@@ -51,6 +64,19 @@ const specialComponents: Record<string, React.ReactNode> = {
   "trim-spaces": <TrimSpaces />,
   "normalize-case": <NormalizeCase />,
   "find-replace": <FindReplace />,
+  "remove-empty-rows": <RemoveEmptyRows />,
+  "scan-formula-errors": <ScanFormulaErrors />,
+  "compare-workbooks": <CompareWorkbooks />,
+  "summary-stats": <SummaryStats />,
+  "freeze-header": <FreezeHeader />,
+  "auto-size-columns": <AutoSizeColumns />,
+  "sort-rows": <SortRows />,
+  "transpose-sheet": <TransposeSheet />,
+  "split-column": <SplitColumn />,
+  "validate-emails": <ValidateEmails />,
+  "detect-blanks": <DetectBlanks />,
+  "password-protect": <PasswordProtect />,
+  "remove-password": <RemovePassword />,
 };
 
 export function generateStaticParams() {

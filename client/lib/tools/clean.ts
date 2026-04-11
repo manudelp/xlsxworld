@@ -69,3 +69,45 @@ export async function findReplace(
   appendTargetOptions(fd, options);
   return api.postForm<ArrayBuffer>("/api/v1/tools/clean/find-replace", fd);
 }
+
+import { buildUrl } from "../api";
+
+async function postFormWithHeaders(
+  path: string,
+  form: FormData,
+): Promise<{ buffer: ArrayBuffer; headers: Headers }> {
+  const res = await fetch(buildUrl(path), {
+    method: "POST",
+    body: form,
+    credentials: "include",
+  });
+  if (!res.ok) {
+    let detail = res.statusText;
+    try {
+      const data = await res.json();
+      if (data?.detail) detail = data.detail;
+    } catch { /* use statusText */ }
+    throw new Error(detail);
+  }
+  const buffer = await res.arrayBuffer();
+  return { buffer, headers: res.headers };
+}
+
+export interface RemoveEmptyRowsResult {
+  buffer: ArrayBuffer;
+  rowsRemoved: number;
+}
+
+export async function removeEmptyRows(
+  file: File,
+  sheets: string,
+): Promise<RemoveEmptyRowsResult> {
+  const fd = new FormData();
+  fd.append("file", file);
+  fd.append("sheets", sheets);
+  const { buffer, headers } = await postFormWithHeaders("/api/v1/tools/clean/remove-empty-rows", fd);
+  return {
+    buffer,
+    rowsRemoved: parseInt(headers.get("X-Rows-Removed") || "0", 10),
+  };
+}

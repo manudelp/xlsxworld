@@ -1,66 +1,82 @@
-# XLSX World Client
+# XLSX World — Client
 
-This folder contains the Next.js frontend for the XLSX World tool suite.
+Next.js 15 frontend for the XLSX World tool suite.
 
-- Framework: Next.js App Router
-- Language: TypeScript
-- Bundler: built-in Vercel/Next.js
-- UI: custom components in `components/` and tool flows under `app/tools/[slug]`
+## Tech
 
-## Prerequisites
+- **Framework:** Next.js 15 (App Router, Turbopack, standalone output)
+- **Language:** TypeScript 5, React 19
+- **Styling:** Tailwind CSS v4 + CSS custom properties (no component library)
+- **i18n:** next-intl (en, es, fr, pt)
+- **Auth:** Supabase Auth via AuthProvider context
 
-- Node.js >= 18
-- npm, yarn, or pnpm
+## Structure
+
+```
+client/
+├── app/
+│   ├── [locale]/                  # i18n dynamic route
+│   │   ├── tools/[slug]/          # Tool pages (dynamic slug routing)
+│   │   │   ├── analyze/           # CompareWorkbooks, ScanFormulaErrors
+│   │   │   ├── clean/             # FindReplace, NormalizeCase, RemoveDuplicates, TrimSpaces
+│   │   │   ├── convert/           # CSV/JSON/SQL/XML/PDF ↔ XLSX components
+│   │   │   ├── inspect/           # InspectSheets
+│   │   │   ├── merge/             # AppendWorkbooks, MergeSheets
+│   │   │   ├── split/             # SplitSheet, SplitWorkbook
+│   │   │   └── page.tsx
+│   │   ├── admin/, contact/, faq/, privacy/, terms/
+│   │   ├── login/, signup/, forgot-password/, reset-password/
+│   │   ├── my-account/
+│   │   ├── layout.tsx, page.tsx, error.tsx, loading.tsx, not-found.tsx
+│   ├── api/                       # Next.js API routes (auth, proxy)
+│   ├── globals.css, layout.tsx, robots.ts, sitemap.ts
+├── components/
+│   ├── auth/          # AuthProvider, useRequireAuth
+│   ├── common/        # BackToTopButton, FileUploadDropzone
+│   ├── layout/        # Header, Footer, LanguageToggle
+│   ├── theme/         # ThemeProvider, ThemeToggle
+│   └── tools/         # Tools listing, filtering, data registry, translations
+├── i18n/              # next-intl config (routing, navigation, request)
+├── lib/
+│   ├── auth/          # Auth client, constants, types
+│   ├── tools/         # API client functions (analyze, clean, convert, inspect, merge, split)
+│   ├── api.ts         # Base API client
+│   └── seo.ts
+├── messages/          # i18n JSON files (en, es, fr, pt)
+├── public/            # Static assets
+└── types/             # Global TypeScript declarations
+```
 
 ## Setup
 
 ```bash
 cd client
 npm install
-# or yarn
-# or pnpm install
 ```
 
 ## Environment
 
-`NEXT_PUBLIC_API_BASE` (optional, defaults to `http://localhost:8000`)
-
-Example `.env.local`:
+Create `.env.local`:
 
 ```env
 NEXT_PUBLIC_API_BASE=http://localhost:8000
 ```
 
-## Run
+## Commands
 
 ```bash
-npm run dev
-```
-
-Visit `http://localhost:3000`.
-
-## Build
-
-```bash
-npm run build
-npm run start
-```
-
-## Lint / Format
-
-```bash
-npm run lint
-npm run fmt
+npm run dev          # Dev server with Turbopack (http://localhost:3000)
+npm run build        # Production build
+npm run start        # Start production server
+npm run lint         # ESLint
+npm run type-check   # TypeScript check
+npm run test         # Jest tests
 ```
 
 ## API Integration
 
-The frontend uses `client/lib/api.ts` for calls.
-- `api.get('/tools/...')`
-- `api.postForm('/tools/...', formData)`
+Centralized API client in `lib/api.ts` with tool-specific wrappers in `lib/tools/`:
 
-## Notes
-
-- Login/signup is available via `/login` and `/signup`.
-- Tool inspection path: `/tools/[slug]/inspect/InspectSheets`.
-
+- `api.get(path)`, `api.postForm(path, formData)`, `api.postJson(path, body)`
+- Authenticated variants under `api.auth.*` with automatic 401 → refresh → retry
+- All `/api/` paths auto-proxied through Next.js `/api/proxy` in production
