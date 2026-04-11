@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import logging
 from typing import Any
 from uuid import UUID
 
 import httpx
 from fastapi import Depends
+from jose import JWTError, jwt as jose_jwt
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert
@@ -203,6 +205,16 @@ class SupabaseAuthClient:
             raise AuthServiceError("Supabase OTP verification returned an unexpected response", status_code=502)
         return _SupabaseSession.model_validate(data)
 
+    async def update_user_by_id(self, user_id: str, *, password: str | None = None) -> dict[str, Any]:
+        """Update a user via the admin API. Creates an email identity if setting a password on an OAuth-only account."""
+        payload: dict[str, Any] = {}
+        if password is not None:
+            payload["password"] = password
+        data = await self._request("PUT", f"/admin/users/{user_id}", json_body=payload)
+        if not isinstance(data, dict):
+            raise AuthServiceError("Supabase admin user update returned an unexpected response", status_code=502)
+        return data
+
 
 class AuthService:
     def __init__(self, db: AsyncSession, settings: Settings | None = None) -> None:
@@ -313,6 +325,14 @@ class AuthService:
 
     async def reset_password(self, body: AuthResetPasswordRequest) -> AuthMessageResponse:
         await self.auth_client.update_user_password(body.access_token, body.new_password)
+        # Also set via admin API to ensure an email identity is created for OAuth-only accounts
+        try:
+            claims = jose_jwt.get_unverified_claims(body.access_token)
+            user_id = claims.get("sub")
+            if user_id:
+                await self.auth_client.update_user_by_id(user_id, password=body.new_password)
+        except (JWTError, AuthServiceError, httpx.HTTPError) as exc:
+            logging.getLogger(__name__).debug("Admin identity link best-effort failed: %s", exc)
         return AuthMessageResponse(detail="Password updated successfully.")
 
     async def google_login(self, body: AuthGoogleRequest) -> AuthSessionResponse:

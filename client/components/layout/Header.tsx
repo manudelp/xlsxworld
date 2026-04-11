@@ -67,7 +67,7 @@ export default function Header() {
         <ThemeToggle />
         {isLoading ? (
           <span className="inline-flex items-center rounded-md bg-muted px-3 py-2 text-sm font-medium text-primary-foreground opacity-50">
-            {t("header.login")}
+            <span className="animate-pulse">{t("header.login")}</span>
           </span>
         ) : isAuthenticated ? (
           <div className="relative">

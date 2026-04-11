@@ -9,6 +9,69 @@ import { resetPassword } from "@/lib/auth/client";
 import { api } from "@/lib/api";
 import { Link } from "@/i18n/navigation";
 
+type PasswordRule = { key: string; test: (p: string) => boolean };
+
+const PASSWORD_RULES: PasswordRule[] = [
+  { key: "ruleLength", test: (p) => p.length >= 8 },
+  { key: "ruleLowercase", test: (p) => /[a-z]/.test(p) },
+  { key: "ruleUppercase", test: (p) => /[A-Z]/.test(p) },
+  { key: "ruleNumber", test: (p) => /\d/.test(p) },
+  { key: "ruleSpecial", test: (p) => /[^a-zA-Z0-9]/.test(p) },
+];
+
+function PasswordStrength({
+  password,
+  t,
+}: {
+  password: string;
+  t: (key: string) => string;
+}) {
+  const passed = PASSWORD_RULES.filter((r) => r.test(password)).length;
+  const ratio = passed / PASSWORD_RULES.length;
+
+  const barColor =
+    ratio <= 0.4
+      ? "var(--danger)"
+      : ratio <= 0.7
+        ? "var(--warning)"
+        : "var(--success)";
+
+  return (
+    <div className="flex flex-col gap-2 pb-1">
+      <div
+        className="h-1.5 w-full overflow-hidden rounded-full"
+        style={{ backgroundColor: "var(--border)" }}
+      >
+        <div
+          className="h-full rounded-full transition-all duration-300 ease-out"
+          style={{ width: `${ratio * 100}%`, backgroundColor: barColor }}
+        />
+      </div>
+
+      <div className="flex flex-wrap gap-x-3 gap-y-1">
+        {PASSWORD_RULES.map((rule) => {
+          const ok = rule.test(password);
+          return (
+            <span
+              key={rule.key}
+              className="inline-flex items-center gap-1 text-xs transition-colors duration-150"
+              style={{ color: ok ? "var(--success)" : "var(--muted)" }}
+            >
+              <span
+                className="inline-block text-[10px] leading-none transition-transform duration-150"
+                style={{ transform: ok ? "scale(1.1)" : "scale(1)" }}
+              >
+                {ok ? "✓" : "○"}
+              </span>
+              {t(rule.key)}
+            </span>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export default function ResetPasswordPage() {
   const t = useTranslations("resetPassword");
   const searchParams = useSearchParams();
@@ -217,6 +280,9 @@ export default function ResetPasswordPage() {
                   </button>
                 )}
               </div>
+              {password.length > 0 && (
+                <PasswordStrength password={password} t={t} />
+              )}
             </div>
 
             <div className="flex flex-col gap-1.5">

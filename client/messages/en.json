@@ -128,7 +128,12 @@
     "invalidLink": "This reset link is invalid or has expired. Please request a new one.",
     "requestNewLink": "Request a new link",
     "backToLogin": "Back to login",
-    "genericError": "Something went wrong. Please try again."
+    "genericError": "Something went wrong. Please try again.",
+    "ruleLength": "8+ characters",
+    "ruleLowercase": "Lowercase",
+    "ruleUppercase": "Uppercase",
+    "ruleNumber": "Number",
+    "ruleSpecial": "Special character"
   },
   "login": {
     "title": "Log in",

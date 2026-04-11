@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import { Link } from "@/i18n/navigation";
@@ -32,11 +32,9 @@ export default function Footer() {
     }
 
     checkHealth();
-    const intervalId = window.setInterval(checkHealth, 30000);
 
     return () => {
       isMounted = false;
-      window.clearInterval(intervalId);
     };
   }, []);
 
@@ -61,6 +59,51 @@ export default function Footer() {
         ? t("apiOfflineTooltip")
         : t("checkingApiTooltip");
 
+  const triggerRef = useRef<HTMLDivElement | null>(null);
+  const tooltipRef = useRef<HTMLSpanElement | null>(null);
+  const arrowRef = useRef<HTMLSpanElement | null>(null);
+
+  const updatePosition = useCallback(() => {
+    const trigger = triggerRef.current;
+    const tooltip = tooltipRef.current;
+    const arrow = arrowRef.current;
+    if (!trigger || !tooltip || !arrow) return;
+
+    const gap = 8;
+    const pad = 8;
+    const tr = trigger.getBoundingClientRect();
+    const tt = tooltip.getBoundingClientRect();
+
+    const above = tr.top - gap - tt.height >= 0;
+    tooltip.style.top = above
+      ? `${-(tt.height + gap)}px`
+      : `${tr.height + gap}px`;
+
+    const centerX = tr.width / 2 - tt.width / 2;
+    const absLeft = tr.left + centerX;
+    const absRight = absLeft + tt.width;
+    let shiftX = centerX;
+    if (absLeft < pad) shiftX = -tr.left + pad;
+    else if (absRight > window.innerWidth - pad)
+      shiftX = window.innerWidth - pad - tt.width - tr.left;
+    tooltip.style.left = `${shiftX}px`;
+
+    const arrowX = tr.width / 2 - shiftX - 4;
+    arrow.style.left = `${arrowX}px`;
+
+    if (above) {
+      arrow.style.top = "";
+      arrow.style.bottom = "-4px";
+      arrow.className =
+        "absolute h-2 w-2 rotate-45 border-r border-b";
+    } else {
+      arrow.style.bottom = "";
+      arrow.style.top = "-4px";
+      arrow.className =
+        "absolute h-2 w-2 rotate-45 border-l border-t";
+    }
+  }, []);
+
   return (
     <footer className="w-full bg-[#292931] text-white py-6 px-4">
       <div className="container mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
@@ -82,15 +125,20 @@ export default function Footer() {
           </Link>
         </div>
         <div className="text-center md:text-right flex flex-col items-center md:items-end gap-1">
-          <div className="relative group inline-flex cursor-default items-center gap-2 text-xs text-white/90">
+          <div
+            ref={triggerRef}
+            onMouseEnter={updatePosition}
+            className="relative group inline-flex cursor-default items-center gap-2 text-xs text-white/90"
+          >
             <span
               className={`h-2 w-2 rounded-full ${healthDotClass}`}
               aria-hidden="true"
             />
             <span>{healthLabel}</span>
             <span
+              ref={tooltipRef}
               role="tooltip"
-              className="pointer-events-none absolute bottom-[calc(100%+0.5rem)] left-1/2 z-10 w-max max-w-[16rem] -translate-x-1/2 rounded border px-2 py-1 text-left text-[11px] leading-snug opacity-0 shadow-sm transition-opacity group-hover:opacity-100 group-focus-within:opacity-100"
+              className="pointer-events-none absolute z-10 w-max max-w-[16rem] rounded border px-2 py-1 text-left text-[11px] leading-snug opacity-0 shadow-sm transition-opacity group-hover:opacity-100 group-focus-within:opacity-100"
               style={{
                 borderColor: "var(--border)",
                 backgroundColor: "var(--surface-2)",
@@ -98,8 +146,9 @@ export default function Footer() {
               }}
             >
               <span
+                ref={arrowRef}
                 aria-hidden="true"
-                className="absolute left-1/2 top-full h-2 w-2 -translate-x-1/2 -translate-y-1/2 rotate-45 border-r border-b"
+                className="absolute h-2 w-2 rotate-45 border-r border-b"
                 style={{
                   borderColor: "var(--border)",
                   backgroundColor: "var(--surface-2)",

@@ -128,7 +128,12 @@
     "invalidLink": "Este link é inválido ou expirou. Solicite um novo.",
     "requestNewLink": "Solicitar novo link",
     "backToLogin": "Voltar ao login",
-    "genericError": "Algo deu errado. Tente novamente."
+    "genericError": "Algo deu errado. Tente novamente.",
+    "ruleLength": "8+ caracteres",
+    "ruleLowercase": "Minúscula",
+    "ruleUppercase": "Maiúscula",
+    "ruleNumber": "Número",
+    "ruleSpecial": "Caractere especial"
   },
   "login": {
     "title": "Entrar",

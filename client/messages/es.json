@@ -128,7 +128,12 @@
     "invalidLink": "Este enlace es inválido o ha expirado. Solicita uno nuevo.",
     "requestNewLink": "Solicitar nuevo enlace",
     "backToLogin": "Volver al inicio de sesión",
-    "genericError": "Algo salió mal. Inténtalo de nuevo."
+    "genericError": "Algo salió mal. Inténtalo de nuevo.",
+    "ruleLength": "8+ caracteres",
+    "ruleLowercase": "Minúscula",
+    "ruleUppercase": "Mayúscula",
+    "ruleNumber": "Número",
+    "ruleSpecial": "Carácter especial"
   },
   "login": {
     "title": "Iniciar sesión",

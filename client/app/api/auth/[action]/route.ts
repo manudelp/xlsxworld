@@ -290,8 +290,11 @@ async function handleGoogleCallback(request: NextRequest) {
 
 async function handleForgotPassword(request: NextRequest) {
   const body = await request.json().catch(() => null);
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const redirectTo = `${siteUrl}/reset-password`;
   const { response, detail } = await backendJsonWithError<{ detail: string }>(
-    "/auth/forgot-password",
+    `/auth/forgot-password?redirect_to=${encodeURIComponent(redirectTo)}`,
     {
       method: "POST",
       body: JSON.stringify(body ?? {}),

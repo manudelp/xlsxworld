@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 
 from app.core.rate_limit import limiter
 from app.core.security import AuthenticatedPrincipal, get_bearer_token, get_current_user
@@ -51,9 +51,10 @@ async def logout(
 async def forgot_password(
     request: Request,
     body: AuthForgotPasswordRequest,
+    redirect_to: str | None = Query(default=None),
     auth_service: AuthService = Depends(get_auth_service),
 ) -> AuthMessageResponse:
-    return await auth_service.forgot_password(body)
+    return await auth_service.forgot_password(body, redirect_to=redirect_to)
 
 
 @router.post("/reset-password", response_model=AuthMessageResponse)

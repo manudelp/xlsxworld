@@ -128,7 +128,12 @@
     "invalidLink": "Ce lien est invalide ou a expiré. Veuillez en demander un nouveau.",
     "requestNewLink": "Demander un nouveau lien",
     "backToLogin": "Retour à la connexion",
-    "genericError": "Quelque chose s'est mal passé. Veuillez réessayer."
+    "genericError": "Quelque chose s'est mal passé. Veuillez réessayer.",
+    "ruleLength": "8+ caractères",
+    "ruleLowercase": "Minuscule",
+    "ruleUppercase": "Majuscule",
+    "ruleNumber": "Chiffre",
+    "ruleSpecial": "Caractère spécial"
   },
   "login": {
     "title": "Se connecter",
