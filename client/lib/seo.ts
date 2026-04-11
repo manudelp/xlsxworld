@@ -61,6 +61,8 @@ export const ACTIVE_TOOL_SLUGS = [
   "sql-to-xlsx",
   "xlsx-to-xml",
   "xml-to-xlsx",
+  "xlsx-to-pdf",
+  "pdf-to-xlsx",
   "remove-duplicates",
   "trim-spaces",
   "normalize-case",
@@ -132,6 +134,16 @@ export const TOOL_SEO: Record<string, ToolSeo> = {
     metaTitle: "Convert XML to Excel XLSX Online Free",
     metaDescription:
       "Import XML files into Excel workbooks. Map XML nodes to rows and columns automatically — free online tool, no signup or installation.",
+  },
+  "xlsx-to-pdf": {
+    metaTitle: "Convert Excel to PDF Online Free",
+    metaDescription:
+      "Export Excel spreadsheets to formatted PDF documents. Select sheets and page orientation — free online XLSX to PDF converter, no signup required.",
+  },
+  "pdf-to-xlsx": {
+    metaTitle: "Convert PDF to Excel XLSX Online Free",
+    metaDescription:
+      "Extract tables from PDF files into editable Excel workbooks. Automatic table detection — free online tool, no signup or installation needed.",
   },
   "remove-duplicates": {
     metaTitle: "Remove Duplicate Rows from Excel Online Free",

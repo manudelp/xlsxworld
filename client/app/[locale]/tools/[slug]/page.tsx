@@ -20,6 +20,8 @@ import ConvertXlsxToSql from "./convert/ConvertXlsxToSql";
 import ConvertSqlToXlsx from "./convert/ConvertSqlToXlsx";
 import ConvertXlsxToXml from "./convert/ConvertXlsxToXml";
 import ConvertXmlToXlsx from "./convert/ConvertXmlToXlsx";
+import ConvertXlsxToPdf from "./convert/ConvertXlsxToPdf";
+import ConvertPdfToXlsx from "./convert/ConvertPdfToXlsx";
 import MergeSheets from "./merge/MergeSheets";
 import SplitSheet from "./split/SplitSheet";
 import AppendWorkbooks from "./merge/AppendWorkbooks";
@@ -39,6 +41,8 @@ const specialComponents: Record<string, React.ReactNode> = {
   "sql-to-xlsx": <ConvertSqlToXlsx />,
   "xlsx-to-xml": <ConvertXlsxToXml />,
   "xml-to-xlsx": <ConvertXmlToXlsx />,
+  "xlsx-to-pdf": <ConvertXlsxToPdf />,
+  "pdf-to-xlsx": <ConvertPdfToXlsx />,
   "merge-sheets": <MergeSheets />,
   "append-workbooks": <AppendWorkbooks />,
   "split-sheet": <SplitSheet />,

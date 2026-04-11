@@ -513,7 +513,20 @@
     "xmlToXlsxInfo": "How XML is parsed",
     "xmlRowElementsStructure": "Repeated child elements are treated as rows, their sub-elements as columns",
     "xmlSheetPerGroup": "Grouped elements or named sections become separate sheets",
-    "xmlToXlsxNote": "Tabular XML structures are detected automatically. Deeply nested XML may not convert as expected."
+    "xmlToXlsxNote": "Tabular XML structures are detected automatically. Deeply nested XML may not convert as expected.",
+    "dropExcelConvertPdf": "Arrastra o selecciona un archivo Excel (.xlsx, .xls, .xlsb, etc.) para convertir a PDF",
+    "selectSheetsToExportPdf": "Selecciona hojas para exportar como PDF",
+    "pageOrientation": "Orientación de página",
+    "landscape": "Horizontal",
+    "portrait": "Vertical",
+    "downloadPdf": "Descargar PDF",
+    "pdfExportNote": "El PDF está formateado para impresión. Los estilos y fórmulas no se conservan.",
+    "dropPdfConvertXlsx": "Arrastra o selecciona un archivo PDF para convertir a XLSX",
+    "pdfToXlsxInfo": "Cómo funciona la extracción de PDF",
+    "pdfTablesExtracted": "Las tablas se detectan y extraen automáticamente de cada página",
+    "pdfComplexLayoutsNote": "Los diseños complejos, imágenes y celdas combinadas pueden no convertirse perfectamente",
+    "oneSheetPerPage": "Crear una hoja por página del PDF",
+    "pdfToXlsxNote": "Mejores resultados con PDFs que contienen tablas claramente estructuradas."
   },
   "theme": {
     "light": "Claro",
@@ -728,12 +741,38 @@
     "xlsx-to-pdf": {
       "title": "XLSX → PDF",
       "heading": "XLSX → PDF",
-      "description": "Exporta hojas seleccionadas a archivos PDF imprimibles."
+      "description": "Exporta hojas seleccionadas a archivos PDF imprimibles.",
+      "seoHowItWorksTitle": "Cómo funciona",
+      "seoHowItWorks1": "Sube tu archivo Excel (.xlsx, .xls o .xlsb).",
+      "seoHowItWorks2": "Selecciona las hojas que deseas incluir y elige la orientación de página.",
+      "seoHowItWorks3": "Haz clic en Descargar para obtener tu PDF formateado al instante.",
+      "seoWhyUseTitle": "Por qué usar esta herramienta",
+      "seoWhyUse": "¿Necesitas compartir datos de hojas de cálculo con personas que no tienen Excel? PDF es el formato de documento universal. Convierte tus archivos Excel a PDFs limpios e imprimibles — perfecto para informes, facturas y compartir datos.",
+      "seoFaqTitle": "Preguntas frecuentes",
+      "seoFaq1Q": "¿Se conservan las fórmulas y estilos?",
+      "seoFaq1A": "El PDF contiene los valores calculados de las celdas en un diseño de tabla formateado. Las fórmulas de Excel, el formato condicional y los gráficos no se incluyen.",
+      "seoFaq2Q": "¿Puedo elegir qué hojas exportar?",
+      "seoFaq2A": "Sí. Después de subir el archivo, selecciona una o más hojas para incluir en el PDF.",
+      "seoFaq3Q": "¿Qué tamaños de página se admiten?",
+      "seoFaq3A": "El PDF se genera en tamaño A4. Puedes elegir entre orientación horizontal y vertical."
     },
     "pdf-to-xlsx": {
       "title": "PDF → XLSX",
       "heading": "PDF → XLSX",
-      "description": "Extrae tablas de PDFs en hojas XLSX editables."
+      "description": "Extrae tablas de PDFs en hojas XLSX editables.",
+      "seoHowItWorksTitle": "Cómo funciona",
+      "seoHowItWorks1": "Sube tu archivo PDF.",
+      "seoHowItWorks2": "Las tablas se detectan y extraen automáticamente de cada página.",
+      "seoHowItWorks3": "Haz clic en Convertir para descargar un libro XLSX editable.",
+      "seoWhyUseTitle": "Por qué usar esta herramienta",
+      "seoWhyUse": "Los PDFs bloquean los datos en formato de solo lectura. Extrae tablas de informes, facturas o estados de cuenta PDF en hojas de cálculo Excel editables — sin necesidad de volver a escribir manualmente.",
+      "seoFaqTitle": "Preguntas frecuentes",
+      "seoFaq1Q": "¿Qué tipos de PDFs funcionan mejor?",
+      "seoFaq1A": "Los PDFs con tablas claramente estructuradas (filas y columnas) producen los mejores resultados. Las imágenes escaneadas o diseños complejos de múltiples columnas pueden no extraerse perfectamente.",
+      "seoFaq2Q": "¿Puedo obtener una hoja por página?",
+      "seoFaq2A": "Sí. Activa la opción 'una hoja por página' para crear una hoja de Excel separada para cada página del PDF.",
+      "seoFaq3Q": "¿Se extraen imágenes o gráficos?",
+      "seoFaq3A": "No. Solo se extraen datos tabulares de texto. Las imágenes, gráficos y contenido no tabular no se incluyen en la salida."
     },
     "xlsx-to-json": {
       "title": "XLSX → JSON",

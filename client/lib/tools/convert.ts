@@ -122,3 +122,33 @@ export async function xmlToXlsx(
   fd.append("include_headers", String(includeHeaders));
   return api.postForm<ArrayBuffer>("/api/v1/tools/convert/xml-to-xlsx", fd);
 }
+
+export async function xlsxToPdf(
+  file: File,
+  sheets?: string[],
+  orientation: "portrait" | "landscape" = "landscape",
+): Promise<ArrayBuffer> {
+  const fd = new FormData();
+  fd.append("file", file);
+  const qs: Record<string, string> = { orientation };
+  const path =
+    sheets && sheets.length > 0
+      ? buildUrlWithArrayParams("/api/v1/tools/convert/xlsx-to-pdf", {
+          sheets,
+          ...qs,
+        })
+      : buildUrl("/api/v1/tools/convert/xlsx-to-pdf", qs);
+  return api.postForm<ArrayBuffer>(path, fd);
+}
+
+export async function pdfToXlsx(
+  file: File,
+  includeHeaders = true,
+  oneSheetPerPage = false,
+): Promise<ArrayBuffer> {
+  const fd = new FormData();
+  fd.append("file", file);
+  fd.append("include_headers", String(includeHeaders));
+  fd.append("one_sheet_per_page", String(oneSheetPerPage));
+  return api.postForm<ArrayBuffer>("/api/v1/tools/convert/pdf-to-xlsx", fd);
+}

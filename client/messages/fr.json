@@ -513,7 +513,20 @@
     "xmlToXlsxInfo": "How XML is parsed",
     "xmlRowElementsStructure": "Repeated child elements are treated as rows, their sub-elements as columns",
     "xmlSheetPerGroup": "Grouped elements or named sections become separate sheets",
-    "xmlToXlsxNote": "Tabular XML structures are detected automatically. Deeply nested XML may not convert as expected."
+    "xmlToXlsxNote": "Tabular XML structures are detected automatically. Deeply nested XML may not convert as expected.",
+    "dropExcelConvertPdf": "Déposez ou sélectionnez un fichier Excel (.xlsx, .xls, .xlsb, etc.) pour convertir en PDF",
+    "selectSheetsToExportPdf": "Sélectionnez les feuilles à exporter en PDF",
+    "pageOrientation": "Orientation de la page",
+    "landscape": "Paysage",
+    "portrait": "Portrait",
+    "downloadPdf": "Télécharger le PDF",
+    "pdfExportNote": "Le PDF est formaté pour l'impression. Les styles et formules ne sont pas conservés.",
+    "dropPdfConvertXlsx": "Déposez ou sélectionnez un fichier PDF pour convertir en XLSX",
+    "pdfToXlsxInfo": "Comment fonctionne l'extraction PDF",
+    "pdfTablesExtracted": "Les tableaux sont automatiquement détectés et extraits de chaque page",
+    "pdfComplexLayoutsNote": "Les mises en page complexes, images et cellules fusionnées peuvent ne pas être converties parfaitement",
+    "oneSheetPerPage": "Créer une feuille par page du PDF",
+    "pdfToXlsxNote": "Meilleurs résultats avec des PDFs contenant des tableaux clairement structurés."
   },
   "theme": {
     "light": "Clair",
@@ -728,12 +741,38 @@
     "xlsx-to-pdf": {
       "title": "XLSX → PDF",
       "heading": "XLSX → PDF",
-      "description": "Exportez les feuilles sélectionnées en fichiers PDF imprimables."
+      "description": "Exportez les feuilles sélectionnées en fichiers PDF imprimables.",
+      "seoHowItWorksTitle": "Comment ça marche",
+      "seoHowItWorks1": "Téléchargez votre fichier Excel (.xlsx, .xls ou .xlsb).",
+      "seoHowItWorks2": "Sélectionnez les feuilles à inclure et choisissez l'orientation de la page.",
+      "seoHowItWorks3": "Cliquez sur Télécharger pour obtenir votre PDF formaté instantanément.",
+      "seoWhyUseTitle": "Pourquoi utiliser cet outil",
+      "seoWhyUse": "Besoin de partager des données de tableur avec des personnes qui n'ont pas Excel ? Le PDF est le format de document universel. Convertissez vos fichiers Excel en PDFs propres et imprimables — parfait pour les rapports, factures et le partage de données.",
+      "seoFaqTitle": "FAQ",
+      "seoFaq1Q": "Les formules et styles sont-ils conservés ?",
+      "seoFaq1A": "Le PDF contient les valeurs calculées des cellules dans une mise en page de tableau formaté. Les formules Excel, la mise en forme conditionnelle et les graphiques ne sont pas inclus.",
+      "seoFaq2Q": "Puis-je choisir quelles feuilles exporter ?",
+      "seoFaq2A": "Oui. Après le téléchargement, sélectionnez une ou plusieurs feuilles à inclure dans le PDF.",
+      "seoFaq3Q": "Quelles tailles de page sont prises en charge ?",
+      "seoFaq3A": "Le PDF est généré au format A4. Vous pouvez choisir entre l'orientation paysage et portrait."
     },
     "pdf-to-xlsx": {
       "title": "PDF → XLSX",
       "heading": "PDF → XLSX",
-      "description": "Extrayez des tableaux de PDF en feuilles XLSX modifiables."
+      "description": "Extrayez des tableaux de PDF en feuilles XLSX modifiables.",
+      "seoHowItWorksTitle": "Comment ça marche",
+      "seoHowItWorks1": "Téléchargez votre fichier PDF.",
+      "seoHowItWorks2": "Les tableaux sont automatiquement détectés et extraits de chaque page.",
+      "seoHowItWorks3": "Cliquez sur Convertir pour télécharger un classeur XLSX modifiable.",
+      "seoWhyUseTitle": "Pourquoi utiliser cet outil",
+      "seoWhyUse": "Les PDFs verrouillent les données en format lecture seule. Extrayez les tableaux des rapports, factures ou relevés PDF dans des feuilles de calcul Excel modifiables — sans saisie manuelle.",
+      "seoFaqTitle": "FAQ",
+      "seoFaq1Q": "Quels types de PDFs fonctionnent le mieux ?",
+      "seoFaq1A": "Les PDFs avec des tableaux clairement structurés (lignes et colonnes) produisent les meilleurs résultats. Les images numérisées ou les mises en page complexes multi-colonnes peuvent ne pas s'extraire parfaitement.",
+      "seoFaq2Q": "Puis-je obtenir une feuille par page ?",
+      "seoFaq2A": "Oui. Activez l'option 'une feuille par page' pour créer une feuille Excel séparée pour chaque page du PDF.",
+      "seoFaq3Q": "Les images ou graphiques sont-ils extraits ?",
+      "seoFaq3A": "Non. Seules les données tabulaires textuelles sont extraites. Les images, graphiques et contenus non tabulaires ne sont pas inclus dans la sortie."
     },
     "xlsx-to-json": {
       "title": "XLSX → JSON",

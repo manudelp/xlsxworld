@@ -55,14 +55,14 @@ export const toolItems: ToolItem[] = [
     slug: "xlsx-to-pdf",
     icon: "🖨️",
     category: "Convert",
-    commingSoon: true,
+    isNew: true,
   },
   {
     href: "/tools/pdf-to-xlsx",
     slug: "pdf-to-xlsx",
     icon: "📥",
     category: "Convert",
-    commingSoon: true,
+    isNew: true,
   },
   {
     href: "/tools/xlsx-to-json",
