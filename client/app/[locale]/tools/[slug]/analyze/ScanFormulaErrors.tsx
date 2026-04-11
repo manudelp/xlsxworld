@@ -36,8 +36,8 @@ export default function ScanFormulaErrors() {
         onFiles={(files) => { if (files[0]) void handleFile(files[0]); }}
       />
 
-      {loading && <p className="text-sm" style={{ color: "var(--muted-2)" }}>{t("uploadingScanning")}</p>}
-      {error && <p className="text-sm" style={{ color: "var(--danger)" }}>{error}</p>}
+      {loading && <p className="flex items-center gap-2 text-sm" style={{ color: "var(--muted-2)" }}><span className="tool-spinner" />{t("uploadingScanning")}</p>}
+      {error && <div className="tool-error">{error}</div>}
 
       {result && (
         <div className="space-y-4 rounded-lg border p-4" style={{ borderColor: "var(--border)", backgroundColor: "var(--surface)" }}>

@@ -72,12 +72,13 @@ export default function NormalizeCase() {
       />
 
       {loading ? (
-        <p className="text-sm" style={{ color: "var(--muted-2)" }}>
+        <p className="flex items-center gap-2 text-sm" style={{ color: "var(--muted-2)" }}>
+          <span className="tool-spinner" />
           Uploading and preparing workbook...
         </p>
       ) : null}
 
-      {error ? <p className="text-sm" style={{ color: "var(--danger)" }}>{error}</p> : null}
+      {error ? <div className="tool-error">{error}</div> : null}
 
       {preview ? (
         <div

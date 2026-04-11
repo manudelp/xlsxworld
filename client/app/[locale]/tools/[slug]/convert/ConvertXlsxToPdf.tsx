@@ -95,16 +95,13 @@ export default function ConvertXlsxToPdf() {
         }}
       />
 
-      {loading && (
-        <div className="text-sm" style={{ color: "var(--muted-2)" }}>
+      {loading && !preview && (
+        <div className="flex items-center gap-2 text-sm" style={{ color: "var(--muted-2)" }}>
+          <span className="tool-spinner" />
           {t("uploadingScanning")}
         </div>
       )}
-      {error && (
-        <div className="text-sm" style={{ color: "var(--danger)" }}>
-          {error}
-        </div>
-      )}
+      {error && <div className="tool-error">{error}</div>}
 
       {preview && (
         <div
@@ -253,15 +250,13 @@ export default function ConvertXlsxToPdf() {
       )}
 
       {preview && (
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-xs" style={{ color: "var(--muted-2)" }}>
-            {t("pdfExportNote")}
-          </p>
+        <div className="flex justify-end">
           <button
             onClick={() => void download()}
             disabled={!canConvert}
-            className="tool-primary-action cursor-pointer rounded-md px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
+            className="tool-primary-action inline-flex cursor-pointer items-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
           >
+            {loading && <span className="tool-spinner" />}
             {loading ? t("exporting") : t("downloadPdf")}
           </button>
         </div>

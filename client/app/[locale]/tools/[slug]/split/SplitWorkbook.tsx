@@ -104,7 +104,8 @@ export default function SplitWorkbook() {
       />
 
       {previewLoading && (
-        <div className="text-sm" style={{ color: "var(--muted-2)" }}>
+        <div className="flex items-center gap-2 text-sm" style={{ color: "var(--muted-2)" }}>
+          <span className="tool-spinner" />
           Reading workbook structure...
         </div>
       )}
@@ -258,19 +259,20 @@ export default function SplitWorkbook() {
         </div>
       )}
 
+      {error && <div className="tool-error">{error}</div>}
+
       {file && (
         <div className="flex justify-end">
           <button
             onClick={handleSplit}
             disabled={!canSplit}
-            className="tool-primary-action cursor-pointer rounded-md px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
+            className="tool-primary-action inline-flex cursor-pointer items-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
           >
+            {loading && <span className="tool-spinner" />}
             {loading ? t("splitting") : t("split")}
           </button>
         </div>
       )}
-
-      {error && <div className="text-sm" style={{ color: "var(--danger)" }}>{error}</div>}
     </div>
   );
 }

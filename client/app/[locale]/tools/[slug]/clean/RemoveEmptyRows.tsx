@@ -67,8 +67,8 @@ export default function RemoveEmptyRows() {
         onFiles={(files) => { if (files[0]) void onFile(files[0]); }}
       />
 
-      {loading && !result && <p className="text-sm" style={{ color: "var(--muted-2)" }}>{t("processing")}</p>}
-      {error && <p className="text-sm" style={{ color: "var(--danger)" }}>{error}</p>}
+      {loading && !result && <p className="flex items-center gap-2 text-sm" style={{ color: "var(--muted-2)" }}><span className="tool-spinner" />{t("processing")}</p>}
+      {error && <div className="tool-error">{error}</div>}
 
       {preview && !result && (
         <div className="space-y-4 rounded-lg border p-4" style={{ borderColor: "var(--border)", backgroundColor: "var(--surface)" }}>

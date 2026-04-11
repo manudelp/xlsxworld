@@ -682,14 +682,15 @@ export default function AppendWorkbooks() {
       {files.length > 0 && (
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="text-xs" style={{ color: "var(--muted-2)" }}>
-            Combines all workbook sheets into one output workbook, preserving sheet structure.
+            All workbook sheets combined into one output, preserving sheet structure.
           </div>
           <button
             type="button"
             onClick={handleAppend}
             disabled={files.length < 2 || loading}
-            className="tool-primary-action cursor-pointer rounded-md px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
+            className="tool-primary-action inline-flex cursor-pointer items-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
           >
+            {loading && <span className="tool-spinner" />}
             {loading ? t("appending") : t("append")}
           </button>
         </div>

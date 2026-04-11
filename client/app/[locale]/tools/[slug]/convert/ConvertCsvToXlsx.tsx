@@ -10,6 +10,7 @@ export default function ConvertCsvToXlsx() {
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
   const [delimiter, setDelimiter] = useState(",");
   const [sheetName, setSheetName] = useState("Sheet1");
 
@@ -18,6 +19,7 @@ export default function ConvertCsvToXlsx() {
 
   const onFile = useCallback((selected: File) => {
     setError(null);
+    setSuccess(false);
     setFile(selected);
   }, []);
 
@@ -43,6 +45,7 @@ export default function ConvertCsvToXlsx() {
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
+      setSuccess(true);
     } catch (e) {
       setError(e instanceof Error ? e.message : t("conversionFailed"));
     } finally {
@@ -64,39 +67,12 @@ export default function ConvertCsvToXlsx() {
 
       {file && (
         <div
-          className="rounded-md border px-3 py-2 text-sm"
-          style={{
-            borderColor: "var(--border)",
-            backgroundColor: "var(--surface-2)",
-            color: "var(--foreground)",
-          }}
-        >
-          Selected file: <strong>{file.name}</strong> ({(file.size / 1024).toFixed(1)} KB)
-        </div>
-      )}
-
-      {file && (
-        <div
-          className="rounded-lg border p-4"
+          className="rounded-lg border p-3"
           style={{
             borderColor: "var(--border)",
             backgroundColor: "var(--surface)",
           }}
         >
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-            <h3 className="font-medium">{t("conversionSettings")}</h3>
-            <span
-              className="rounded-full border px-2 py-0.5 text-xs"
-              style={{
-                borderColor: "var(--tag-border)",
-                backgroundColor: "var(--tag-bg)",
-                color: "var(--tag-text)",
-              }}
-            >
-              CSV to XLSX
-            </span>
-          </div>
-
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <label className="block text-sm" style={{ color: "var(--muted)" }}>
               Output sheet name
@@ -155,23 +131,19 @@ export default function ConvertCsvToXlsx() {
         </div>
       )}
 
+      {error && <div className="tool-error">{error}</div>}
+      {success && <div className="tool-success">✓ {t("conversionComplete") ?? "File converted successfully"}</div>}
+
       {file && (
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-xs" style={{ color: "var(--muted-2)" }}>
-            Data is preserved; formulas, styles, and advanced Excel formatting are not.
-          </p>
-
-          <button
-            onClick={handleConvert}
-            disabled={!canConvert}
-            className="tool-primary-action cursor-pointer rounded-md px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {loading ? t("converting") : t("convertToXlsx")}
-          </button>
-        </div>
+        <button
+          onClick={handleConvert}
+          disabled={!canConvert}
+          className="tool-primary-action inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:ml-auto sm:flex"
+        >
+          {loading && <span className="tool-spinner" />}
+          {loading ? t("converting") : t("convertToXlsx")}
+        </button>
       )}
-
-      {error && <div className="text-sm" style={{ color: "var(--danger)" }}>{error}</div>}
     </div>
   );
 }

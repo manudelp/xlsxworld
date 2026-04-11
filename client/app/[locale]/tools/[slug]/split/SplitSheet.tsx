@@ -233,7 +233,8 @@ export default function SplitSheet() {
       />
 
       {previewLoading && (
-        <div className="text-sm" style={{ color: "var(--muted-2)" }}>
+        <div className="flex items-center gap-2 text-sm" style={{ color: "var(--muted-2)" }}>
+          <span className="tool-spinner" />
           Reading workbook structure...
         </div>
       )}
@@ -538,23 +539,20 @@ export default function SplitSheet() {
         </div>
       )}
 
-      {file && (
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-xs" style={{ color: "var(--muted-2)" }}>
-            Output names follow your base name and numbering style, like sheet_01 or chunk_A.
-          </p>
+      {error && <div className="tool-error">{error}</div>}
 
+      {file && (
+        <div className="flex justify-end">
           <button
             onClick={handleSplit}
             disabled={!canSplit}
-            className="tool-primary-action cursor-pointer rounded-md px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
+            className="tool-primary-action inline-flex cursor-pointer items-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
           >
+            {loading && <span className="tool-spinner" />}
             {loading ? t("splitting") : t("split")}
           </button>
         </div>
       )}
-
-      {error && <div className="text-sm" style={{ color: "var(--danger)" }}>{error}</div>}
     </div>
   );
 }

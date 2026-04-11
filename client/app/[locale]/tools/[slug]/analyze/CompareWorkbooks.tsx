@@ -68,7 +68,7 @@ export default function CompareWorkbooks() {
         </div>
       )}
 
-      {error && <p className="text-sm" style={{ color: "var(--danger)" }}>{error}</p>}
+      {error && <div className="tool-error">{error}</div>}
 
       {result && (
         <div className="space-y-4 rounded-lg border p-4" style={{ borderColor: "var(--border)", backgroundColor: "var(--surface)" }}>

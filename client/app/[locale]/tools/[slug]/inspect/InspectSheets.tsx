@@ -782,12 +782,13 @@ export default function InspectSheets() {
       />
 
       {loading && (
-        <div className="text-sm" style={{ color: "var(--muted-2)" }}>
+        <div className="flex items-center gap-2 text-sm" style={{ color: "var(--muted-2)" }}>
+          <span className="tool-spinner" />
           {t("uploadingParsing")}
         </div>
       )}
 
-      {error && <div className="text-sm text-red-600">{error}</div>}
+      {error && <div className="tool-error">{error}</div>}
 
       {preview && (
         <div className="space-y-4">
@@ -1852,12 +1853,7 @@ export default function InspectSheets() {
                 </div>
 
                 <p className="mt-2 text-xs" style={{ color: "var(--muted-2)" }}>
-                  Search, filter, and sort apply to the currently loaded rows
-                  for this sheet.
-                </p>
-                <p className="mt-1 text-xs" style={{ color: "var(--muted-2)" }}>
-                  Tip: use Shift + mouse wheel for horizontal scroll and Alt +
-                  drag to pan the grid.
+                  Tip: Shift + scroll for horizontal, Alt + drag to pan.
                 </p>
               </>
             ) : (

@@ -35,8 +35,8 @@ export default function RemovePassword() {
         ⚠️ {td("limitation")}
       </div>
 
-      {loading && <p className="text-sm" style={{ color: "var(--muted-2)" }}>{t("processing")}</p>}
-      {error && <p className="text-sm" style={{ color: "var(--danger)" }}>{error}</p>}
+      {loading && <p className="flex items-center gap-2 text-sm" style={{ color: "var(--muted-2)" }}><span className="tool-spinner" />{t("processing")}</p>}
+      {error && <div className="tool-error">{error}</div>}
     </div>
   );
 }

@@ -38,7 +38,7 @@ export default function FreezeHeader() {
         onFiles={(files) => { if (files[0]) { setFile(files[0]); setError(null); } }}
       />
 
-      {error && <p className="text-sm" style={{ color: "var(--danger)" }}>{error}</p>}
+      {error && <div className="tool-error">{error}</div>}
 
       {file && (
         <div className="space-y-4 rounded-lg border p-4" style={{ borderColor: "var(--border)", backgroundColor: "var(--surface)" }}>

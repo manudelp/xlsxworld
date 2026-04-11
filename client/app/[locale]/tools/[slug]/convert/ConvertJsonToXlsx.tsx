@@ -10,10 +10,12 @@ export default function ConvertJsonToXlsx() {
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
   const [includeHeaders, setIncludeHeaders] = useState(true);
 
   const onFile = useCallback((selected: File) => {
     setError(null);
+    setSuccess(false);
     setFile(selected);
   }, []);
 
@@ -40,6 +42,7 @@ export default function ConvertJsonToXlsx() {
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
+      setSuccess(true);
     } catch (e) {
       setError(e instanceof Error ? e.message : t("conversionFailed"));
     } finally {
@@ -58,20 +61,6 @@ export default function ConvertJsonToXlsx() {
           if (selected) onFile(selected);
         }}
       />
-
-      {file && (
-        <div
-          className="rounded-md border px-3 py-2 text-sm"
-          style={{
-            borderColor: "var(--border)",
-            backgroundColor: "var(--surface-2)",
-            color: "var(--foreground)",
-          }}
-        >
-          {t("selectedFile")} <strong>{file.name}</strong> (
-          {(file.size / 1024).toFixed(1)} KB)
-        </div>
-      )}
 
       {file && (
         <div
@@ -102,26 +91,18 @@ export default function ConvertJsonToXlsx() {
         </div>
       )}
 
+      {error && <div className="tool-error">{error}</div>}
+      {success && <div className="tool-success">✓ {t("conversionComplete") ?? "File converted successfully"}</div>}
+
       {file && (
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-xs" style={{ color: "var(--muted-2)" }}>
-            {t("nestedJsonSerializedInCells")}
-          </p>
-
-          <button
-            onClick={() => void handleConvert()}
-            disabled={!file || loading}
-            className="tool-primary-action cursor-pointer rounded-md px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {loading ? t("converting") : t("convertToXlsx")}
-          </button>
-        </div>
-      )}
-
-      {error && (
-        <div className="text-sm" style={{ color: "var(--danger)" }}>
-          {error}
-        </div>
+        <button
+          onClick={() => void handleConvert()}
+          disabled={!file || loading}
+          className="tool-primary-action inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:ml-auto sm:flex"
+        >
+          {loading && <span className="tool-spinner" />}
+          {loading ? t("converting") : t("convertToXlsx")}
+        </button>
       )}
     </div>
   );

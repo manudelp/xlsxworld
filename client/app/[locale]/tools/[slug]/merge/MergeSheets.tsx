@@ -291,7 +291,8 @@ export default function MergeSheets() {
       />
 
       {previewLoading && (
-        <div className="text-sm" style={{ color: "var(--muted-2)" }}>
+        <div className="flex items-center gap-2 text-sm" style={{ color: "var(--muted-2)" }}>
+          <span className="tool-spinner" />
           Reading workbook structure...
         </div>
       )}
@@ -726,14 +727,15 @@ export default function MergeSheets() {
       {file && (
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="text-xs" style={{ color: "var(--muted-2)" }}>
-            Tip: Selected sheets are merged using the order shown above.
+            Selected sheets are merged in the order shown above.
           </div>
           <button
             type="button"
             onClick={handleMerge}
             disabled={!isReadyToMerge || loading}
-            className="tool-primary-action cursor-pointer rounded-md px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
+            className="tool-primary-action inline-flex cursor-pointer items-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
           >
+            {loading && <span className="tool-spinner" />}
             {loading ? t("merging") : t("merge")}
           </button>
         </div>

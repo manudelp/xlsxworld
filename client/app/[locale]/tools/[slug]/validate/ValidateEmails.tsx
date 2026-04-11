@@ -58,7 +58,7 @@ export default function ValidateEmails() {
       <FileUploadDropzone accept={EXCEL_ACCEPT} message={td("dropMessage")} hasError={!!error}
         onFiles={(files) => { if (files[0]) void onFile(files[0]); }} />
 
-      {error && <p className="text-sm" style={{ color: "var(--danger)" }}>{error}</p>}
+      {error && <div className="tool-error">{error}</div>}
 
       {preview && !result && (
         <div className="space-y-4 rounded-lg border p-4" style={{ borderColor: "var(--border)", backgroundColor: "var(--surface)" }}>

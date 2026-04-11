@@ -70,7 +70,7 @@ export default function PasswordProtect() {
         ⚠️ {td("limitation")}
       </div>
 
-      {error && <p className="text-sm" style={{ color: "var(--danger)" }}>{error}</p>}
+      {error && <div className="tool-error">{error}</div>}
 
       {preview && (
         <div className="space-y-4 rounded-lg border p-4" style={{ borderColor: "var(--border)", backgroundColor: "var(--surface)" }}>

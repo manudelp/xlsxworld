@@ -80,12 +80,13 @@ export default function ConvertXlsxToCsv() {
         }}
       />
 
-      {loading && (
-        <div className="text-sm" style={{ color: "var(--muted-2)" }}>
+      {loading && !preview && (
+        <div className="flex items-center gap-2 text-sm" style={{ color: "var(--muted-2)" }}>
+          <span className="tool-spinner" />
           {t("uploadingScanning")}
         </div>
       )}
-      {error && <div className="text-sm" style={{ color: "var(--danger)" }}>{error}</div>}
+      {error && <div className="tool-error">{error}</div>}
 
       {preview && (
         <div
@@ -272,12 +273,7 @@ export default function ConvertXlsxToCsv() {
             </table>
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-xs" style={{ color: "var(--muted-2)" }}>
-              Token expires after 15 minutes. CSV export includes the full selected sheet.
-            </p>
-
-            <div className="flex flex-wrap justify-end gap-2">
+          <div className="flex flex-wrap items-center justify-end gap-2">
               {selectedCount === 0 ? (
                 <button
                   disabled
@@ -375,7 +371,6 @@ export default function ConvertXlsxToCsv() {
                   {loading ? t("exporting") : t("downloadAllCsvsZip")}
                 </button>
               ) : null}
-            </div>
           </div>
         </>
       )}
