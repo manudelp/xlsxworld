@@ -33,26 +33,39 @@ function FAQContent() {
 
   const faqs = [
     {
-      category: t("generalInfo"),
+      category: t("privacySecurity"),
       questions: [
         { q: t("q1"), a: t("a1") },
         { q: t("q2"), a: t("a2") },
         { q: t("q3"), a: t("a3") },
-      ],
-    },
-    {
-      category: t("dataPrivacy"),
-      questions: [
         { q: t("q4"), a: t("a4") },
-        { q: t("q5"), a: t("a5") },
       ],
     },
     {
-      category: t("technicalFeatures"),
+      category: t("usingTools"),
       questions: [
+        { q: t("q5"), a: t("a5") },
         { q: t("q6"), a: t("a6") },
         { q: t("q7"), a: t("a7") },
         { q: t("q8"), a: t("a8") },
+        { q: t("q9"), a: t("a9") },
+      ],
+    },
+    {
+      category: t("toolsFeatures"),
+      questions: [
+        { q: t("q10"), a: t("a10") },
+        { q: t("q11"), a: t("a11") },
+        { q: t("q12"), a: t("a12") },
+        { q: t("q13"), a: t("a13") },
+      ],
+    },
+    {
+      category: t("accountData"),
+      questions: [
+        { q: t("q14"), a: t("a14") },
+        { q: t("q15"), a: t("a15") },
+        { q: t("q16"), a: t("a16") },
       ],
     },
   ];
