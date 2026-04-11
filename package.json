@@ -5,12 +5,15 @@
   "scripts": {
     "prepare": "husky install",
     "build": "npm --prefix client run build",
-    "dev": "npm --prefix client run dev",
+    "dev": "concurrently -n client,server -c cyan,green \"npm --prefix client run dev\" \"cd server && uv run uvicorn main:app --reload\"",
+    "dev:client": "npm --prefix client run dev",
+    "dev:server": "cd server && uv run uvicorn main:app --reload",
     "verify:build": "npm --prefix client run build",
     "verify:ci": "npm --prefix client run type-check && npm --prefix client run lint && npm --prefix client run build",
     "format": "prettier --write \"client/**/*.{ts,tsx,js,jsx,json,css,md}\""
   },
   "devDependencies": {
+    "concurrently": "^9.2.1",
     "husky": "^8.0.0",
     "lint-staged": "^13.0.0",
     "prettier": "^3.0.0"
