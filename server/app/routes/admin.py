@@ -1,0 +1,347 @@
+from __future__ import annotations
+
+from datetime import datetime, timedelta, timezone
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import case, cast, func, outerjoin, select, text, Float, Integer
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.security import AuthenticatedPrincipal, get_current_user
+from app.db.models.analytics import MetricEvent, UserActivityDaily
+from app.db.models.users import AppUser, UserRole
+from app.db.session import get_db_session
+
+router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
+
+
+async def require_admin(
+    principal: AuthenticatedPrincipal = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session),
+) -> AuthenticatedPrincipal:
+    result = await db.execute(
+        select(AppUser.role).where(AppUser.id == principal.user_id)
+    )
+    role = result.scalar_one_or_none()
+    if role != UserRole.ADMIN:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")
+    return principal
+
+
+@router.get("/overview")
+async def overview(
+    _: AuthenticatedPrincipal = Depends(require_admin),
+    db: AsyncSession = Depends(get_db_session),
+) -> dict:
+    now = datetime.now(timezone.utc)
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    week_ago = now - timedelta(days=7)
+    month_ago = now - timedelta(days=30)
+
+    # User counts
+    user_q = await db.execute(
+        select(
+            func.count().label("total"),
+            func.count().filter(AppUser.created_at >= today_start).label("today"),
+            func.count().filter(AppUser.created_at >= week_ago).label("week"),
+            func.count().filter(AppUser.created_at >= month_ago).label("month"),
+        ).select_from(AppUser)
+    )
+    u = user_q.one()
+
+    # Tool usage counts from metric_events
+    col_success = MetricEvent.properties_json["success"].as_string()
+    col_duration = cast(MetricEvent.properties_json["duration_ms"].as_string(), Float)
+
+    tool_q = await db.execute(
+        select(
+            func.count().label("total"),
+            func.count().filter(MetricEvent.occurred_at >= today_start).label("today"),
+            func.count().filter(MetricEvent.occurred_at >= week_ago).label("week"),
+            func.count().filter(MetricEvent.occurred_at >= month_ago).label("month"),
+            func.avg(
+                case(
+                    (col_success == "true", 1.0),
+                    else_=0.0,
+                )
+            ).label("success_rate"),
+            func.avg(col_duration).label("avg_duration"),
+        ).where(MetricEvent.event_name == "tool_usage")
+    )
+    t = tool_q.one()
+
+    return {
+        "total_users": u.total,
+        "new_users_today": u.today,
+        "new_users_this_week": u.week,
+        "new_users_this_month": u.month,
+        "total_tool_uses": t.total,
+        "tool_uses_today": t.today,
+        "tool_uses_this_week": t.week,
+        "tool_uses_this_month": t.month,
+        "overall_success_rate": round((t.success_rate or 0) * 100, 1),
+        "avg_response_time_ms": round(t.avg_duration or 0, 1),
+    }
+
+
+@router.get("/overview/trend")
+async def overview_trend(
+    _: AuthenticatedPrincipal = Depends(require_admin),
+    db: AsyncSession = Depends(get_db_session),
+) -> list[dict]:
+    month_ago = datetime.now(timezone.utc) - timedelta(days=30)
+    day_col = func.date_trunc("day", MetricEvent.occurred_at)
+
+    result = await db.execute(
+        select(
+            day_col.label("day"),
+            func.count().label("count"),
+        )
+        .where(MetricEvent.event_name == "tool_usage")
+        .where(MetricEvent.occurred_at >= month_ago)
+        .group_by(day_col)
+        .order_by(day_col)
+    )
+    return [
+        {"date": row.day.strftime("%Y-%m-%d"), "count": row.count}
+        for row in result.all()
+    ]
+
+
+@router.get("/tools")
+async def tools(
+    _: AuthenticatedPrincipal = Depends(require_admin),
+    db: AsyncSession = Depends(get_db_session),
+) -> list[dict]:
+    col_slug = MetricEvent.properties_json["tool_slug"].as_string()
+    col_name = MetricEvent.properties_json["tool_name"].as_string()
+    col_success = MetricEvent.properties_json["success"].as_string()
+    col_duration = cast(MetricEvent.properties_json["duration_ms"].as_string(), Float)
+
+    result = await db.execute(
+        select(
+            col_slug.label("tool_slug"),
+            col_name.label("tool_name"),
+            func.count().label("total_uses"),
+            func.avg(
+                case(
+                    (col_success == "true", 1.0),
+                    else_=0.0,
+                )
+            ).label("success_rate"),
+            func.avg(col_duration).label("avg_duration_ms"),
+            func.max(MetricEvent.occurred_at).label("last_used_at"),
+        )
+        .where(MetricEvent.event_name == "tool_usage")
+        .group_by(col_slug, col_name)
+        .order_by(func.count().desc())
+    )
+    rows = result.all()
+    return [
+        {
+            "tool_slug": r.tool_slug,
+            "tool_name": r.tool_name,
+            "total_uses": r.total_uses,
+            "success_rate": round((r.success_rate or 0) * 100, 1),
+            "avg_duration_ms": round(r.avg_duration_ms or 0, 1),
+            "last_used_at": r.last_used_at.isoformat() if r.last_used_at else None,
+        }
+        for r in rows
+    ]
+
+
+@router.get("/users")
+async def users(
+    _: AuthenticatedPrincipal = Depends(require_admin),
+    db: AsyncSession = Depends(get_db_session),
+) -> dict:
+    now = datetime.now(timezone.utc)
+    month_ago = now - timedelta(days=30)
+
+    # Total users
+    total_q = await db.execute(select(func.count()).select_from(AppUser))
+    total_users = total_q.scalar_one()
+
+    # Signups per day (last 30 days)
+    signups_q = await db.execute(
+        select(
+            func.date_trunc("day", AppUser.created_at).label("day"),
+            func.count().label("count"),
+        )
+        .where(AppUser.created_at >= month_ago)
+        .group_by(text("1"))
+        .order_by(text("1"))
+    )
+    signups_per_day = [
+        {"date": row.day.strftime("%Y-%m-%d"), "count": row.count}
+        for row in signups_q.all()
+    ]
+
+    # DAU per day (last 30 days)
+    dau_q = await db.execute(
+        select(
+            UserActivityDaily.activity_date.label("day"),
+            func.count(func.distinct(UserActivityDaily.user_id)).label("count"),
+        )
+        .where(UserActivityDaily.activity_date >= month_ago.date())
+        .group_by(UserActivityDaily.activity_date)
+        .order_by(UserActivityDaily.activity_date)
+    )
+    dau_per_day = [
+        {"date": row.day.strftime("%Y-%m-%d"), "count": row.count}
+        for row in dau_q.all()
+    ]
+
+    return {
+        "total_users": total_users,
+        "signups_per_day": signups_per_day,
+        "dau_per_day": dau_per_day,
+    }
+
+
+@router.get("/users/list")
+async def users_list(
+    _: AuthenticatedPrincipal = Depends(require_admin),
+    db: AsyncSession = Depends(get_db_session),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=20, ge=1, le=100),
+) -> dict:
+    # Subquery: tool uses per user
+    tool_counts = (
+        select(
+            MetricEvent.user_id.label("uid"),
+            func.count().label("tool_uses"),
+        )
+        .where(MetricEvent.event_name == "tool_usage")
+        .group_by(MetricEvent.user_id)
+        .subquery()
+    )
+
+    total_q = await db.execute(select(func.count()).select_from(AppUser))
+    total = total_q.scalar_one()
+
+    rows_q = await db.execute(
+        select(
+            AppUser.id,
+            AppUser.email,
+            AppUser.display_name,
+            AppUser.role,
+            AppUser.status,
+            AppUser.created_at,
+            AppUser.last_seen_at,
+            func.coalesce(tool_counts.c.tool_uses, 0).label("total_tool_uses"),
+        )
+        .outerjoin(tool_counts, AppUser.id == tool_counts.c.uid)
+        .order_by(AppUser.created_at.desc())
+        .offset((page - 1) * page_size)
+        .limit(page_size)
+    )
+    rows = rows_q.all()
+
+    return {
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "users": [
+            {
+                "id": str(r.id),
+                "email": r.email,
+                "display_name": r.display_name,
+                "role": r.role.value if hasattr(r.role, "value") else r.role,
+                "status": r.status.value if hasattr(r.status, "value") else r.status,
+                "created_at": r.created_at.isoformat() if r.created_at else None,
+                "last_seen_at": r.last_seen_at.isoformat() if r.last_seen_at else None,
+                "total_tool_uses": r.total_tool_uses,
+            }
+            for r in rows
+        ],
+    }
+
+
+@router.get("/activity")
+async def activity(
+    _: AuthenticatedPrincipal = Depends(require_admin),
+    db: AsyncSession = Depends(get_db_session),
+) -> list[dict]:
+    col_slug = MetricEvent.properties_json["tool_slug"].as_string()
+    col_name = MetricEvent.properties_json["tool_name"].as_string()
+    col_duration = MetricEvent.properties_json["duration_ms"].as_string()
+    col_success = MetricEvent.properties_json["success"].as_string()
+    col_error = MetricEvent.properties_json["error_type"].as_string()
+
+    result = await db.execute(
+        select(
+            MetricEvent.occurred_at,
+            MetricEvent.user_id,
+            col_slug.label("tool_slug"),
+            col_name.label("tool_name"),
+            col_duration.label("duration_ms"),
+            col_success.label("success"),
+            col_error.label("error_type"),
+            AppUser.email.label("user_email"),
+        )
+        .outerjoin(AppUser, MetricEvent.user_id == AppUser.id)
+        .where(MetricEvent.event_name == "tool_usage")
+        .order_by(MetricEvent.occurred_at.desc())
+        .limit(50)
+    )
+    rows = result.all()
+    return [
+        {
+            "occurred_at": r.occurred_at.isoformat() if r.occurred_at else None,
+            "user_id": str(r.user_id) if r.user_id else None,
+            "tool_slug": r.tool_slug,
+            "tool_name": r.tool_name,
+            "duration_ms": r.duration_ms,
+            "success": r.success == "true" if r.success else False,
+            "error_type": r.error_type if r.error_type and r.error_type != "null" else None,
+            "user_email": r.user_email,
+        }
+        for r in rows
+    ]
+
+
+@router.get("/performance")
+async def performance(
+    _: AuthenticatedPrincipal = Depends(require_admin),
+    db: AsyncSession = Depends(get_db_session),
+) -> list[dict]:
+    now = datetime.now(timezone.utc)
+    last_24h = now - timedelta(hours=24)
+
+    col_path = MetricEvent.properties_json["path"].as_string()
+    col_method = MetricEvent.properties_json["method"].as_string()
+    col_success = MetricEvent.properties_json["success"].as_string()
+    col_duration = cast(MetricEvent.properties_json["duration_ms"].as_string(), Float)
+
+    result = await db.execute(
+        select(
+            col_path.label("path"),
+            col_method.label("method"),
+            func.count().label("total_requests"),
+            func.avg(col_duration).label("avg_response_time_ms"),
+            func.percentile_cont(0.95).within_group(col_duration).label("p95_response_time_ms"),
+            func.avg(
+                case(
+                    (col_success == "true", 0.0),
+                    else_=1.0,
+                )
+            ).label("error_rate"),
+            func.count().filter(MetricEvent.occurred_at >= last_24h).label("requests_last_24h"),
+        )
+        .where(MetricEvent.event_name == "endpoint_performance")
+        .group_by(col_path, col_method)
+        .order_by(func.count().desc())
+    )
+    rows = result.all()
+    return [
+        {
+            "path": r.path,
+            "method": r.method,
+            "total_requests": r.total_requests,
+            "avg_response_time_ms": round(r.avg_response_time_ms or 0, 1),
+            "p95_response_time_ms": round(r.p95_response_time_ms or 0, 1),
+            "error_rate": round((r.error_rate or 0) * 100, 1),
+            "requests_last_24h": r.requests_last_24h,
+        }
+        for r in rows
+    ]

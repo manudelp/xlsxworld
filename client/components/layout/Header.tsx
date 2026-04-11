@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { ChevronDown, LogOut, UserRound } from "lucide-react";
+import { ChevronDown, LogOut, UserRound, ShieldUser } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -66,7 +66,7 @@ export default function Header() {
         <LanguageToggle />
         <ThemeToggle />
         {isLoading ? (
-          <span className="inline-flex items-center rounded-md bg-muted px-3 py-2 text-sm font-medium text-primary-foreground opacity-50">
+          <span className="inline-flex items-center rounded-md bg-muted px-3 py-2 text-sm font-medium text-primary-foreground opacity-50 cursor-wait">
             <span className="animate-pulse">{t("header.login")}</span>
           </span>
         ) : isAuthenticated ? (
@@ -115,6 +115,18 @@ export default function Header() {
                 <UserRound className="h-4 w-4" />
                 {t("account.myAccount")}
               </Link>
+              {user?.role === "admin" && (
+                <Link
+                  href="/admin"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-2 rounded px-3 py-2 text-sm hover:bg-black/5"
+                  style={{ color: "var(--foreground)" }}
+                  tabIndex={menuOpen ? 0 : -1}
+                >
+                  <ShieldUser className="h-4 w-4" />
+                  Admin
+                </Link>
+              )}
               <button
                 type="button"
                 onClick={handleLogout}

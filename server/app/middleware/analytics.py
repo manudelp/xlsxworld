@@ -96,7 +96,7 @@ class AnalyticsMiddleware(BaseHTTPMiddleware):
 
     @staticmethod
     def _should_skip_tracking(path: str, method: str, route_name: str | None) -> bool:
-        if path in {"/health", "/api/health"} or path.startswith(("/docs", "/redoc", "/openapi")):
+        if path in {"/health", "/api/health"} or path.startswith(("/docs", "/redoc", "/openapi", "/api/v1/admin")):
             return True
 
         if method.upper() == "GET" and path == "/auth/me":
