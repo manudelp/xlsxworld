@@ -71,6 +71,9 @@ class AnalyticsService:
             pass
 
     async def _guard(self, task_name: str, coro: Any) -> None:
+        if get_settings().app_env != "production":
+            self.logger.debug("Analytics skipped (non-production environment)")
+            return
         try:
             await coro
         except Exception:

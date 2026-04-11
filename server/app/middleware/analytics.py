@@ -8,6 +8,7 @@ from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.responses import Response
 
+from app.core.config import get_settings
 from app.core.security import AuthenticatedPrincipal, verify_supabase_token
 from app.schemas.analytics import EndpointPerformanceEvent, FileUploadEvent, ToolUsageEvent
 from app.services.analytics_service import AnalyticsService, get_analytics_service
@@ -15,6 +16,9 @@ from app.services.analytics_service import AnalyticsService, get_analytics_servi
 
 class AnalyticsMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
+        if get_settings().app_env != "production":
+            return await call_next(request)
+
         path = request.url.path
         analytics_service = get_analytics_service(request)
         started_at = perf_counter()
