@@ -59,15 +59,42 @@ def _validate_magic_bytes(raw: bytes, extension: str):
 
 
 def _read_openpyxl_values(raw: bytes) -> dict[str, list[list[Any]]]:
-    workbook = load_workbook(
+    wb_data = load_workbook(
         filename=BytesIO(raw),
         read_only=True,
         data_only=True,
         keep_links=False,
     )
     data: dict[str, list[list[Any]]] = {}
-    for sheet in workbook.worksheets:
-        data[sheet.title] = [list(row) for row in sheet.iter_rows(values_only=True)]
+    has_none = False
+    for sheet in wb_data.worksheets:
+        rows = [list(row) for row in sheet.iter_rows(values_only=True)]
+        data[sheet.title] = rows
+        if not has_none and any(cell is None for row in rows for cell in row):
+            has_none = True
+    wb_data.close()
+
+    if not has_none:
+        return data
+
+    wb_formula = load_workbook(
+        filename=BytesIO(raw),
+        read_only=True,
+        data_only=False,
+        keep_links=False,
+    )
+    for sheet in wb_formula.worksheets:
+        if sheet.title not in data:
+            continue
+        data_rows = data[sheet.title]
+        for r, row in enumerate(sheet.iter_rows(values_only=True)):
+            if r >= len(data_rows):
+                break
+            for c, val in enumerate(row):
+                if c < len(data_rows[r]) and data_rows[r][c] is None and val is not None:
+                    data_rows[r][c] = val
+    wb_formula.close()
+
     return data
 
 
