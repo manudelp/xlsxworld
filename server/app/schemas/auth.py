@@ -4,15 +4,36 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+import re
+
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 from app.db.models.users import UserRole, UserStatus
+
+_STRONG_PASSWORD_RE = re.compile(
+    r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,256}$"
+)
+_STRONG_PASSWORD_MSG = (
+    "Password must contain at least one lowercase letter, one uppercase letter, "
+    "one digit, and one special character"
+)
+
+
+def _validate_strong_password(value: str) -> str:
+    if not _STRONG_PASSWORD_RE.match(value):
+        raise ValueError(_STRONG_PASSWORD_MSG)
+    return value
 
 
 class AuthSignupRequest(BaseModel):
     email: EmailStr
     password: str = Field(min_length=8, max_length=256)
     display_name: str | None = Field(default=None, max_length=150)
+
+    @field_validator("password")
+    @classmethod
+    def password_strength(cls, v: str) -> str:
+        return _validate_strong_password(v)
 
 
 class AuthLoginRequest(BaseModel):
@@ -62,6 +83,11 @@ class AuthForgotPasswordRequest(BaseModel):
 class AuthResetPasswordRequest(BaseModel):
     access_token: str = Field(min_length=1)
     new_password: str = Field(min_length=8, max_length=256)
+
+    @field_validator("new_password")
+    @classmethod
+    def password_strength(cls, v: str) -> str:
+        return _validate_strong_password(v)
 
 
 class AuthGoogleRequest(BaseModel):

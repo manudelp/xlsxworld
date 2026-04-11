@@ -23,12 +23,14 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.post("/signup", response_model=AuthSessionResponse)
-async def signup(body: AuthSignupRequest, auth_service: AuthService = Depends(get_auth_service)) -> AuthSessionResponse:
+@limiter.limit("5/minute")
+async def signup(request: Request, body: AuthSignupRequest, auth_service: AuthService = Depends(get_auth_service)) -> AuthSessionResponse:
     return await auth_service.signup(body)
 
 
 @router.post("/login", response_model=AuthSessionResponse)
-async def login(body: AuthLoginRequest, auth_service: AuthService = Depends(get_auth_service)) -> AuthSessionResponse:
+@limiter.limit("10/minute")
+async def login(request: Request, body: AuthLoginRequest, auth_service: AuthService = Depends(get_auth_service)) -> AuthSessionResponse:
     return await auth_service.login(body)
 
 
@@ -76,7 +78,7 @@ async def google_login(
 
 
 @router.post("/verify-recovery", response_model=AuthVerifyRecoveryResponse)
-@limiter.limit("10/minute")
+@limiter.limit("5/minute")
 async def verify_recovery(
     request: Request,
     body: AuthVerifyRecoveryRequest,

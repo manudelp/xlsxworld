@@ -150,6 +150,7 @@ export default function ContactForm() {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               rows={6}
+              maxLength={2000}
               placeholder={t("messagePlaceholder")}
               disabled={status === "sending"}
               className="mt-1 block w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-muted shadow-sm transition-colors duration-150 focus:border-primary focus:ring-2 focus:ring-primary/25 outline-none"

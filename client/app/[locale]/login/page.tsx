@@ -393,7 +393,7 @@ export default function AuthPage() {
                       mode === "login" ? "current-password" : "new-password"
                     }
                     required
-                    minLength={mode === "register" ? 8 : undefined}
+                    minLength={mode === "register" ? 8 : 1}
                     value={password}
                     placeholder={t("placeholderPassword")}
                     onChange={(e) => setPassword(e.target.value)}
