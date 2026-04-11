@@ -5,8 +5,9 @@
   },
   "home": {
     "welcomeBanner": "Welcome. Your account is ready.",
-    "heading": "All your XLSX tools, all in one place",
-    "subheading": "Work with Excel files easily—free, simple, and fast."
+    "heading": "Stop wrestling with Excel.",
+    "subheading": "Convert, clean, split, merge and analyze spreadsheets in seconds — no software, no signup needed.",
+    "trustLine": "Free to use · No account required · No files stored"
   },
   "header": {
     "login": "Login"
@@ -615,7 +616,7 @@
     "inspect-sheets": {
       "title": "Inspect Sheets",
       "heading": "Inspect Sheets",
-      "description": "Inspect sheet structure with filters, sorting, and quick stats before running other tools.",
+      "description": "Preview sheet structure with filters, sorting, and quick stats.",
       "seoHowItWorksTitle": "How it works",
       "seoHowItWorks1": "Upload your Excel file (.xlsx, .xls, or .xlsb) using the file picker or drag-and-drop.",
       "seoHowItWorks2": "The tool reads every sheet and displays row counts, column headers, data types, and quality stats.",
@@ -633,7 +634,7 @@
     "merge-sheets": {
       "title": "Merge Sheets",
       "heading": "Merge Sheets",
-      "description": "Merge selected sheets from one workbook into a single sheet using one shared header row.",
+      "description": "Combine selected sheets into one using a shared header row.",
       "seoHowItWorksTitle": "How it works",
       "seoHowItWorks1": "Upload an Excel workbook that contains the sheets you want to merge.",
       "seoHowItWorks2": "Select which sheets to include and arrange their merge order.",
@@ -651,7 +652,7 @@
     "append-workbooks": {
       "title": "Append Workbooks",
       "heading": "Append Workbooks",
-      "description": "Append rows from multiple workbooks into one sheet, with file order controls and a custom output sheet name.",
+      "description": "Combine rows from multiple workbooks into a single output sheet.",
       "seoHowItWorksTitle": "How it works",
       "seoHowItWorks1": "Upload two or more Excel workbooks using the file picker.",
       "seoHowItWorks2": "Arrange the file order and choose an output sheet name.",
@@ -669,7 +670,7 @@
     "split-sheet": {
       "title": "Split Sheet",
       "heading": "Split Sheet",
-      "description": "Split one sheet by row count and customize output names with your own base label and numbering style.",
+      "description": "Split a sheet into chunks by row count with custom naming.",
       "seoHowItWorksTitle": "How it works",
       "seoHowItWorks1": "Upload an Excel file and select the sheet you want to split.",
       "seoHowItWorks2": "Set the number of rows per chunk and customize the output naming style.",
@@ -687,7 +688,7 @@
     "split-workbook": {
       "title": "Split Workbook",
       "heading": "Split Workbook",
-      "description": "Split a workbook into a ZIP containing one XLSX file per source sheet.",
+      "description": "Extract each sheet into its own XLSX file, bundled as a ZIP.",
       "seoHowItWorksTitle": "How it works",
       "seoHowItWorks1": "Upload an Excel workbook with multiple sheets.",
       "seoHowItWorks2": "Select which sheets to include in the output.",
@@ -705,7 +706,7 @@
     "xlsx-to-csv": {
       "title": "XLSX → CSV",
       "heading": "XLSX → CSV",
-      "description": "Export one sheet as CSV or multiple selected sheets as a ZIP of CSV files.",
+      "description": "Export one or more sheets as CSV files.",
       "seoHowItWorksTitle": "How it works",
       "seoHowItWorks1": "Upload your Excel file (.xlsx, .xls, or .xlsb).",
       "seoHowItWorks2": "Select one sheet for a single CSV or multiple sheets for a ZIP of CSVs.",
@@ -723,7 +724,7 @@
     "csv-to-xlsx": {
       "title": "CSV → XLSX",
       "heading": "CSV → XLSX",
-      "description": "Convert a CSV into a single-sheet XLSX with configurable delimiter and sheet name.",
+      "description": "Turn a CSV file into a proper XLSX workbook.",
       "seoHowItWorksTitle": "How it works",
       "seoHowItWorks1": "Upload your CSV file using the file picker or drag-and-drop.",
       "seoHowItWorks2": "Set the delimiter (comma, semicolon, tab, or custom) and output sheet name.",
@@ -885,7 +886,7 @@
     "remove-empty-rows": {
       "title": "Remove Empty Rows",
       "heading": "Remove Empty Rows",
-      "description": "Delete rows that are completely empty or blank across all columns.",
+      "description": "Remove rows that are completely empty across all columns.",
       "dropMessage": "Drop or select an Excel file to remove empty rows",
       "processFailed": "Could not remove empty rows",
       "selectSheets": "Select sheets to clean",
@@ -927,7 +928,7 @@
     "trim-spaces": {
       "title": "Trim Spaces",
       "heading": "Trim Spaces",
-      "description": "Clean messy text by removing leading and trailing spaces across one or all sheets, with an option to also collapse repeated spaces inside each value.",
+      "description": "Remove leading, trailing, and repeated spaces from text cells.",
       "seoHowItWorksTitle": "How it works",
       "seoHowItWorks1": "Upload your Excel file and choose to clean all sheets or a specific one.",
       "seoHowItWorks2": "Optionally enable collapsing of repeated internal spaces.",
@@ -963,7 +964,7 @@
     "find-replace": {
       "title": "Find & Replace",
       "heading": "Find & Replace",
-      "description": "Search and replace values or regex patterns across sheets or columns.",
+      "description": "Bulk find and replace text or regex patterns across sheets.",
       "seoHowItWorksTitle": "How it works",
       "seoHowItWorks1": "Upload your Excel file and enter the text or regex pattern to find.",
       "seoHowItWorks2": "Enter the replacement text and choose scope (all sheets or specific columns).",
@@ -981,7 +982,7 @@
     "scan-formula-errors": {
       "title": "Scan Formula Errors",
       "heading": "Scan Formula Errors",
-      "description": "Scan every cell across all sheets for formula errors like #REF!, #VALUE!, #DIV/0!, and more. Download a detailed error report.",
+      "description": "Detect formula errors like #REF!, #VALUE!, and #DIV/0! across all sheets.",
       "dropMessage": "Drop or select an Excel file to scan for formula errors",
       "scanFailed": "Could not scan for formula errors",
       "resultsTitle": "Scan Results",
@@ -1005,7 +1006,7 @@
     "compare-workbooks": {
       "title": "Compare Workbooks",
       "heading": "Compare Workbooks",
-      "description": "Compare two Excel files cell by cell. Detect added, removed, and modified cells across all sheets.",
+      "description": "Compare two Excel files cell by cell and download a diff report.",
       "original": "Original",
       "modified": "Modified",
       "dropOriginal": "Drop or select the original Excel file",
@@ -1036,7 +1037,7 @@
     "summary-stats": {
       "title": "Summary Stats",
       "heading": "Summary Stats",
-      "description": "Calculate summary statistics for every numeric column: count, min, max, mean, median, standard deviation, sum, and blank count.",
+      "description": "Get count, mean, median, sum, and more for every numeric column.",
       "dropMessage": "Drop or select an Excel file to analyze",
       "analysisFailed": "Could not analyze workbook",
       "resultsTitle": "Analysis Results",
@@ -1060,7 +1061,7 @@
     "freeze-header": {
       "title": "Freeze Header Row",
       "heading": "Freeze Header Row",
-      "description": "Freeze the first row or multiple rows so headers stay visible when scrolling.",
+      "description": "Freeze header rows so they stay visible when scrolling.",
       "dropMessage": "Drop or select an Excel file to freeze headers",
       "processFailed": "Could not freeze headers",
       "rowsToFreeze": "Number of rows to freeze",
@@ -1082,7 +1083,7 @@
     "auto-size-columns": {
       "title": "Auto Size Columns",
       "heading": "Auto Size Columns",
-      "description": "Auto-fit all column widths based on cell content across every sheet.",
+      "description": "Auto-fit column widths to match cell content across all sheets.",
       "dropMessage": "Drop or select an Excel file to auto-size columns",
       "processFailed": "Could not auto-size columns",
       "seoHowItWorksTitle": "How it works",
@@ -1107,7 +1108,7 @@
     "sort-rows": {
       "title": "Sort Rows",
       "heading": "Sort Rows",
-      "description": "Sort rows in a selected sheet by one or more columns in ascending or descending order.",
+      "description": "Sort rows by one or more columns in ascending or descending order.",
       "dropMessage": "Drop or select an Excel file to sort rows",
       "processFailed": "Could not sort rows",
       "firstRowIsHeader": "First row is header",
@@ -1133,7 +1134,7 @@
     "transpose-sheet": {
       "title": "Transpose Sheet",
       "heading": "Transpose Sheet",
-      "description": "Swap rows and columns in a selected sheet — rows become columns and columns become rows.",
+      "description": "Flip rows and columns — transpose any sheet instantly.",
       "dropMessage": "Drop or select an Excel file to transpose",
       "processFailed": "Could not transpose sheet",
       "selectSheet": "Select sheet to transpose",
@@ -1155,7 +1156,7 @@
     "split-column": {
       "title": "Split Column",
       "heading": "Split Column",
-      "description": "Split a single column into multiple columns by a delimiter (comma, space, dash, or custom).",
+      "description": "Split one column into many by comma, space, dash, or custom delimiter.",
       "dropMessage": "Drop or select an Excel file to split a column",
       "processFailed": "Could not split column",
       "selectColumn": "Select column to split...",
@@ -1179,7 +1180,7 @@
     "validate-emails": {
       "title": "Validate Emails",
       "heading": "Validate Emails",
-      "description": "Scan a column for email addresses and validate their format. Get a color-coded report with Valid, Invalid, and Empty status.",
+      "description": "Validate email formats and get a color-coded status report.",
       "dropMessage": "Drop or select an Excel file to validate emails",
       "processFailed": "Could not validate emails",
       "selectColumn": "Select email column...",
@@ -1206,7 +1207,7 @@
     "detect-blanks": {
       "title": "Detect Blanks",
       "heading": "Detect Blanks",
-      "description": "Scan all sheets for blank cells and get a detailed report with summary statistics and cell references.",
+      "description": "Find blank cells across all sheets and download a detailed report.",
       "dropMessage": "Drop or select an Excel file to detect blank cells",
       "scanFailed": "Could not scan for blanks",
       "resultsTitle": "Scan Results",
@@ -1231,7 +1232,7 @@
     "password-protect": {
       "title": "Password Protect",
       "heading": "Password Protect",
-      "description": "Protect sheets from editing with a password. Locks structure, content, and formatting to prevent accidental changes.",
+      "description": "Lock sheets with a password to prevent accidental edits.",
       "dropMessage": "Drop or select an Excel file to protect",
       "processFailed": "Could not protect workbook",
       "passwordPlaceholder": "Enter protection password",
@@ -1259,7 +1260,7 @@
     "remove-password": {
       "title": "Remove Password",
       "heading": "Remove Password",
-      "description": "Remove sheet-level editing protection from all sheets in your Excel file.",
+      "description": "Remove sheet editing protection without the original password.",
       "dropMessage": "Drop or select an Excel file to remove protection",
       "processFailed": "Could not remove protection",
       "limitation": "This removes sheet editing protection only. It cannot unlock files that require a password to open.",

@@ -5,6 +5,7 @@
   "scripts": {
     "prepare": "husky install",
     "build": "npm --prefix client run build",
+    "predev": "lsof -ti:3000,8000 | xargs kill -9 2>/dev/null || true",
     "dev": "concurrently -n client,server -c cyan,green \"npm --prefix client run dev\" \"cd server && uv run uvicorn main:app --reload\"",
     "dev:client": "npm --prefix client run dev",
     "dev:server": "cd server && uv run uvicorn main:app --reload",

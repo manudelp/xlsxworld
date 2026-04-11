@@ -96,7 +96,8 @@ function FAQContent() {
                 {group.questions.map((item, itemIdx) => (
                   <details
                     key={itemIdx}
-                    className="group rounded-xl border border-border bg-primary-soft p-3 sm:p-5 [&_summary::-webkit-details-marker]:hidden"
+                    className="group rounded-xl border border-border p-3 sm:p-5 [&_summary::-webkit-details-marker]:hidden"
+                    style={{ backgroundColor: "color-mix(in srgb, var(--background) 88%, var(--primary) 12%)" }}
                   >
                     <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-foreground font-medium outline-none">
                       <span className="text-lg">{item.q}</span>
@@ -128,7 +129,10 @@ function FAQContent() {
           ))}
         </div>
 
-        <section className="mt-16 text-center rounded-xl border border-border bg-primary-soft p-8">
+        <section
+          className="mt-16 text-center rounded-xl border border-border p-8"
+          style={{ backgroundColor: "color-mix(in srgb, var(--background) 88%, var(--primary) 12%)" }}
+        >
           <h2 className="text-xl font-medium text-foreground mb-3">
             {t("stillHaveQuestions")}
           </h2>

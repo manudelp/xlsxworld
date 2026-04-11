@@ -5,8 +5,9 @@
   },
   "home": {
     "welcomeBanner": "Bienvenido. Tu cuenta está lista.",
-    "heading": "Todas tus herramientas XLSX en un solo lugar",
-    "subheading": "Trabaja con archivos Excel fácilmente—gratis, simple y rápido."
+    "heading": "Deja de pelear con Excel.",
+    "subheading": "Convierte, limpia, divide, combina y analiza hojas de cálculo en segundos — sin software, sin registro.",
+    "trustLine": "Gratis · Sin cuenta requerida · Sin archivos almacenados"
   },
   "header": {
     "login": "Iniciar sesión"

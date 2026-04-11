@@ -24,7 +24,9 @@ export default function FileUploadDropzone({
   maxSizeLabel,
 }: FileUploadDropzoneProps) {
   const [dragOver, setDragOver] = useState(false);
+  const [hover, setHover] = useState(false);
 
+  const needsTint = !hasError && (dragOver || hover);
 
   return (
       <label
@@ -51,17 +53,26 @@ export default function FileUploadDropzone({
           const dropped = e.dataTransfer.files;
           if (dropped.length > 0) onFiles(dropped);
         }}
+        onMouseEnter={() => setHover(true)}
+        onMouseLeave={() => setHover(false)}
         className={
           className ||
           `group flex min-h-[160px] h-40 w-full cursor-pointer flex-col items-center justify-center p-6 text-center rounded-xl border-2 border-dashed transition-all duration-200 
           ${hasError 
             ? "border-[var(--danger)] bg-[var(--danger-soft)]"
             : dragOver
-              ? "border-primary bg-primary-soft scale-[1.01] shadow-md ring-2 ring-primary/25"
-              : "border-[var(--border)] bg-[var(--background)] hover:border-primary hover:bg-primary-soft"
+              ? "border-primary scale-[1.01] shadow-md ring-2 ring-primary/25"
+              : hover
+                ? "border-primary"
+                : "border-[var(--border)] bg-[var(--background)]"
           }`
         }
-        style={style}
+        style={{
+          ...style,
+          ...(needsTint && {
+            backgroundColor: "color-mix(in srgb, var(--background) 88%, var(--primary) 12%)",
+          }),
+        }}
       >
         <div className={`mb-3 rounded-full p-3 transition-all duration-200 ${hasError ? 'bg-[var(--danger)] text-white' : dragOver ? 'bg-primary text-white scale-110' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 group-hover:bg-primary group-hover:text-white'}`}>
           <svg className={`h-6 w-6 transition-transform duration-200 ${dragOver ? '-translate-y-0.5' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">

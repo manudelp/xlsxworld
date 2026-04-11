@@ -179,15 +179,19 @@
 body {
   font-family: "Alan Sans", sans-serif;
   background-color: var(--background);
-  background-repeat: no-repeat;
-  background-position: center top;
-  background-size: cover;
+  background-image: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--foreground) 6%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 24px 24px;
   color: var(--foreground);
   overflow-x: hidden;
   transition:
     background-color 200ms ease,
     color 200ms ease;
 }
+
 
 .tool-card {
   background-color: color-mix(in srgb, var(--surface) 96%, var(--primary) 4%);

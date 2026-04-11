@@ -193,7 +193,10 @@ export default function ContactForm() {
       </div>
 
       <section className="mt-10 grid gap-5 sm:grid-cols-2">
-        <div className="rounded-xl border border-border bg-primary-soft p-5">
+        <div
+          className="rounded-xl border border-border p-5"
+          style={{ backgroundColor: "color-mix(in srgb, var(--background) 88%, var(--primary) 12%)" }}
+        >
           <h2 className="text-lg font-medium text-foreground">
             {t("faqTitle")}
           </h2>
@@ -211,7 +214,10 @@ export default function ContactForm() {
           </p>
         </div>
 
-        <div className="rounded-xl border border-border bg-primary-soft p-5">
+        <div
+          className="rounded-xl border border-border p-5"
+          style={{ backgroundColor: "color-mix(in srgb, var(--background) 88%, var(--primary) 12%)" }}
+        >
           <h2 className="text-lg font-medium text-foreground">
             {t("communityTitle")}
           </h2>

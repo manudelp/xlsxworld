@@ -56,7 +56,7 @@ export default function Tool({
             className="text-sm"
             style={{
               display: "-webkit-box",
-              WebkitLineClamp: 2,
+              WebkitLineClamp: 3,
               WebkitBoxOrient: "vertical",
               overflow: "hidden",
               color: "var(--muted)",

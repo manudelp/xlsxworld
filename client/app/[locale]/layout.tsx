@@ -9,6 +9,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import DotTrail from "@/components/common/DotTrail";
 import { BASE_URL, buildAlternates } from "@/lib/seo";
 
 export function generateStaticParams() {
@@ -117,7 +118,10 @@ export default async function LocaleLayout({
           <ThemeProvider>
             <AuthProvider>
               <Header />
-              <main className="pt-[60px] min-h-screen">{children}</main>
+              <DotTrail />
+              <main className="pt-[60px] min-h-screen">
+                {children}
+              </main>
               <Footer />
             </AuthProvider>
           </ThemeProvider>

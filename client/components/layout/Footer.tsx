@@ -106,7 +106,7 @@ export default function Footer() {
 
   return (
     <footer className="w-full bg-[#292931] text-white py-6 px-4">
-      <div className="container mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
+      <div className="container mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-sm overflow-visible">
         <div className="flex flex-wrap justify-center md:justify-start gap-x-6 gap-y-2">
           <Link href="/" className="hover:underline">
             {t("home")}
@@ -124,7 +124,7 @@ export default function Footer() {
             {t("terms")}
           </Link>
         </div>
-        <div className="text-center md:text-right flex flex-col items-center md:items-end gap-1">
+        <div className="text-center md:text-right flex flex-col items-center md:items-end gap-1 overflow-visible">
           <div
             ref={triggerRef}
             onMouseEnter={updatePosition}
