@@ -337,7 +337,8 @@ export default function OverviewTab({
                   if (payload?.[0]?.payload?.date) return payload[0].payload.date;
                   return "";
                 }}
-                formatter={(val: number) => {
+                formatter={(val) => {
+                  if (val == null) return ["", ""];
                   if (activeKpi === "success_rate") return [`${val}%`, chartLabel];
                   if (activeKpi === "avg_duration_ms") return [`${val} ms`, chartLabel];
                   return [val, chartLabel];
