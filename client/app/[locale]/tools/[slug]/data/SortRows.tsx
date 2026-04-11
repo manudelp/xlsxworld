@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import FileUploadDropzone from "@/components/common/FileUploadDropzone";
 import { uploadForPreview, type WorkbookPreview } from "@/lib/tools/inspect";
 import { sortRows, type SortKey } from "@/lib/tools/data";
-import { EXCEL_ACCEPT, downloadXlsx, getSheetColumnNames } from "../clean/shared";
+import { EXCEL_ACCEPT, downloadToolResult, getSheetColumnNames, VISUAL_ELEMENTS_WARNING } from "../clean/shared";
 
 export default function SortRows() {
   const t = useTranslations("common");
@@ -18,11 +18,13 @@ export default function SortRows() {
   const [hasHeader, setHasHeader] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [visualWarning, setVisualWarning] = useState(false);
 
   const onFile = useCallback(async (selected: File) => {
     setError(null);
     setFile(selected);
     setLoading(true);
+    setVisualWarning(false);
     try {
       const wb = await uploadForPreview(selected, 5);
       setPreview(wb);
@@ -49,8 +51,8 @@ export default function SortRows() {
     setError(null);
     setLoading(true);
     try {
-      const buffer = await sortRows(file, sheetName, validKeys, hasHeader);
-      downloadXlsx(buffer, "sorted.xlsx");
+      const result = await sortRows(file, sheetName, validKeys, hasHeader);
+      setVisualWarning(downloadToolResult(result, "sorted.xlsx"));
     } catch (e) {
       setError(e instanceof Error ? e.message : td("processFailed"));
     } finally {
@@ -64,6 +66,10 @@ export default function SortRows() {
         onFiles={(files) => { if (files[0]) void onFile(files[0]); }} />
 
       {error && <div className="tool-error">{error}</div>}
+
+      {visualWarning ? (
+        <div className="tool-warning">{VISUAL_ELEMENTS_WARNING}</div>
+      ) : null}
 
       {preview && (
         <div className="space-y-4 rounded-lg border p-4" style={{ borderColor: "var(--border)", backgroundColor: "var(--surface)" }}>

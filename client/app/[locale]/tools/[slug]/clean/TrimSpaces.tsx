@@ -8,7 +8,7 @@ import FileUploadDropzone from "@/components/common/FileUploadDropzone";
 import { uploadForPreview, type WorkbookPreview } from "@/lib/tools/inspect";
 import { trimSpaces } from "@/lib/tools/clean";
 
-import { downloadXlsx, EXCEL_ACCEPT, getSheetColumnNames } from "./shared";
+import { downloadToolResult, EXCEL_ACCEPT, getSheetColumnNames, VISUAL_ELEMENTS_WARNING } from "./shared";
 
 export default function TrimSpaces() {
   const t = useTranslations("common");
@@ -22,6 +22,7 @@ export default function TrimSpaces() {
   const [collapseInternalSpaces, setCollapseInternalSpaces] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [visualWarning, setVisualWarning] = useState(false);
 
   const onFile = useCallback(async (selected: File) => {
     setError(null);
@@ -34,6 +35,7 @@ export default function TrimSpaces() {
     setOnlySpecificColumns(false);
     setCollapseInternalSpaces(false);
     setLoading(true);
+    setVisualWarning(false);
 
     try {
       const workbook = await uploadForPreview(selected, 5);
@@ -88,6 +90,10 @@ export default function TrimSpaces() {
       ) : null}
 
       {error ? <div className="tool-error">{error}</div> : null}
+
+      {visualWarning ? (
+        <div className="tool-warning">{VISUAL_ELEMENTS_WARNING}</div>
+      ) : null}
 
       {preview ? (
         <div
@@ -299,7 +305,7 @@ export default function TrimSpaces() {
                 setError(null);
                 setLoading(true);
                 try {
-                  const buffer = await trimSpaces(
+                  const result = await trimSpaces(
                     file,
                     {
                       allSheets,
@@ -309,9 +315,11 @@ export default function TrimSpaces() {
                     collapseInternalSpaces,
                   );
                   const baseName = file.name.replace(/\.[^.]+$/, "").trim();
-                  downloadXlsx(
-                    buffer,
-                    `${baseName || "workbook"}_trimmed.xlsx`,
+                  setVisualWarning(
+                    downloadToolResult(
+                      result,
+                      `${baseName || "workbook"}_trimmed.xlsx`,
+                    ),
                   );
                 } catch (e) {
                   setError(

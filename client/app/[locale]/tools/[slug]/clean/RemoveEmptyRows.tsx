@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import FileUploadDropzone from "@/components/common/FileUploadDropzone";
 import { uploadForPreview, type WorkbookPreview } from "@/lib/tools/inspect";
 import { removeEmptyRows, type RemoveEmptyRowsResult } from "@/lib/tools/clean";
-import { EXCEL_ACCEPT, downloadXlsx } from "../clean/shared";
+import { EXCEL_ACCEPT, downloadXlsx, VISUAL_ELEMENTS_WARNING } from "../clean/shared";
 
 export default function RemoveEmptyRows() {
   const t = useTranslations("common");
@@ -17,12 +17,14 @@ export default function RemoveEmptyRows() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<RemoveEmptyRowsResult | null>(null);
+  const [visualWarning, setVisualWarning] = useState(false);
 
   const onFile = useCallback(async (selected: File) => {
     setError(null);
     setResult(null);
     setFile(selected);
     setLoading(true);
+    setVisualWarning(false);
     try {
       const wb = await uploadForPreview(selected, 5);
       setPreview(wb);
@@ -50,7 +52,9 @@ export default function RemoveEmptyRows() {
     setLoading(true);
     try {
       const sheets = Array.from(selectedSheets).join(",");
-      setResult(await removeEmptyRows(file, sheets));
+      const r = await removeEmptyRows(file, sheets);
+      setResult(r);
+      setVisualWarning(r.visualElementsRemoved);
     } catch (e) {
       setError(e instanceof Error ? e.message : td("processFailed"));
     } finally {
@@ -101,6 +105,9 @@ export default function RemoveEmptyRows() {
           <div className="rounded-md border p-3 text-sm" style={{ borderColor: "var(--border)", backgroundColor: "var(--surface-2)", color: "var(--muted)" }}>
             <p><strong>{td("rowsRemoved")}:</strong> {result.rowsRemoved}</p>
           </div>
+          {visualWarning ? (
+            <div className="tool-warning">{VISUAL_ELEMENTS_WARNING}</div>
+          ) : null}
           <div className="flex justify-end">
             <button type="button" onClick={() => downloadXlsx(result.buffer, "cleaned.xlsx")}
               className="tool-primary-action inline-flex cursor-pointer items-center gap-2 rounded-md px-4 py-2 text-sm font-medium">

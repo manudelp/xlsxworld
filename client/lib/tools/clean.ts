@@ -1,4 +1,6 @@
-import { api } from "../api";
+import { buildUrl, postFormForFile, type ToolFileResult } from "../api";
+
+export type { ToolFileResult };
 
 export interface CleanTargetOptions {
   sheet?: string;
@@ -18,36 +20,36 @@ export async function removeDuplicates(
   file: File,
   options: CleanTargetOptions,
   keep: "first" | "last" = "first",
-): Promise<ArrayBuffer> {
+): Promise<ToolFileResult> {
   const fd = new FormData();
   fd.append("file", file);
   fd.append("keep", keep);
   appendTargetOptions(fd, options);
-  return api.postForm<ArrayBuffer>("/api/v1/tools/clean/remove-duplicates", fd);
+  return postFormForFile("/api/v1/tools/clean/remove-duplicates", fd);
 }
 
 export async function trimSpaces(
   file: File,
   options: CleanTargetOptions,
   collapseInternalSpaces = false,
-): Promise<ArrayBuffer> {
+): Promise<ToolFileResult> {
   const fd = new FormData();
   fd.append("file", file);
   fd.append("collapse_internal_spaces", collapseInternalSpaces ? "true" : "false");
   appendTargetOptions(fd, options);
-  return api.postForm<ArrayBuffer>("/api/v1/tools/clean/trim-spaces", fd);
+  return postFormForFile("/api/v1/tools/clean/trim-spaces", fd);
 }
 
 export async function normalizeCase(
   file: File,
   options: CleanTargetOptions,
   mode: "lower" | "upper" | "title",
-): Promise<ArrayBuffer> {
+): Promise<ToolFileResult> {
   const fd = new FormData();
   fd.append("file", file);
   fd.append("mode", mode);
   appendTargetOptions(fd, options);
-  return api.postForm<ArrayBuffer>("/api/v1/tools/clean/normalize-case", fd);
+  return postFormForFile("/api/v1/tools/clean/normalize-case", fd);
 }
 
 export async function findReplace(
@@ -59,7 +61,7 @@ export async function findReplace(
     useRegex: boolean;
     matchCase: boolean;
   },
-): Promise<ArrayBuffer> {
+): Promise<ToolFileResult> {
   const fd = new FormData();
   fd.append("file", file);
   fd.append("find_text", config.findText);
@@ -67,18 +69,25 @@ export async function findReplace(
   fd.append("use_regex", config.useRegex ? "true" : "false");
   fd.append("match_case", config.matchCase ? "true" : "false");
   appendTargetOptions(fd, options);
-  return api.postForm<ArrayBuffer>("/api/v1/tools/clean/find-replace", fd);
+  return postFormForFile("/api/v1/tools/clean/find-replace", fd);
 }
 
-import { buildUrl } from "../api";
+export interface RemoveEmptyRowsResult {
+  buffer: ArrayBuffer;
+  rowsRemoved: number;
+  visualElementsRemoved: boolean;
+}
 
-async function postFormWithHeaders(
-  path: string,
-  form: FormData,
-): Promise<{ buffer: ArrayBuffer; headers: Headers }> {
-  const res = await fetch(buildUrl(path), {
+export async function removeEmptyRows(
+  file: File,
+  sheets: string,
+): Promise<RemoveEmptyRowsResult> {
+  const fd = new FormData();
+  fd.append("file", file);
+  fd.append("sheets", sheets);
+  const res = await fetch(buildUrl("/api/v1/tools/clean/remove-empty-rows"), {
     method: "POST",
-    body: form,
+    body: fd,
     credentials: "include",
   });
   if (!res.ok) {
@@ -90,24 +99,10 @@ async function postFormWithHeaders(
     throw new Error(detail);
   }
   const buffer = await res.arrayBuffer();
-  return { buffer, headers: res.headers };
-}
-
-export interface RemoveEmptyRowsResult {
-  buffer: ArrayBuffer;
-  rowsRemoved: number;
-}
-
-export async function removeEmptyRows(
-  file: File,
-  sheets: string,
-): Promise<RemoveEmptyRowsResult> {
-  const fd = new FormData();
-  fd.append("file", file);
-  fd.append("sheets", sheets);
-  const { buffer, headers } = await postFormWithHeaders("/api/v1/tools/clean/remove-empty-rows", fd);
   return {
     buffer,
-    rowsRemoved: parseInt(headers.get("X-Rows-Removed") || "0", 10),
+    rowsRemoved: parseInt(res.headers.get("X-Rows-Removed") || "0", 10),
+    visualElementsRemoved:
+      res.headers.get("X-Visual-Elements-Removed") === "true",
   };
 }

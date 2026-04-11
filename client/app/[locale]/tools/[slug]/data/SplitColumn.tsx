@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import FileUploadDropzone from "@/components/common/FileUploadDropzone";
 import { uploadForPreview, type WorkbookPreview } from "@/lib/tools/inspect";
 import { splitColumn } from "@/lib/tools/data";
-import { EXCEL_ACCEPT, downloadXlsx, getSheetColumnNames } from "../clean/shared";
+import { EXCEL_ACCEPT, downloadToolResult, getSheetColumnNames, VISUAL_ELEMENTS_WARNING } from "../clean/shared";
 
 const DELIMITERS = [
   { value: "comma", label: "Comma (,)" },
@@ -28,11 +28,13 @@ export default function SplitColumn() {
   const [keepOriginal, setKeepOriginal] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [visualWarning, setVisualWarning] = useState(false);
 
   const onFile = useCallback(async (selected: File) => {
     setError(null);
     setFile(selected);
     setLoading(true);
+    setVisualWarning(false);
     try {
       const wb = await uploadForPreview(selected, 5);
       setPreview(wb);
@@ -54,8 +56,8 @@ export default function SplitColumn() {
     setLoading(true);
     try {
       const delim = delimiter === "custom" ? customDelimiter : delimiter;
-      const buffer = await splitColumn(file, sheetName, column, delim, keepOriginal);
-      downloadXlsx(buffer, "split-column.xlsx");
+      const result = await splitColumn(file, sheetName, column, delim, keepOriginal);
+      setVisualWarning(downloadToolResult(result, "split-column.xlsx"));
     } catch (e) {
       setError(e instanceof Error ? e.message : td("processFailed"));
     } finally {
@@ -69,6 +71,10 @@ export default function SplitColumn() {
         onFiles={(files) => { if (files[0]) void onFile(files[0]); }} />
 
       {error && <div className="tool-error">{error}</div>}
+
+      {visualWarning ? (
+        <div className="tool-warning">{VISUAL_ELEMENTS_WARNING}</div>
+      ) : null}
 
       {preview && (
         <div className="space-y-4 rounded-lg border p-4" style={{ borderColor: "var(--border)", backgroundColor: "var(--surface)" }}>

@@ -7,7 +7,7 @@ from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from openpyxl import Workbook
 
 from app.services.excel_reader import parse_excel_bytes
-from app.tools._common import check_excel_file, file_response, read_with_limit, safe_sheet_title, unique_sheet_title
+from app.tools._common import check_excel_file, file_response, has_visual_elements, read_with_limit, safe_sheet_title, unique_sheet_title
 
 router = APIRouter()
 
@@ -85,6 +85,7 @@ async def split_sheet(
         raise HTTPException(status_code=400, detail="chunk_size must be >= 2")
 
     workbook_data = parse_excel_bytes(raw, file.filename)
+    has_visuals = has_visual_elements(raw)
 
     if sheet not in workbook_data:
         raise HTTPException(status_code=404, detail="Sheet not found")
@@ -140,4 +141,5 @@ async def split_sheet(
         output.getvalue(),
         "split.xlsx",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        visual_elements_removed=has_visuals,
     )

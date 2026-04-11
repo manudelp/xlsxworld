@@ -3,7 +3,7 @@ from __future__ import annotations
 from fastapi import APIRouter, File, Form, UploadFile
 
 from app.services.excel_reader import parse_excel_bytes
-from app.tools._common import check_excel_file, file_response, read_with_limit, normalize_sheet_selection
+from app.tools._common import check_excel_file, file_response, has_visual_elements, read_with_limit, normalize_sheet_selection
 from app.tools.clean._utils import workbook_bytes_from_data
 
 router = APIRouter()
@@ -39,11 +39,16 @@ async def remove_empty_rows(
         workbook_data[sheet_name] = [header, *cleaned]
 
     output_bytes = workbook_bytes_from_data(workbook_data)
+    has_visuals = has_visual_elements(raw)
     resp = file_response(
         output_bytes,
         "cleaned.xlsx",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        visual_elements_removed=has_visuals,
     )
     resp.headers["X-Rows-Removed"] = str(total_removed)
-    resp.headers["Access-Control-Expose-Headers"] = "X-Rows-Removed"
+    exposed = resp.headers.get("Access-Control-Expose-Headers", "")
+    resp.headers["Access-Control-Expose-Headers"] = (
+        f"{exposed}, X-Rows-Removed".lstrip(", ")
+    )
     return resp

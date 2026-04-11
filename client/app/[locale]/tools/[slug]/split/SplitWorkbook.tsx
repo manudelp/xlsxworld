@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import React, { useCallback, useMemo, useState } from "react";
 import { Archive, Layers3 } from "lucide-react";
 import { splitWorkbook } from "@/lib/tools/split";
+import { VISUAL_ELEMENTS_WARNING } from "../clean/shared";
 import FileUploadDropzone from "@/components/common/FileUploadDropzone";
 import { uploadForPreview, type WorkbookPreview } from "@/lib/tools/inspect";
 
@@ -16,6 +17,7 @@ export default function SplitWorkbook() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [previewLoading, setPreviewLoading] = useState(false);
+  const [visualWarning, setVisualWarning] = useState(false);
 
   const onFile = useCallback(async (selected: File) => {
     setError(null);
@@ -24,6 +26,7 @@ export default function SplitWorkbook() {
     setSelectedSheets([]);
     setFileName(selected.name);
     setPreviewLoading(true);
+    setVisualWarning(false);
 
     try {
       const workbook = await uploadForPreview(selected, 1);
@@ -73,8 +76,9 @@ export default function SplitWorkbook() {
     setLoading(true);
 
     try {
-      const buffer = await splitWorkbook(file, selectedSheets);
-      const blob = new Blob([buffer], { type: "application/zip" });
+      const result = await splitWorkbook(file, selectedSheets);
+      setVisualWarning(result.visualElementsRemoved);
+      const blob = new Blob([result.buffer], { type: "application/zip" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -260,6 +264,10 @@ export default function SplitWorkbook() {
       )}
 
       {error && <div className="tool-error">{error}</div>}
+
+      {visualWarning ? (
+        <div className="tool-warning">{VISUAL_ELEMENTS_WARNING}</div>
+      ) : null}
 
       {file && (
         <div className="flex justify-end">

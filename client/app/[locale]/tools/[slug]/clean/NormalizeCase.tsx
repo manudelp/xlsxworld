@@ -8,7 +8,7 @@ import FileUploadDropzone from "@/components/common/FileUploadDropzone";
 import { uploadForPreview, type WorkbookPreview } from "@/lib/tools/inspect";
 import { normalizeCase } from "@/lib/tools/clean";
 
-import { downloadXlsx, EXCEL_ACCEPT, getSheetColumnNames } from "./shared";
+import { downloadToolResult, EXCEL_ACCEPT, getSheetColumnNames, VISUAL_ELEMENTS_WARNING } from "./shared";
 
 export default function NormalizeCase() {
   const t = useTranslations("common");
@@ -21,6 +21,7 @@ export default function NormalizeCase() {
   const [mode, setMode] = useState<"lower" | "upper" | "title">("title");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [visualWarning, setVisualWarning] = useState(false);
 
   const onFile = useCallback(async (selected: File) => {
     setError(null);
@@ -31,6 +32,7 @@ export default function NormalizeCase() {
     setActiveSheet(0);
     setAllSheets(false);
     setLoading(true);
+    setVisualWarning(false);
 
     try {
       const workbook = await uploadForPreview(selected, 5);
@@ -79,6 +81,10 @@ export default function NormalizeCase() {
       ) : null}
 
       {error ? <div className="tool-error">{error}</div> : null}
+
+      {visualWarning ? (
+        <div className="tool-warning">{VISUAL_ELEMENTS_WARNING}</div>
+      ) : null}
 
       {preview ? (
         <div
@@ -238,12 +244,14 @@ export default function NormalizeCase() {
                 setLoading(true);
                 try {
                   const sheetName = preview.sheets[activeSheet]?.name ?? "";
-                  const buffer = await normalizeCase(file, {
+                  const result = await normalizeCase(file, {
                     allSheets,
                     sheet: sheetName,
                     columns: selectedColumns,
                   }, mode);
-                  downloadXlsx(buffer, "normalized-case.xlsx");
+                  setVisualWarning(
+                    downloadToolResult(result, "normalized-case.xlsx"),
+                  );
                 } catch (e) {
                   setError(e instanceof Error ? e.message : t("couldNotNormalizeCase"));
                 } finally {

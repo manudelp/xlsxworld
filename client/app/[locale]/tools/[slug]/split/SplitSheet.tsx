@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import React, { useCallback, useMemo, useState } from "react";
 import { Layers3, Scissors } from "lucide-react";
 import { splitSheet } from "@/lib/tools/split";
+import { VISUAL_ELEMENTS_WARNING } from "../clean/shared";
 import FileUploadDropzone from "@/components/common/FileUploadDropzone";
 import { uploadForPreview, type WorkbookPreview } from "@/lib/tools/inspect";
 
@@ -93,6 +94,7 @@ export default function SplitSheet() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [previewLoading, setPreviewLoading] = useState(false);
+  const [visualWarning, setVisualWarning] = useState(false);
 
   const onFile = useCallback(async (selected: File) => {
     setError(null);
@@ -105,6 +107,7 @@ export default function SplitSheet() {
     setCustomSequenceInput("");
     setFileName(selected.name);
     setPreviewLoading(true);
+    setVisualWarning(false);
 
     try {
       const workbook = await uploadForPreview(selected, 1);
@@ -181,7 +184,7 @@ export default function SplitSheet() {
     setLoading(true);
 
     try {
-      const buffer = await splitSheet(
+      const result = await splitSheet(
         file,
         sheetName.trim(),
         chunkSize,
@@ -192,7 +195,8 @@ export default function SplitSheet() {
           customSequence: customTokens,
         },
       );
-      const blob = new Blob([buffer], {
+      setVisualWarning(result.visualElementsRemoved);
+      const blob = new Blob([result.buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
       const url = URL.createObjectURL(blob);
@@ -540,6 +544,10 @@ export default function SplitSheet() {
       )}
 
       {error && <div className="tool-error">{error}</div>}
+
+      {visualWarning ? (
+        <div className="tool-warning">{VISUAL_ELEMENTS_WARNING}</div>
+      ) : null}
 
       {file && (
         <div className="flex justify-end">

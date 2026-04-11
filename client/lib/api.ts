@@ -167,6 +167,36 @@ async function sendRequest(
   return retryResponse;
 }
 
+export interface ToolFileResult {
+  buffer: ArrayBuffer;
+  visualElementsRemoved: boolean;
+}
+
+export async function postFormForFile(
+  path: string,
+  form: FormData,
+): Promise<ToolFileResult> {
+  const res = await fetch(buildUrl(path), {
+    method: "POST",
+    body: form,
+    credentials: "include",
+  });
+  if (!res.ok) {
+    let detail = res.statusText;
+    try {
+      const data = await res.json();
+      if (data?.detail) detail = data.detail;
+    } catch { /* use statusText */ }
+    throw new Error(detail);
+  }
+  const buffer = await res.arrayBuffer();
+  return {
+    buffer,
+    visualElementsRemoved:
+      res.headers.get("X-Visual-Elements-Removed") === "true",
+  };
+}
+
 export const api = {
   async postForm<T>(
     path: string,

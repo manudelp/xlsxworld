@@ -1,4 +1,4 @@
-import { api } from "../api";
+import { postFormForFile, type ToolFileResult } from "../api";
 
 export interface SortKey {
   column: string;
@@ -10,20 +10,20 @@ export async function sortRows(
   sheet: string,
   sortKeys: SortKey[],
   hasHeader: boolean = true,
-): Promise<ArrayBuffer> {
+): Promise<ToolFileResult> {
   const fd = new FormData();
   fd.append("file", file);
   fd.append("sheet", sheet);
   fd.append("sort_keys", JSON.stringify(sortKeys));
   fd.append("has_header", hasHeader ? "true" : "false");
-  return api.postForm<ArrayBuffer>("/api/v1/tools/data/sort-rows", fd);
+  return postFormForFile("/api/v1/tools/data/sort-rows", fd);
 }
 
-export async function transposeSheet(file: File, sheet: string): Promise<ArrayBuffer> {
+export async function transposeSheet(file: File, sheet: string): Promise<ToolFileResult> {
   const fd = new FormData();
   fd.append("file", file);
   fd.append("sheet", sheet);
-  return api.postForm<ArrayBuffer>("/api/v1/tools/data/transpose-sheet", fd);
+  return postFormForFile("/api/v1/tools/data/transpose-sheet", fd);
 }
 
 export async function splitColumn(
@@ -32,12 +32,12 @@ export async function splitColumn(
   column: string,
   delimiter: string,
   keepOriginal: boolean,
-): Promise<ArrayBuffer> {
+): Promise<ToolFileResult> {
   const fd = new FormData();
   fd.append("file", file);
   fd.append("sheet", sheet);
   fd.append("column", column);
   fd.append("delimiter", delimiter);
   fd.append("keep_original", keepOriginal ? "true" : "false");
-  return api.postForm<ArrayBuffer>("/api/v1/tools/data/split-column", fd);
+  return postFormForFile("/api/v1/tools/data/split-column", fd);
 }

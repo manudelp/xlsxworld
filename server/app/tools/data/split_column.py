@@ -5,7 +5,7 @@ from typing import Any
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 
 from app.services.excel_reader import parse_excel_bytes
-from app.tools._common import check_excel_file, file_response, read_with_limit
+from app.tools._common import check_excel_file, file_response, has_visual_elements, read_with_limit
 from app.tools.clean._utils import workbook_bytes_from_data
 
 router = APIRouter()
@@ -28,6 +28,7 @@ async def split_column(
     check_excel_file(file)
     raw = await read_with_limit(file)
     workbook_data = parse_excel_bytes(raw, file.filename)
+    has_visuals = has_visual_elements(raw)
 
     if sheet not in workbook_data:
         raise HTTPException(status_code=404, detail="Sheet not found")
@@ -88,4 +89,5 @@ async def split_column(
         output_bytes,
         "split-column.xlsx",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        visual_elements_removed=has_visuals,
     )

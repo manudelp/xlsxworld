@@ -1,4 +1,4 @@
-import { api } from '../api';
+import { postFormForFile, type ToolFileResult } from "../api";
 
 export interface SplitSheetNamingOptions {
   baseName?: string;
@@ -19,7 +19,7 @@ export async function splitSheet(
   sheet: string,
   chunkSize = 1000,
   naming: SplitSheetNamingOptions = {},
-): Promise<ArrayBuffer> {
+): Promise<ToolFileResult> {
   const fd = new FormData();
   fd.append("file", file);
   fd.append("sheet", sheet);
@@ -30,17 +30,17 @@ export async function splitSheet(
   if ((naming.customSequence ?? []).length > 0) {
     fd.append("custom_sequence", (naming.customSequence ?? []).join("\n"));
   }
-  return api.postForm<ArrayBuffer>('/api/v1/tools/split-sheet', fd);
+  return postFormForFile("/api/v1/tools/split-sheet", fd);
 }
 
 export async function splitWorkbook(
   file: File,
   sheetNames: string[] = [],
-): Promise<ArrayBuffer> {
+): Promise<ToolFileResult> {
   const fd = new FormData();
   fd.append("file", file);
   if (sheetNames.length > 0) {
     fd.append("sheet_names", sheetNames.join(","));
   }
-  return api.postForm<ArrayBuffer>('/api/v1/tools/split-workbook', fd);
+  return postFormForFile("/api/v1/tools/split-workbook", fd);
 }

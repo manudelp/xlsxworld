@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, ChevronUp, GripVertical } from "lucide-react";
 import { appendWorkbooks } from "@/lib/tools/merge";
+import { VISUAL_ELEMENTS_WARNING } from "../clean/shared";
 import FileUploadDropzone from "@/components/common/FileUploadDropzone";
 
 export default function AppendWorkbooks() {
@@ -13,6 +14,7 @@ export default function AppendWorkbooks() {
   const [outputName, setOutputName] = useState("appended-workbooks");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [visualWarning, setVisualWarning] = useState(false);
   const [orderFeedback, setOrderFeedback] = useState<string | null>(null);
   const [highlightedFile, setHighlightedFile] = useState<string | null>(null);
   const [draggedFileKey, setDraggedFileKey] = useState<string | null>(null);
@@ -277,8 +279,9 @@ export default function AppendWorkbooks() {
     setLoading(true);
 
     try {
-      const buffer = await appendWorkbooks(files);
-      const blob = new Blob([buffer], {
+      const result = await appendWorkbooks(files);
+      setVisualWarning(result.visualElementsRemoved);
+      const blob = new Blob([result.buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
       const url = URL.createObjectURL(blob);
@@ -681,8 +684,13 @@ export default function AppendWorkbooks() {
 
       {files.length > 0 && (
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div className="text-xs" style={{ color: "var(--muted-2)" }}>
-            All workbook sheets combined into one output, preserving sheet structure.
+          <div>
+            <div className="text-xs" style={{ color: "var(--muted-2)" }}>
+              All workbook sheets combined into one output, preserving sheet structure.
+            </div>
+            {visualWarning ? (
+              <div className="tool-warning mt-2">{VISUAL_ELEMENTS_WARNING}</div>
+            ) : null}
           </div>
           <button
             type="button"

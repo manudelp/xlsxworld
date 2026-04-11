@@ -6,7 +6,7 @@ from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from openpyxl import Workbook
 
 from app.services.excel_reader import parse_excel_bytes
-from app.tools._common import check_excel_file, file_response, read_with_limit
+from app.tools._common import check_excel_file, file_response, has_visual_elements, read_with_limit
 
 router = APIRouter()
 
@@ -25,6 +25,7 @@ async def merge_sheets(
     raw = await read_with_limit(file)
 
     workbook_data = parse_excel_bytes(raw, file.filename)
+    has_visuals = has_visual_elements(raw)
     sheet_order = list(workbook_data.keys())
 
     selected = [s.strip() for s in sheet_names.split(",") if s.strip()]
@@ -59,4 +60,5 @@ async def merge_sheets(
         output.getvalue(),
         "merged.xlsx",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        visual_elements_removed=has_visuals,
     )

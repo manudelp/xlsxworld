@@ -5,7 +5,7 @@ import re
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 
 from app.services.excel_reader import parse_excel_bytes
-from app.tools._common import check_excel_file, file_response, read_with_limit
+from app.tools._common import check_excel_file, file_response, has_visual_elements, read_with_limit
 from app.tools.clean._utils import (
     get_cell,
     parse_columns_arg,
@@ -81,4 +81,5 @@ async def normalize_case(
         output_bytes,
         "normalize-case.xlsx",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        visual_elements_removed=has_visual_elements(raw),
     )

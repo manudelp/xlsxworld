@@ -1,11 +1,15 @@
 from __future__ import annotations
 
 import re
+import zipfile
+from io import BytesIO
 from urllib.parse import quote
 
 from fastapi import HTTPException, Response, UploadFile
 
 from app.services.excel_reader import ensure_supported_excel_filename
+
+_VISUAL_PREFIXES = ("xl/drawings/", "xl/charts/", "xl/media/")
 
 MAX_UPLOAD_SIZE_BYTES = 20 * 1024 * 1024  # 20 MB
 _READ_CHUNK = 64 * 1024  # 64 KB
@@ -101,21 +105,42 @@ def _safe_xml_tag(raw: str, fallback: str = "field") -> str:
     return tag
 
 
+def has_visual_elements(raw: bytes) -> bool:
+    try:
+        with zipfile.ZipFile(BytesIO(raw), "r") as zf:
+            for name in zf.namelist():
+                if name.replace("\\", "/").lower().startswith(_VISUAL_PREFIXES):
+                    return True
+    except Exception:
+        pass
+    return False
+
+
 def file_response(
     content: bytes,
     filename: str,
     media_type: str,
+    *,
+    visual_elements_removed: bool = False,
 ) -> Response:
     encoded_filename = quote(filename, safe="")
+    headers = {
+        "Content-Disposition": (
+            f'attachment; filename="{filename}"; '
+            f"filename*=UTF-8''{encoded_filename}"
+        ),
+        "Content-Length": str(len(content)),
+        "X-Content-Type-Options": "nosniff",
+    }
+    if visual_elements_removed:
+        headers["X-Visual-Elements-Removed"] = "true"
+        headers.setdefault("Access-Control-Expose-Headers", "")
+        exposed = headers["Access-Control-Expose-Headers"]
+        headers["Access-Control-Expose-Headers"] = (
+            f"{exposed}, X-Visual-Elements-Removed".lstrip(", ")
+        )
     return Response(
         content=content,
         media_type=media_type,
-        headers={
-            "Content-Disposition": (
-                f'attachment; filename="{filename}"; '
-                f"filename*=UTF-8''{encoded_filename}"
-            ),
-            "Content-Length": str(len(content)),
-            "X-Content-Type-Options": "nosniff",
-        },
+        headers=headers,
     )

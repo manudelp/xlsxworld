@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, ChevronUp, GripVertical } from "lucide-react";
 import { mergeSheets } from "@/lib/tools/merge";
+import { VISUAL_ELEMENTS_WARNING } from "../clean/shared";
 import FileUploadDropzone from "@/components/common/FileUploadDropzone";
 import { uploadForPreview, type WorkbookPreview } from "@/lib/tools/inspect";
 
@@ -17,6 +18,7 @@ export default function MergeSheets() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [previewLoading, setPreviewLoading] = useState(false);
+  const [visualWarning, setVisualWarning] = useState(false);
   const [orderFeedback, setOrderFeedback] = useState<string | null>(null);
   const [highlightedSheet, setHighlightedSheet] = useState<string | null>(null);
   const [draggedSheet, setDraggedSheet] = useState<string | null>(null);
@@ -32,6 +34,7 @@ export default function MergeSheets() {
     setPreview(null);
     setSelectedSheets([]);
     setPreviewLoading(true);
+    setVisualWarning(false);
 
     try {
       const workbook = await uploadForPreview(selected, 1);
@@ -258,8 +261,9 @@ export default function MergeSheets() {
     setLoading(true);
 
     try {
-      const buffer = await mergeSheets(file, selectedSheets, outputSheet);
-      const blob = new Blob([buffer], {
+      const result = await mergeSheets(file, selectedSheets, outputSheet);
+      setVisualWarning(result.visualElementsRemoved);
+      const blob = new Blob([result.buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
       const url = URL.createObjectURL(blob);
@@ -726,8 +730,13 @@ export default function MergeSheets() {
 
       {file && (
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div className="text-xs" style={{ color: "var(--muted-2)" }}>
-            Selected sheets are merged in the order shown above.
+          <div>
+            <div className="text-xs" style={{ color: "var(--muted-2)" }}>
+              Selected sheets are merged in the order shown above.
+            </div>
+            {visualWarning ? (
+              <div className="tool-warning mt-2">{VISUAL_ELEMENTS_WARNING}</div>
+            ) : null}
           </div>
           <button
             type="button"

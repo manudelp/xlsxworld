@@ -8,7 +8,7 @@ import FileUploadDropzone from "@/components/common/FileUploadDropzone";
 import { uploadForPreview, type WorkbookPreview } from "@/lib/tools/inspect";
 import { findReplace } from "@/lib/tools/clean";
 
-import { downloadXlsx, EXCEL_ACCEPT, getSheetColumnNames } from "./shared";
+import { downloadToolResult, EXCEL_ACCEPT, getSheetColumnNames, VISUAL_ELEMENTS_WARNING } from "./shared";
 
 export default function FindReplace() {
   const t = useTranslations("common");
@@ -24,6 +24,7 @@ export default function FindReplace() {
   const [matchCase, setMatchCase] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [visualWarning, setVisualWarning] = useState(false);
 
   const onFile = useCallback(async (selected: File) => {
     setError(null);
@@ -34,6 +35,7 @@ export default function FindReplace() {
     setActiveSheet(0);
     setAllSheets(false);
     setLoading(true);
+    setVisualWarning(false);
 
     try {
       const workbook = await uploadForPreview(selected, 5);
@@ -82,6 +84,10 @@ export default function FindReplace() {
       ) : null}
 
       {error ? <div className="tool-error">{error}</div> : null}
+
+      {visualWarning ? (
+        <div className="tool-warning">{VISUAL_ELEMENTS_WARNING}</div>
+      ) : null}
 
       {preview ? (
         <div
@@ -264,7 +270,7 @@ export default function FindReplace() {
                 setLoading(true);
                 try {
                   const sheetName = preview.sheets[activeSheet]?.name ?? "";
-                  const buffer = await findReplace(file, {
+                  const result = await findReplace(file, {
                     allSheets,
                     sheet: sheetName,
                     columns: selectedColumns,
@@ -274,7 +280,9 @@ export default function FindReplace() {
                     useRegex,
                     matchCase,
                   });
-                  downloadXlsx(buffer, "find-replace.xlsx");
+                  setVisualWarning(
+                    downloadToolResult(result, "find-replace.xlsx"),
+                  );
                 } catch (e) {
                   setError(e instanceof Error ? e.message : t("couldNotFindReplace"));
                 } finally {

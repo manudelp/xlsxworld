@@ -12,7 +12,7 @@ import {
 } from "@/lib/tools/inspect";
 import { removeDuplicates } from "@/lib/tools/clean";
 
-import { downloadXlsx, EXCEL_ACCEPT, getSheetColumnNames } from "./shared";
+import { downloadToolResult, EXCEL_ACCEPT, getSheetColumnNames, VISUAL_ELEMENTS_WARNING } from "./shared";
 
 const DUPLICATE_COUNT_PAGE_SIZE = 1000;
 
@@ -44,6 +44,7 @@ export default function RemoveDuplicates() {
   const [countingDuplicates, setCountingDuplicates] = useState(false);
   const [duplicateCount, setDuplicateCount] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [visualWarning, setVisualWarning] = useState(false);
 
   const onFile = useCallback(async (selected: File) => {
     setError(null);
@@ -59,6 +60,7 @@ export default function RemoveDuplicates() {
     setPreviewError(null);
     setDuplicateCount(null);
     setLoading(true);
+    setVisualWarning(false);
 
     try {
       const workbook = await uploadForPreview(selected, 25);
@@ -248,6 +250,10 @@ export default function RemoveDuplicates() {
       ) : null}
 
       {error ? <div className="tool-error">{error}</div> : null}
+
+      {visualWarning ? (
+        <div className="tool-warning">{VISUAL_ELEMENTS_WARNING}</div>
+      ) : null}
 
       {preview ? (
         <div
@@ -636,7 +642,7 @@ export default function RemoveDuplicates() {
                     setLoading(true);
                     try {
                       const sheetName = preview.sheets[activeSheet]?.name ?? "";
-                      const buffer = await removeDuplicates(
+                      const result = await removeDuplicates(
                         file,
                         {
                           allSheets: false,
@@ -645,7 +651,9 @@ export default function RemoveDuplicates() {
                         },
                         keep,
                       );
-                      downloadXlsx(buffer, `${resolvedOutputName}.xlsx`);
+                      setVisualWarning(
+                        downloadToolResult(result, `${resolvedOutputName}.xlsx`),
+                      );
                     } catch (e) {
                       setError(e instanceof Error ? e.message : t("couldNotRemoveDuplicates"));
                     } finally {

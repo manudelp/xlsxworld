@@ -10,6 +10,7 @@ from app.tools._common import (
     _INVALID_SHEET_CHARS,
     check_excel_file,
     file_response,
+    has_visual_elements,
     read_with_limit,
     safe_sheet_title,
     unique_sheet_title,
@@ -33,6 +34,7 @@ async def append_workbooks(
     out_wb.remove(out_wb.active)
     used_titles: set[str] = set()
     copied_sheets = 0
+    any_visuals = False
 
     for file_index, file in enumerate(files, start=1):
         filename = file.filename or f"workbook_{file_index}.xlsx"
@@ -41,6 +43,8 @@ async def append_workbooks(
 
         check_excel_file(file)
         raw = await read_with_limit(file)
+        if not any_visuals:
+            any_visuals = has_visual_elements(raw)
 
         workbook_data = parse_excel_bytes(raw, file.filename)
         for sheet_name, rows in workbook_data.items():
@@ -67,4 +71,5 @@ async def append_workbooks(
         output.getvalue(),
         "appended.xlsx",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        visual_elements_removed=any_visuals,
     )

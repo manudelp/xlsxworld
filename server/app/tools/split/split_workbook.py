@@ -7,7 +7,7 @@ from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from openpyxl import Workbook
 
 from app.services.excel_reader import parse_excel_bytes
-from app.tools._common import check_excel_file, file_response, read_with_limit
+from app.tools._common import check_excel_file, file_response, has_visual_elements, read_with_limit
 
 router = APIRouter()
 
@@ -27,6 +27,8 @@ async def split_workbook(
     workbook_data = parse_excel_bytes(raw, file.filename)
     if not workbook_data:
         raise HTTPException(status_code=400, detail="Workbook is empty")
+
+    has_visuals = has_visual_elements(raw)
 
     selected_sheet_names = [
         sheet_name.strip() for sheet_name in sheet_names.split(",") if sheet_name.strip()
@@ -61,4 +63,9 @@ async def split_workbook(
             member_name = f"{sheet_name.replace(' ', '_') or 'sheet'}.xlsx"
             zf.writestr(member_name, child_bytes.getvalue())
 
-    return file_response(zipped.getvalue(), "split_workbook.zip", "application/zip")
+    return file_response(
+        zipped.getvalue(),
+        "split_workbook.zip",
+        "application/zip",
+        visual_elements_removed=has_visuals,
+    )
