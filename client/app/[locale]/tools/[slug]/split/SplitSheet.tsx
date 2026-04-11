@@ -227,7 +227,7 @@ export default function SplitSheet() {
   return (
     <div className="space-y-4">
       <FileUploadDropzone
-        accept=".xls,.xlsx,.xlsm,.xlsb,.xltx,.xltm,.xlam,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.binary.macroEnabled.12,application/vnd.ms-excel.sheet.macroEnabled.12"
+        accept=".xls,.xlsx,.xlsm,.xlsb,.xltx,.xltm,.xlam,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.binary.macroEnabled.12,application/vnd.ms-excel.sheet.macroEnabled.12,application/octet-stream"
         message={t("dropExcelSplitSheet")}
         hasError={!!error}
         onFiles={(files) => {
@@ -239,7 +239,7 @@ export default function SplitSheet() {
       {previewLoading && (
         <div className="flex items-center gap-2 text-sm" style={{ color: "var(--muted-2)" }}>
           <span className="tool-spinner" />
-          Reading workbook structure...
+          {t("readingWorkbookStructure")}
         </div>
       )}
 
@@ -267,7 +267,7 @@ export default function SplitSheet() {
                 color: "var(--tag-text)",
               }}
             >
-              1 sheet output per split chunk
+              {t("oneOutputPerSheet")}
             </span>
           </div>
 
@@ -299,7 +299,7 @@ export default function SplitSheet() {
 
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <label className="block text-sm" style={{ color: "var(--muted)" }}>
-              Rows per chunk (including header)
+              {t("rowsPerChunk")}
               <input
                 type="number"
                 min={2}
@@ -316,7 +316,7 @@ export default function SplitSheet() {
 
             <div className="pt-0.5">
               <p className="mb-2 text-sm font-medium" style={{ color: "var(--muted)" }}>
-                Chunk presets
+                {t("chunkPresets")}
               </p>
               <div className="flex flex-wrap gap-2">
                 {[250, 500, 1000, 5000].map((size) => (
@@ -344,7 +344,7 @@ export default function SplitSheet() {
             </div>
 
             <label className="block text-sm" style={{ color: "var(--muted)" }}>
-              Base name
+              {t("baseName")}
               <input
                 value={partBase}
                 onChange={(e) => setPartBase(e.target.value)}
@@ -359,7 +359,7 @@ export default function SplitSheet() {
             </label>
 
             <label className="block text-sm" style={{ color: "var(--muted)" }}>
-              Separator
+              {t("separator")}
               <input
                 value={partSeparator}
                 onChange={(e) => setPartSeparator(e.target.value)}
@@ -376,7 +376,7 @@ export default function SplitSheet() {
 
             <div className="md:col-span-2">
               <p className="mb-2 text-sm font-medium" style={{ color: "var(--muted)" }}>
-                Numbering style
+                {t("numberingStyle")}
               </p>
               <div className="flex flex-wrap gap-2">
                 {[
@@ -416,7 +416,7 @@ export default function SplitSheet() {
                 className="block text-sm md:col-span-2"
                 style={{ color: "var(--muted)" }}
               >
-                Custom token sequence (one per line)
+                {t("customTokenSequence")}
                 <textarea
                   value={customSequenceInput}
                   onChange={(e) => setCustomSequenceInput(e.target.value)}
@@ -429,7 +429,7 @@ export default function SplitSheet() {
                   }}
                 />
                 <span className="mt-1 block text-xs" style={{ color: "var(--muted-2)" }}>
-                  Token 1 maps to part 1, token 2 to part 2. Missing tokens fall back to numeric values.
+                  {t("tokenMappingHint")}
                 </span>
               </label>
             ) : null}
@@ -442,7 +442,7 @@ export default function SplitSheet() {
                 color: "var(--muted-2)",
               }}
             >
-              Name preview: {namingPreview}
+              {t("namePreview", { preview: namingPreview })}
             </div>
           </div>
         </div>
@@ -459,7 +459,7 @@ export default function SplitSheet() {
         >
           <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
             <div className="font-medium" style={{ color: "var(--foreground)" }}>
-              Split summary
+              {t("splitSummary")}
             </div>
             {selectedSheet ? (
               <span
@@ -485,7 +485,7 @@ export default function SplitSheet() {
               }}
             >
               <Layers3 size={14} />
-              {dataRows.toLocaleString()} data rows
+              {t("dataRows", { count: dataRows })}
             </span>
 
             <span

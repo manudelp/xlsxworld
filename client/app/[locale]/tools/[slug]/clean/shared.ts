@@ -2,7 +2,7 @@ import type { ToolFileResult } from "@/lib/api";
 import type { WorkbookPreview } from "@/lib/tools/inspect";
 
 export const EXCEL_ACCEPT =
-  ".xls,.xlsx,.xlsm,.xlsb,.xltx,.xltm,.xlam,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.binary.macroEnabled.12,application/vnd.ms-excel.sheet.macroEnabled.12";
+  ".xls,.xlsx,.xlsm,.xlsb,.xltx,.xltm,.xlam,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.binary.macroEnabled.12,application/vnd.ms-excel.sheet.macroEnabled.12,application/octet-stream";
 
 export const VISUAL_ELEMENTS_WARNING =
   "Charts, images, and other visual elements were removed from the output. Only cell data was preserved.";

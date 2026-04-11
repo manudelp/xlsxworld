@@ -80,7 +80,9 @@ export default function AppendWorkbooks() {
 
         setHighlightedFile(key);
         setOrderFeedback(
-          `Moved ${next[targetIndex].name} ${direction}. Position ${targetIndex + 1} of ${next.length}.`,
+          direction === "up"
+            ? t("movedUp", { name: next[targetIndex].name, pos: String(targetIndex + 1), total: String(next.length) })
+            : t("movedDown", { name: next[targetIndex].name, pos: String(targetIndex + 1), total: String(next.length) }),
         );
 
         return next;
@@ -107,7 +109,7 @@ export default function AppendWorkbooks() {
 
         setHighlightedFile(fileKey(moved));
         setOrderFeedback(
-          `Moved ${moved.name} to position ${toIndex + 1} of ${next.length}.`,
+          t("movedToPosition", { name: moved.name, pos: String(toIndex + 1), total: String(next.length) }),
         );
         return next;
       });
@@ -126,7 +128,7 @@ export default function AppendWorkbooks() {
           sensitivity: "base",
         }),
       );
-      setOrderFeedback("Ordered files A to Z.");
+      setOrderFeedback(t("orderedAtoZ"));
       setHighlightedFile(null);
       return next;
     });
@@ -140,7 +142,7 @@ export default function AppendWorkbooks() {
           sensitivity: "base",
         }),
       );
-      setOrderFeedback("Ordered files Z to A.");
+      setOrderFeedback(t("orderedZtoA"));
       setHighlightedFile(null);
       return next;
     });
@@ -152,7 +154,7 @@ export default function AppendWorkbooks() {
     setFiles((current) => {
       const currentKeys = new Set(current.map((file) => fileKey(file)));
       const next = originalOrder.filter((file) => currentKeys.has(fileKey(file)));
-      setOrderFeedback("Order reset to upload order.");
+      setOrderFeedback(t("orderResetUpload"));
       setHighlightedFile(null);
       return next;
     });
@@ -303,7 +305,7 @@ export default function AppendWorkbooks() {
   return (
     <div className="space-y-4">
       <FileUploadDropzone
-        accept=".xls,.xlsx,.xlsm,.xlsb,.xltx,.xltm,.xlam,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.binary.macroEnabled.12,application/vnd.ms-excel.sheet.macroEnabled.12"
+        accept=".xls,.xlsx,.xlsm,.xlsb,.xltx,.xltm,.xlam,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.binary.macroEnabled.12,application/vnd.ms-excel.sheet.macroEnabled.12,application/octet-stream"
         multiple
         message={t("dropExcelAppend")}
         hasError={!!error}
@@ -322,7 +324,7 @@ export default function AppendWorkbooks() {
             <div>
               <h3 className="font-medium">{t("appendFiles")}</h3>
               <p className="text-sm" style={{ color: "var(--muted-2)" }}>
-                {files.length} file{files.length === 1 ? "" : "s"} ready
+                {t("filesReady", { count: files.length })}
               </p>
             </div>
 
@@ -332,7 +334,7 @@ export default function AppendWorkbooks() {
                 onClick={() => {
                   setFiles([]);
                   setOriginalOrder([]);
-                  setOrderFeedback("Selection cleared.");
+                  setOrderFeedback(t("selectionCleared"));
                   setHighlightedFile(null);
                   setError(null);
                 }}
@@ -343,7 +345,7 @@ export default function AppendWorkbooks() {
                   color: "var(--tag-text)",
                 }}
               >
-                Clear all
+                {t("clearAll")}
               </button>
             </div>
           </div>
@@ -359,7 +361,7 @@ export default function AppendWorkbooks() {
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="font-medium" style={{ color: "var(--foreground)" }}>
-                  Append summary
+                  {t("appendSummary")}
                 </div>
                 <span
                   className="rounded-full border px-2 py-0.5 text-xs"
@@ -369,7 +371,7 @@ export default function AppendWorkbooks() {
                     color: "var(--tag-text)",
                   }}
                 >
-                  {files.length} files
+                  {t("filesCount", { count: files.length })}
                 </span>
               </div>
 
@@ -427,13 +429,13 @@ export default function AppendWorkbooks() {
                     style={{ color: "var(--foreground)" }}
                     title={t("allSourceSheetsPreserved")}
                   >
-                    All source sheets preserved
+                    {t("allSourceSheetsPreserved")}
                   </div>
                 </div>
               </div>
 
               <div className="mt-2 text-xs" style={{ color: "var(--muted-2)" }}>
-                File order preview
+                {t("fileOrderPreview")}
               </div>
               <div
                 ref={summaryRowRef}
@@ -470,7 +472,7 @@ export default function AppendWorkbooks() {
             </div>
 
             <label className="block text-sm" style={{ color: "var(--muted)" }}>
-              Output file name
+              {t("outputFileName")}
               <input
                 value={outputName}
                 onChange={(event) => setOutputName(event.target.value)}
@@ -506,7 +508,7 @@ export default function AppendWorkbooks() {
                       color: "var(--tag-text)",
                     }}
                   >
-                    Order ASC
+                    {t("orderAsc")}
                   </button>
                   <button
                     type="button"
@@ -518,7 +520,7 @@ export default function AppendWorkbooks() {
                       color: "var(--tag-text)",
                     }}
                   >
-                    Order DESC
+                    {t("orderDesc")}
                   </button>
                   <button
                     type="button"
@@ -530,7 +532,7 @@ export default function AppendWorkbooks() {
                       color: "var(--tag-text)",
                     }}
                   >
-                    Clear order
+                    {t("clearOrder")}
                   </button>
                 </div>
 
@@ -569,7 +571,7 @@ export default function AppendWorkbooks() {
                   aria-live="polite"
                 >
                   {orderFeedback ||
-                    "Drag and drop rows or use Up and Down to define append order."}
+                    t("dragAndDropAppendOrder")}
                 </div>
 
                 <div className="space-y-2">
@@ -651,7 +653,7 @@ export default function AppendWorkbooks() {
                               color: "var(--tag-text)",
                             }}
                           >
-                            Up
+                            {t("up")}
                           </button>
                           <button
                             type="button"
@@ -665,7 +667,7 @@ export default function AppendWorkbooks() {
                               color: "var(--tag-text)",
                             }}
                           >
-                            Down
+                            {t("down")}
                           </button>
                         </div>
                       </div>
@@ -675,7 +677,7 @@ export default function AppendWorkbooks() {
               </>
             ) : (
               <div className="text-xs" style={{ color: "var(--muted-2)" }}>
-                {files.length} file(s) selected. Expand to reorder manually.
+                {t("filesSelectedExpandToReorder", { count: files.length })}
               </div>
             )}
           </div>
@@ -686,7 +688,7 @@ export default function AppendWorkbooks() {
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="text-xs" style={{ color: "var(--muted-2)" }}>
-              All workbook sheets combined into one output, preserving sheet structure.
+              {t("allWorkbookSheetsCombined")}
             </div>
             {visualWarning ? (
               <div className="tool-warning mt-2">{VISUAL_ELEMENTS_WARNING}</div>

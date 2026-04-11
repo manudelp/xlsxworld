@@ -71,7 +71,7 @@ export default function ConvertXlsxToCsv() {
   return (
     <div className="space-y-4">
       <FileUploadDropzone
-        accept=".xls,.xlsx,.xlsm,.xlsb,.xltx,.xltm,.xlam,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.binary.macroEnabled.12,application/vnd.ms-excel.sheet.macroEnabled.12"
+        accept=".xls,.xlsx,.xlsm,.xlsb,.xltx,.xltm,.xlam,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.binary.macroEnabled.12,application/vnd.ms-excel.sheet.macroEnabled.12,application/octet-stream"
         message={t("dropExcelConvertCsv")}
         hasError={!!error}
         onFiles={(files) => {
@@ -115,7 +115,7 @@ export default function ConvertXlsxToCsv() {
                   color: "var(--tag-text)",
                 }}
               >
-                Select all
+                {t("selectAll")}
               </button>
               <button
                 type="button"
@@ -127,7 +127,7 @@ export default function ConvertXlsxToCsv() {
                   color: "var(--tag-text)",
                 }}
               >
-                Clear
+                {t("clear")}
               </button>
             </div>
           </div>
@@ -166,7 +166,7 @@ export default function ConvertXlsxToCsv() {
           }}
         >
           <div className="mb-2 font-medium" style={{ color: "var(--foreground)" }}>
-            Export summary
+            {t("exportSummary")}
           </div>
 
           <div className="flex flex-wrap gap-1.5">
@@ -178,7 +178,7 @@ export default function ConvertXlsxToCsv() {
                 color: "var(--tag-text)",
               }}
             >
-              Previewing: {selectedSheet.name}
+              {t("previewing", { name: selectedSheet.name })}
             </span>
             <span
               className="rounded-full border px-2 py-0.5 text-xs"
@@ -188,7 +188,7 @@ export default function ConvertXlsxToCsv() {
                 color: "var(--tag-text)",
               }}
             >
-              {selectedDataRows.toLocaleString()} data rows
+              {t("dataRows", { count: selectedDataRows })}
             </span>
             <span
               className="rounded-full border px-2 py-0.5 text-xs"
@@ -198,7 +198,7 @@ export default function ConvertXlsxToCsv() {
                 color: "var(--tag-text)",
               }}
             >
-              {selectedCount.toLocaleString()} selected for export
+              {t("selectedForExport", { count: selectedCount })}
             </span>
             <span
               className="rounded-full border px-2 py-0.5 text-xs"
@@ -208,7 +208,7 @@ export default function ConvertXlsxToCsv() {
                 color: "var(--tag-text)",
               }}
             >
-              Preview uses first 25 rows
+              {t("previewUsesFirst25")}
             </span>
             {canDownloadAllSheets ? (
               <span
@@ -219,7 +219,7 @@ export default function ConvertXlsxToCsv() {
                   color: "var(--tag-text)",
                 }}
               >
-                Also available: all sheets as CSV ZIP
+                {t("alsoAvailableCsvZip")}
               </span>
             ) : null}
           </div>
@@ -284,7 +284,7 @@ export default function ConvertXlsxToCsv() {
                     color: "var(--muted)",
                   }}
                 >
-                  No sheets selected
+                  {t("noSheetsSelected")}
                 </button>
               ) : null}
 

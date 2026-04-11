@@ -69,7 +69,9 @@ export default function MergeSheets() {
 
       setHighlightedSheet(name);
       setOrderFeedback(
-        `Moved ${name} ${direction}. Position ${targetIndex + 1} of ${next.length}.`,
+        t(direction === "up"
+          ? "movedUp"
+          : "movedDown", { name, pos: String(targetIndex + 1), total: String(next.length) }),
       );
 
       return next;
@@ -93,7 +95,7 @@ export default function MergeSheets() {
 
       setHighlightedSheet(moved);
       setOrderFeedback(
-        `Moved ${moved} to position ${toIndex + 1} of ${next.length}.`,
+        t("movedToPosition", { name: moved, pos: String(toIndex + 1), total: String(next.length) }),
       );
       return next;
     });
@@ -107,7 +109,7 @@ export default function MergeSheets() {
       const next = [...current].sort((a, b) =>
         a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" }),
       );
-      setOrderFeedback("Ordered sheets A to Z.");
+      setOrderFeedback(t("orderedSheetsAtoZ"));
       setHighlightedSheet(null);
       return next;
     });
@@ -118,7 +120,7 @@ export default function MergeSheets() {
       const next = [...current].sort((a, b) =>
         b.localeCompare(a, undefined, { numeric: true, sensitivity: "base" }),
       );
-      setOrderFeedback("Ordered sheets Z to A.");
+      setOrderFeedback(t("orderedSheetsZtoA"));
       setHighlightedSheet(null);
       return next;
     });
@@ -132,7 +134,7 @@ export default function MergeSheets() {
       const next = preview.sheets
         .map((sheet) => sheet.name)
         .filter((name) => currentSet.has(name));
-      setOrderFeedback("Order reset to workbook order.");
+      setOrderFeedback(t("orderResetWorkbook"));
       setHighlightedSheet(null);
       return next;
     });
@@ -285,7 +287,7 @@ export default function MergeSheets() {
   return (
     <div className="space-y-4">
       <FileUploadDropzone
-        accept=".xls,.xlsx,.xlsm,.xlsb,.xltx,.xltm,.xlam,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.binary.macroEnabled.12,application/vnd.ms-excel.sheet.macroEnabled.12"
+        accept=".xls,.xlsx,.xlsm,.xlsb,.xltx,.xltm,.xlam,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.binary.macroEnabled.12,application/vnd.ms-excel.sheet.macroEnabled.12,application/octet-stream"
         message={t("dropExcelMerge")}
         hasError={!!error}
         onFiles={(files) => {
@@ -297,7 +299,7 @@ export default function MergeSheets() {
       {previewLoading && (
         <div className="flex items-center gap-2 text-sm" style={{ color: "var(--muted-2)" }}>
           <span className="tool-spinner" />
-          Reading workbook structure...
+          {t("readingWorkbookStructure")}
         </div>
       )}
 
@@ -324,7 +326,7 @@ export default function MergeSheets() {
                 onClick={() => {
                   const allSheets = preview.sheets.map((sheet) => sheet.name);
                   setSelectedSheets(allSheets);
-                  setOrderFeedback(`Selected all ${allSheets.length} sheets.`);
+                  setOrderFeedback(t("selectedAllSheets", { count: allSheets.length }));
                   setHighlightedSheet(null);
                 }}
                 className="cursor-pointer rounded-md border px-3 py-1.5 text-sm"
@@ -334,14 +336,14 @@ export default function MergeSheets() {
                   color: "var(--tag-text)",
                 }}
               >
-                Select all
+                {t("selectAll")}
               </button>
 
               <button
                 type="button"
                 onClick={() => {
                   setSelectedSheets([]);
-                  setOrderFeedback("Selection cleared.");
+                  setOrderFeedback(t("selectionCleared"));
                   setHighlightedSheet(null);
                 }}
                 className="cursor-pointer rounded-md border px-3 py-1.5 text-sm"
@@ -351,7 +353,7 @@ export default function MergeSheets() {
                   color: "var(--tag-text)",
                 }}
               >
-                Clear
+                {t("clear")}
               </button>
             </div>
           </div>
@@ -387,7 +389,7 @@ export default function MergeSheets() {
               className="block text-sm"
               style={{ color: "var(--muted)" }}
             >
-              Output sheet name
+              {t("outputSheetName")}
               <input
                 className="mt-1 w-full rounded border px-3 py-2 text-sm"
                 style={{
@@ -410,7 +412,7 @@ export default function MergeSheets() {
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="font-medium" style={{ color: "var(--foreground)" }}>
-                  Merge summary
+                  {t("mergeSummary")}
                 </div>
                 <span
                   className="rounded-full border px-2 py-0.5 text-xs"
@@ -484,7 +486,7 @@ export default function MergeSheets() {
               </div>
 
               <div className="mt-2 text-xs" style={{ color: "var(--muted-2)" }}>
-                Merge order preview
+                {t("mergeOrderPreview")}
               </div>
               <div
                 ref={summaryRowRef}
@@ -520,7 +522,7 @@ export default function MergeSheets() {
 
                 {!hasSelectedSheets && (
                   <span style={{ color: "var(--muted-2)" }}>
-                    No sheets selected.
+                    {t("noSheetsSelected")}
                   </span>
                 )}
               </div>
@@ -549,7 +551,7 @@ export default function MergeSheets() {
                         color: "var(--tag-text)",
                       }}
                     >
-                      Order ASC
+                      {t("orderAsc")}
                     </button>
                     <button
                       type="button"
@@ -561,7 +563,7 @@ export default function MergeSheets() {
                         color: "var(--tag-text)",
                       }}
                     >
-                      Order DESC
+                      {t("orderDesc")}
                     </button>
                     <button
                       type="button"
@@ -573,7 +575,7 @@ export default function MergeSheets() {
                         color: "var(--tag-text)",
                       }}
                     >
-                      Clear order
+                      {t("clearOrder")}
                     </button>
                   </div>
 
@@ -615,7 +617,7 @@ export default function MergeSheets() {
                     aria-live="polite"
                   >
                     {orderFeedback ||
-                      "Drag and drop rows or use Up and Down to set exact merge order."}
+                      t("dragAndDropMergeOrder")}
                   </div>
                   <div className="space-y-2">
                     {selectedSheets.map((sheetName, index) => (
@@ -697,7 +699,7 @@ export default function MergeSheets() {
                               color: "var(--tag-text)",
                             }}
                           >
-                            Up
+                            {t("up")}
                           </button>
                           <button
                             type="button"
@@ -711,7 +713,7 @@ export default function MergeSheets() {
                               color: "var(--tag-text)",
                             }}
                           >
-                            Down
+                            {t("down")}
                           </button>
                         </div>
                       </div>
@@ -720,7 +722,7 @@ export default function MergeSheets() {
                 </>
               ) : (
                 <div className="text-xs" style={{ color: "var(--muted-2)" }}>
-                  {selectedSheets.length} sheet(s) selected. Expand to reorder manually.
+                  {t("sheetsSelectedExpandToReorder", { count: selectedSheets.length })}
                 </div>
               )}
             </div>
@@ -732,7 +734,7 @@ export default function MergeSheets() {
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="text-xs" style={{ color: "var(--muted-2)" }}>
-              Selected sheets are merged in the order shown above.
+              {t("selectedSheetsMergedInOrder")}
             </div>
             {visualWarning ? (
               <div className="tool-warning mt-2">{VISUAL_ELEMENTS_WARNING}</div>

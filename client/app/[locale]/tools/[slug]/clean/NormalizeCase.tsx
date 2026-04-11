@@ -76,7 +76,7 @@ export default function NormalizeCase() {
       {loading ? (
         <p className="flex items-center gap-2 text-sm" style={{ color: "var(--muted-2)" }}>
           <span className="tool-spinner" />
-          Uploading and preparing workbook...
+          {t("uploadingPreparingWorkbook")}
         </p>
       ) : null}
 
@@ -104,13 +104,13 @@ export default function NormalizeCase() {
                 checked={allSheets}
                 onChange={(event) => setAllSheets(event.target.checked)}
               />
-              Apply to all sheets
+              {t("applyToAllSheets")}
             </label>
           </div>
 
           <div>
             <p className="mb-2 text-sm font-medium" style={{ color: "var(--muted)" }}>
-              Target case
+              {t("targetCase")}
             </p>
             <div className="flex flex-wrap gap-2">
               {([
@@ -172,7 +172,7 @@ export default function NormalizeCase() {
           <div>
             <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
               <p className="text-sm font-medium" style={{ color: "var(--muted)" }}>
-                Text columns (empty means all columns)
+                {t("textColumnsEmptyMeansAll")}
               </p>
               <div className="flex gap-2">
                 <button
@@ -185,7 +185,7 @@ export default function NormalizeCase() {
                     color: "var(--tag-text)",
                   }}
                 >
-                  Select all
+                  {t("selectAll")}
                 </button>
                 <button
                   type="button"
@@ -197,14 +197,14 @@ export default function NormalizeCase() {
                     color: "var(--tag-text)",
                   }}
                 >
-                  Clear
+                  {t("clear")}
                 </button>
               </div>
             </div>
 
             {columnNames.length === 0 ? (
               <p className="text-xs" style={{ color: "var(--muted-2)" }}>
-                This sheet has no named headers. The tool will use all columns.
+                {t("noNamedHeadersAllColumns")}
               </p>
             ) : (
               <div className="flex flex-wrap gap-2">

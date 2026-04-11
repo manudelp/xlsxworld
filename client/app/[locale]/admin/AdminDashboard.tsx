@@ -1,10 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import {
   fetchAdminOverview,
   fetchAdminOverviewTrend,
+  fetchAdminKpiTrends,
   fetchAdminTools,
   fetchAdminUsers,
   fetchAdminPerformance,
@@ -17,6 +19,7 @@ import type {
   AdminPerformanceStat,
   AdminActivityItem,
   DayCount,
+  KpiTrendDay,
 } from "@/lib/admin";
 
 import OverviewTab from "./tabs/OverviewTab";
@@ -27,19 +30,15 @@ import ActivityTab from "./tabs/ActivityTab";
 
 type Tab = "overview" | "tools" | "users" | "performance" | "activity";
 
-const TABS: { key: Tab; label: string }[] = [
-  { key: "overview", label: "Overview" },
-  { key: "tools", label: "Tools" },
-  { key: "users", label: "Users" },
-  { key: "performance", label: "Performance" },
-  { key: "activity", label: "Activity" },
-];
+const TAB_KEYS: Tab[] = ["overview", "tools", "users", "performance", "activity"];
 
 export default function AdminDashboard() {
+  const t = useTranslations("admin");
   const [activeTab, setActiveTab] = useState<Tab>("overview");
 
   const [overviewData, setOverviewData] = useState<AdminOverview | null>(null);
   const [trendData, setTrendData] = useState<DayCount[] | null>(null);
+  const [kpiTrends, setKpiTrends] = useState<KpiTrendDay[] | null>(null);
   const [toolsData, setToolsData] = useState<AdminToolStat[] | null>(null);
   const [usersData, setUsersData] = useState<AdminUsers | null>(null);
   const [perfData, setPerfData] = useState<AdminPerformanceStat[] | null>(null);
@@ -56,12 +55,14 @@ export default function AdminDashboard() {
     try {
       switch (tab) {
         case "overview": {
-          const [overview, trend] = await Promise.all([
+          const [overview, trend, kpi] = await Promise.all([
             fetchAdminOverview(),
             fetchAdminOverviewTrend(),
+            fetchAdminKpiTrends(),
           ]);
           setOverviewData(overview);
           setTrendData(trend);
+          setKpiTrends(kpi.series);
           break;
         }
         case "tools": {
@@ -99,7 +100,7 @@ export default function AdminDashboard() {
         className="mb-6 text-2xl font-bold"
         style={{ color: "var(--foreground)" }}
       >
-        Admin Dashboard
+        {t("title")}
       </h1>
 
       <div
@@ -109,24 +110,24 @@ export default function AdminDashboard() {
           backgroundColor: "var(--surface)",
         }}
       >
-        {TABS.map((tab) => (
+        {TAB_KEYS.map((key) => (
           <button
-            key={tab.key}
+            key={key}
             type="button"
-            onClick={() => setActiveTab(tab.key)}
+            onClick={() => setActiveTab(key)}
             className="rounded-md px-4 py-2 text-sm font-medium transition-colors"
             style={{
               backgroundColor:
-                activeTab === tab.key
+                activeTab === key
                   ? "var(--tag-selected-bg)"
                   : "transparent",
               color:
-                activeTab === tab.key
+                activeTab === key
                   ? "var(--tag-selected-text)"
                   : "var(--muted-2)",
             }}
           >
-            {tab.label}
+            {t(`tabs.${key}`)}
           </button>
         ))}
       </div>
@@ -141,15 +142,15 @@ export default function AdminDashboard() {
           }}
         >
           <p className="text-sm" style={{ color: "var(--muted-2)" }}>
-            Failed to load data: {error}
+            {t("failedToLoad", { error })}
           </p>
         </div>
       ) : loading ? (
-        <LoadingSkeleton />
+        <LoadingSkeleton tab={activeTab} />
       ) : (
         <>
           {activeTab === "overview" && overviewData && (
-            <OverviewTab data={overviewData} trend={trendData ?? []} />
+            <OverviewTab data={overviewData} trend={trendData ?? []} kpiTrends={kpiTrends ?? []} />
           )}
           {activeTab === "tools" && toolsData && (
             <ToolsTab data={toolsData} />
@@ -174,28 +175,157 @@ export default function AdminDashboard() {
   );
 }
 
-function LoadingSkeleton() {
+function SkeletonBlock({ className }: { className: string }) {
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {Array.from({ length: 6 }).map((_, i) => (
+    <div
+      className={`rounded ${className}`}
+      style={{ backgroundColor: "var(--border)" }}
+    />
+  );
+}
+
+function SkeletonCard({ hasSparkline = false }: { hasSparkline?: boolean }) {
+  return (
+    <div
+      className="animate-pulse rounded-lg border p-5"
+      style={{
+        borderColor: "var(--border)",
+        backgroundColor: "var(--surface)",
+      }}
+    >
+      <SkeletonBlock className="mb-2 h-3 w-20" />
+      <SkeletonBlock className="mb-1 h-7 w-16" />
+      <SkeletonBlock className="h-3 w-24" />
+      {hasSparkline && <SkeletonBlock className="mt-3 h-10 w-full" />}
+    </div>
+  );
+}
+
+function SkeletonChart() {
+  return (
+    <div
+      className="animate-pulse rounded-lg border p-6"
+      style={{
+        borderColor: "var(--border)",
+        backgroundColor: "var(--surface)",
+      }}
+    >
+      <SkeletonBlock className="mb-4 h-4 w-48" />
+      <SkeletonBlock className="h-[280px] w-full" />
+    </div>
+  );
+}
+
+function SkeletonTableRow() {
+  return (
+    <div
+      className="flex gap-4 px-4 py-3"
+      style={{ borderBottom: "1px solid var(--border)" }}
+    >
+      <SkeletonBlock className="h-4 w-28" />
+      <SkeletonBlock className="h-4 w-16" />
+      <SkeletonBlock className="h-4 w-16" />
+      <SkeletonBlock className="h-4 w-20" />
+      <SkeletonBlock className="h-4 w-24" />
+    </div>
+  );
+}
+
+function SkeletonFeedItem() {
+  return (
+    <div
+      className="animate-pulse rounded-lg border p-4"
+      style={{
+        borderColor: "var(--border)",
+        backgroundColor: "var(--surface)",
+        borderLeft: "4px solid var(--border)",
+      }}
+    >
+      <div className="flex items-center gap-2">
+        <SkeletonBlock className="h-4 w-4 rounded-full" />
+        <SkeletonBlock className="h-4 w-32" />
+        <SkeletonBlock className="h-4 w-20" />
+      </div>
+      <div className="mt-2 flex gap-3">
+        <SkeletonBlock className="h-3 w-28" />
+        <SkeletonBlock className="h-3 w-14" />
+      </div>
+    </div>
+  );
+}
+
+function LoadingSkeleton({ tab }: { tab: Tab }) {
+  switch (tab) {
+    case "overview":
+      return (
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <SkeletonCard key={i} hasSparkline />
+            ))}
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <SkeletonCard key={i} hasSparkline />
+            ))}
+          </div>
+          <SkeletonChart />
+        </div>
+      );
+
+    case "tools":
+    case "performance":
+      return (
         <div
-          key={i}
-          className="animate-pulse rounded-lg border p-6"
+          className="animate-pulse rounded-lg border"
           style={{
             borderColor: "var(--border)",
             backgroundColor: "var(--surface)",
           }}
         >
           <div
-            className="mb-3 h-4 w-24 rounded"
-            style={{ backgroundColor: "var(--border)" }}
-          />
-          <div
-            className="h-8 w-16 rounded"
-            style={{ backgroundColor: "var(--border)" }}
-          />
+            className="flex gap-4 px-4 py-3"
+            style={{ borderBottom: "1px solid var(--border)" }}
+          >
+            {Array.from({ length: 5 }).map((_, i) => (
+              <SkeletonBlock key={i} className="h-4 w-20" />
+            ))}
+          </div>
+          {Array.from({ length: 6 }).map((_, i) => (
+            <SkeletonTableRow key={i} />
+          ))}
         </div>
-      ))}
-    </div>
-  );
+      );
+
+    case "users":
+      return (
+        <div className="space-y-6">
+          <SkeletonCard />
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <SkeletonChart />
+            <SkeletonChart />
+          </div>
+          <div
+            className="animate-pulse rounded-lg border"
+            style={{
+              borderColor: "var(--border)",
+              backgroundColor: "var(--surface)",
+            }}
+          >
+            {Array.from({ length: 5 }).map((_, i) => (
+              <SkeletonTableRow key={i} />
+            ))}
+          </div>
+        </div>
+      );
+
+    case "activity":
+      return (
+        <div className="space-y-2">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <SkeletonFeedItem key={i} />
+          ))}
+        </div>
+      );
+  }
 }

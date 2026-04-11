@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import type { AdminToolStat } from "@/lib/admin";
 
@@ -12,8 +13,8 @@ function rateColor(rate: number) {
   return "#ef4444";
 }
 
-function formatDate(iso: string | null) {
-  if (!iso) return "Never used";
+function formatDate(iso: string | null, neverUsedLabel: string) {
+  if (!iso) return neverUsedLabel;
   return new Date(iso).toLocaleDateString(undefined, {
     month: "short",
     day: "numeric",
@@ -24,6 +25,7 @@ function formatDate(iso: string | null) {
 }
 
 export default function ToolsTab({ data }: { data: AdminToolStat[] }) {
+  const t = useTranslations("admin.tools");
   const [sortKey, setSortKey] = useState<SortKey>("total_uses");
   const [sortAsc, setSortAsc] = useState(false);
 
@@ -68,27 +70,29 @@ export default function ToolsTab({ data }: { data: AdminToolStat[] }) {
           color: "var(--muted-2)",
         }}
       >
-        No tool usage data yet.
+        {t("noData")}
       </div>
     );
   }
+
+  const columns: [SortKey, string][] = [
+    ["tool_name", t("toolName")],
+    ["total_uses", t("totalUses")],
+    ["success_rate", t("successRate")],
+    ["avg_duration_ms", t("avgDuration")],
+    ["last_used_at", t("lastUsed")],
+  ];
 
   return (
     <div
       className="overflow-x-auto rounded-lg border"
       style={{ borderColor: "var(--border)" }}
     >
-      <table className="w-full text-sm">
+      <table className="w-full text-sm" style={{ backgroundColor: "var(--surface-2)" }}>
         <thead>
           <tr style={{ backgroundColor: "var(--surface)" }}>
             {(
-              [
-                ["tool_name", "Tool Name"],
-                ["total_uses", "Total Uses"],
-                ["success_rate", "Success Rate"],
-                ["avg_duration_ms", "Avg Duration"],
-                ["last_used_at", "Last Used"],
-              ] as [SortKey, string][]
+              columns
             ).map(([key, label]) => (
               <th
                 key={key}
@@ -103,9 +107,9 @@ export default function ToolsTab({ data }: { data: AdminToolStat[] }) {
           </tr>
         </thead>
         <tbody>
-          {sorted.map((tool) => (
+          {sorted.map((tool, idx) => (
             <tr
-              key={tool.tool_slug}
+              key={`${tool.tool_slug}-${idx}`}
               style={{ borderBottom: "1px solid var(--border)" }}
             >
               <td className="px-4 py-3" style={{ color: "var(--foreground)" }}>
@@ -123,7 +127,7 @@ export default function ToolsTab({ data }: { data: AdminToolStat[] }) {
                 {tool.avg_duration_ms} ms
               </td>
               <td className="px-4 py-3" style={{ color: "var(--muted-2)" }}>
-                {formatDate(tool.last_used_at)}
+                {formatDate(tool.last_used_at, t("neverUsed"))}
               </td>
             </tr>
           ))}

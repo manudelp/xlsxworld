@@ -1,21 +1,22 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { CheckCircle, XCircle, Loader2, RefreshCw } from "lucide-react";
 
 import type { AdminActivityItem } from "@/lib/admin";
 
-function timeAgo(iso: string | null): string {
+function timeAgo(iso: string | null, t: (key: string, values?: Record<string, number>) => string): string {
   if (!iso) return "";
   const diff = Date.now() - new Date(iso).getTime();
   const secs = Math.floor(diff / 1000);
-  if (secs < 60) return "Just now";
+  if (secs < 60) return t("justNow");
   const mins = Math.floor(secs / 60);
-  if (mins < 60) return `${mins} minute${mins === 1 ? "" : "s"} ago`;
+  if (mins < 60) return t("minutesAgo", { count: mins });
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+  if (hours < 24) return t("hoursAgo", { count: hours });
   const days = Math.floor(hours / 24);
-  return `${days} day${days === 1 ? "" : "s"} ago`;
+  return t("daysAgo", { count: days });
 }
 
 export default function ActivityTab({
@@ -25,6 +26,7 @@ export default function ActivityTab({
   data: AdminActivityItem[];
   onRefresh: () => Promise<void>;
 }) {
+  const t = useTranslations("admin.activity");
   const [refreshing, setRefreshing] = useState(false);
 
   async function handleRefresh() {
@@ -44,10 +46,10 @@ export default function ActivityTab({
             className="text-sm font-medium"
             style={{ color: "var(--foreground)" }}
           >
-            Live Activity Feed
+            {t("title")}
           </h3>
           <p className="text-xs" style={{ color: "var(--muted-2)" }}>
-            Last 50 tool uses — refresh to update
+            {t("subtitle")}
           </p>
         </div>
         <button
@@ -66,7 +68,7 @@ export default function ActivityTab({
           ) : (
             <RefreshCw className="h-3.5 w-3.5" />
           )}
-          Refresh
+          {t("refresh")}
         </button>
       </div>
 
@@ -79,7 +81,7 @@ export default function ActivityTab({
             color: "var(--muted-2)",
           }}
         >
-          No tool activity yet.
+          {t("noData")}
         </div>
       ) : (
         <div
@@ -108,7 +110,7 @@ export default function ActivityTab({
                       className="text-sm font-medium"
                       style={{ color: "var(--foreground)" }}
                     >
-                      {item.tool_name || item.tool_slug || "Unknown tool"}
+                      {item.tool_name || item.tool_slug || t("unknownTool")}
                     </span>
                     {item.tool_slug && (
                       <span
@@ -125,7 +127,7 @@ export default function ActivityTab({
 
                   <div className="mt-1 flex flex-wrap items-center gap-3 text-xs">
                     <span style={{ color: "var(--muted-2)" }}>
-                      {item.user_email || "Anonymous"}
+                      {item.user_email || t("anonymous")}
                     </span>
                     <span style={{ color: "var(--muted-2)" }}>
                       {item.duration_ms ? `${item.duration_ms} ms` : "—"}
@@ -142,7 +144,7 @@ export default function ActivityTab({
                   className="shrink-0 text-xs"
                   style={{ color: "var(--muted-2)" }}
                 >
-                  {timeAgo(item.occurred_at)}
+                  {timeAgo(item.occurred_at, t)}
                 </span>
               </div>
             </div>

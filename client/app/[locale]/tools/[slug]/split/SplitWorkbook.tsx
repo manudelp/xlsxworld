@@ -98,7 +98,7 @@ export default function SplitWorkbook() {
   return (
     <div className="space-y-4">
       <FileUploadDropzone
-        accept=".xls,.xlsx,.xlsm,.xlsb,.xltx,.xltm,.xlam,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.binary.macroEnabled.12,application/vnd.ms-excel.sheet.macroEnabled.12"
+        accept=".xls,.xlsx,.xlsm,.xlsb,.xltx,.xltm,.xlam,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.binary.macroEnabled.12,application/vnd.ms-excel.sheet.macroEnabled.12,application/octet-stream"
         message={t("dropExcelSplitWorkbook")}
         hasError={!!error}
         onFiles={(files) => {
@@ -110,7 +110,7 @@ export default function SplitWorkbook() {
       {previewLoading && (
         <div className="flex items-center gap-2 text-sm" style={{ color: "var(--muted-2)" }}>
           <span className="tool-spinner" />
-          Reading workbook structure...
+          {t("readingWorkbookStructure")}
         </div>
       )}
 
@@ -138,13 +138,13 @@ export default function SplitWorkbook() {
                 color: "var(--tag-text)",
               }}
             >
-              1 output XLSX per source sheet
+              {t("oneOutputPerSheet")}
             </span>
           </div>
 
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <div className="text-sm" style={{ color: "var(--muted-2)" }}>
-              Select sheets to include in the ZIP output.
+              {t("selectSheetsToInclude")}
             </div>
 
             <div className="flex flex-wrap gap-2">
@@ -158,7 +158,7 @@ export default function SplitWorkbook() {
                   color: "var(--tag-text)",
                 }}
               >
-                Select all
+                {t("selectAll")}
               </button>
               <button
                 type="button"
@@ -170,7 +170,7 @@ export default function SplitWorkbook() {
                   color: "var(--tag-text)",
                 }}
               >
-                Clear
+                {t("clear")}
               </button>
             </div>
           </div>
@@ -209,7 +209,7 @@ export default function SplitWorkbook() {
           }}
         >
           <div className="mb-2 font-medium" style={{ color: "var(--foreground)" }}>
-            Split summary
+            {t("splitSummary")}
           </div>
 
           <div className="flex flex-wrap gap-1.5 overflow-hidden whitespace-nowrap">
@@ -222,8 +222,7 @@ export default function SplitWorkbook() {
               }}
             >
               <Layers3 size={14} />
-              {preview.sheet_count.toLocaleString()} source sheet
-              {preview.sheet_count === 1 ? "" : "s"}
+              {t("sourceSheets", { count: preview.sheet_count })}
             </span>
 
             <span
@@ -246,7 +245,7 @@ export default function SplitWorkbook() {
               }}
             >
               <Archive size={14} />
-              Sheet names preserved in output files
+              {t("sheetNamesPreserved")}
             </span>
 
             <span
@@ -257,7 +256,7 @@ export default function SplitWorkbook() {
                 color: "var(--tag-text)",
               }}
             >
-              .zip download with one .xlsx per sheet
+              {t("zipDownloadOneXlsx")}
             </span>
           </div>
         </div>

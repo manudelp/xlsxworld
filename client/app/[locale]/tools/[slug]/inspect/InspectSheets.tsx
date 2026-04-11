@@ -772,7 +772,7 @@ export default function InspectSheets() {
   return (
     <div className="space-y-4">
       <FileUploadDropzone
-        accept=".xls,.xlsx,.xlsm,.xlsb,.xltx,.xltm,.xlam,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.binary.macroEnabled.12,application/vnd.ms-excel.sheet.macroEnabled.12"
+        accept=".xls,.xlsx,.xlsm,.xlsb,.xltx,.xltm,.xlam,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.binary.macroEnabled.12,application/vnd.ms-excel.sheet.macroEnabled.12,application/octet-stream"
         message={t("dropExcelInspect")}
         hasError={!!error}
         onFiles={(files) => {
@@ -896,7 +896,7 @@ export default function InspectSheets() {
                                 className="mb-2 text-xs font-medium"
                                 style={{ color: "var(--muted)" }}
                               >
-                                Overview
+                                {t("overview")}
                               </div>
                               <div
                                 className="grid grid-cols-2 gap-2 text-xs"
@@ -1112,7 +1112,7 @@ export default function InspectSheets() {
                           whiteSpace: "nowrap",
                         }}
                       >
-                        Clear Search
+                        {t("clearSearch")}
                       </span>
                     </div>
 
@@ -1145,7 +1145,7 @@ export default function InspectSheets() {
                           whiteSpace: "nowrap",
                         }}
                       >
-                        Clear Sort
+                        {t("clearSort")}
                       </span>
                     </div>
 
@@ -1176,7 +1176,7 @@ export default function InspectSheets() {
                           whiteSpace: "nowrap",
                         }}
                       >
-                        Case Sensitive
+                        {t("caseSensitive")}
                       </span>
                     </div>
 
@@ -1213,7 +1213,7 @@ export default function InspectSheets() {
                           whiteSpace: "nowrap",
                         }}
                       >
-                        Hide Empty Rows
+                        {t("hideEmptyRows")}
                       </span>
                     </div>
 
@@ -1244,7 +1244,7 @@ export default function InspectSheets() {
                           whiteSpace: "nowrap",
                         }}
                       >
-                        Highlight Empty Cells
+                        {t("highlightEmptyCells")}
                       </span>
                     </div>
 
@@ -1275,7 +1275,7 @@ export default function InspectSheets() {
                           whiteSpace: "nowrap",
                         }}
                       >
-                        Zebra Rows
+                        {t("zebraRowsLabel")}
                       </span>
                     </div>
 
@@ -1386,7 +1386,7 @@ export default function InspectSheets() {
                           whiteSpace: "nowrap",
                         }}
                       >
-                        Sticky Header
+                        {t("stickyHeaderLabel")}
                       </span>
                     </div>
 
@@ -1478,7 +1478,7 @@ export default function InspectSheets() {
                             className="mb-2 text-xs font-medium"
                             style={{ color: "var(--muted)" }}
                           >
-                            Decimal places{decimalPlaces !== null ? `: ${decimalPlaces}` : ""}
+                            {t("decimalPlacesLabel")}{decimalPlaces !== null ? `: ${decimalPlaces}` : ""}
                           </div>
                           <div className="flex items-center gap-2">
                             <button
@@ -1605,7 +1605,7 @@ export default function InspectSheets() {
                           whiteSpace: "nowrap",
                         }}
                       >
-                        Reset View
+                        {t("resetViewLabel")}
                       </span>
                     </div>
                   </div>
@@ -1823,7 +1823,7 @@ export default function InspectSheets() {
                       ? t("loadingMore")
                       : pagedDone
                         ? t("allRowsLoaded")
-                        : `Load ${PAGE_SIZE} more`}
+                        : t("loadMore", { count: PAGE_SIZE })}
                   </button>
 
                   <button
@@ -1846,14 +1846,12 @@ export default function InspectSheets() {
                   </button>
 
                   <span className="text-xs" style={{ color: "var(--muted-2)" }}>
-                    Showing {loadedRowsCount}
-                    {totalDataRows !== null ? ` of ${totalDataRows}` : ""} rows
-                    in this sheet.
+                    {t("showingRows", { loaded: loadedRowsCount, total: totalDataRows ?? "?" })}
                   </span>
                 </div>
 
                 <p className="mt-2 text-xs" style={{ color: "var(--muted-2)" }}>
-                  Tip: Shift + scroll for horizontal, Alt + drag to pan.
+                  {t("tipShiftScroll")}
                 </p>
               </>
             ) : (

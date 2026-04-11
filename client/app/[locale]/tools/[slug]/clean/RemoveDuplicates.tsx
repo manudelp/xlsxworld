@@ -245,7 +245,7 @@ export default function RemoveDuplicates() {
       {loading ? (
         <p className="flex items-center gap-2 text-sm" style={{ color: "var(--muted-2)" }}>
           <span className="tool-spinner" />
-          Uploading and preparing workbook...
+          {t("uploadingPreparingWorkbook")}
         </p>
       ) : null}
 
@@ -278,15 +278,15 @@ export default function RemoveDuplicates() {
                 color: "var(--tag-text)",
               }}
             >
-              Select one sheet and matching columns
+              {t("selectOneSheetAndColumns")}
             </span>
           </div>
 
           <div className="flex flex-wrap gap-2">
             {([
-              [1, "1. Sheet"],
-              [2, "2. Columns"],
-              [3, "3. Review"],
+              [1, t("step1Sheet")],
+              [2, t("step2Columns")],
+              [3, t("step3Review")],
             ] as const).map(([step, label]) => (
               <button
                 key={step}
@@ -325,7 +325,7 @@ export default function RemoveDuplicates() {
           {currentStep === 1 ? (
             <div className="space-y-3">
               <p className="text-sm" style={{ color: "var(--muted)" }}>
-                Choose the sheet you want to clean.
+                {t("chooseSheetToClean")}
               </p>
               <div className="flex flex-wrap gap-2">
                 {preview.sheets.map((sheet, index) => (
@@ -360,7 +360,7 @@ export default function RemoveDuplicates() {
                   disabled={!canContinueToStep2}
                   className="tool-primary-action inline-flex cursor-pointer items-center gap-2 rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50"
                 >
-                  Continue to Columns
+                  {t("continueToColumns")}
                 </button>
               </div>
             </div>
@@ -381,7 +381,7 @@ export default function RemoveDuplicates() {
 
               <div className="mb-2 flex items-center justify-between gap-2">
                 <p className="text-sm font-medium" style={{ color: "var(--muted)" }}>
-                  Pick columns that define a duplicate row
+                  {t("pickColumnsDuplicate")}
                 </p>
                 <span className="text-xs" style={{ color: "var(--muted-2)" }}>
                   Sheet: {activeSheetPreview?.name}
@@ -390,7 +390,7 @@ export default function RemoveDuplicates() {
 
               <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                 <p className="text-xs" style={{ color: "var(--muted-2)" }}>
-                  Use headers/checkboxes to toggle columns.
+                  {t("useHeadersCheckboxes")}
                 </p>
                 <div className="flex flex-wrap gap-2">
                   <button
@@ -403,7 +403,7 @@ export default function RemoveDuplicates() {
                       color: "var(--tag-text)",
                     }}
                   >
-                    Select all
+                    {t("selectAll")}
                   </button>
                   <button
                     type="button"
@@ -415,7 +415,7 @@ export default function RemoveDuplicates() {
                       color: "var(--tag-text)",
                     }}
                   >
-                    Clear
+                    {t("clear")}
                   </button>
                 </div>
               </div>
@@ -486,7 +486,7 @@ export default function RemoveDuplicates() {
                           className="border px-2 py-2 text-xs"
                           style={{ borderColor: "var(--border)", color: "var(--muted-2)" }}
                         >
-                          Loading preview rows...
+                          {t("loadingPreviewRows")}
                         </td>
                       </tr>
                     ) : previewError ? (
@@ -506,7 +506,7 @@ export default function RemoveDuplicates() {
                           className="border px-2 py-2 text-xs"
                           style={{ borderColor: "var(--border)", color: "var(--muted-2)" }}
                         >
-                          No data rows found in this sheet.
+                          {t("noDataRowsFound")}
                         </td>
                       </tr>
                     ) : (
@@ -547,7 +547,7 @@ export default function RemoveDuplicates() {
                   disabled={!canContinueToStep3}
                   className="tool-primary-action inline-flex cursor-pointer items-center gap-2 rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50"
                 >
-                  Continue to Review
+                  {t("continueToReview")}
                 </button>
               </div>
 
@@ -577,7 +577,7 @@ export default function RemoveDuplicates() {
 
               <div>
                 <p className="mb-2 text-sm font-medium" style={{ color: "var(--muted)" }}>
-                  Keep duplicate row
+                  {t("keepDuplicateRow")}
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {([
@@ -603,7 +603,7 @@ export default function RemoveDuplicates() {
               </div>
 
               <label className="block text-sm" style={{ color: "var(--muted)" }}>
-                Output file name
+                {t("outputFileName")}
                 <input
                   value={outputFileName}
                   onChange={(event) => setOutputFileName(event.target.value)}

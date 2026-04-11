@@ -75,7 +75,7 @@ export default function ConvertCsvToXlsx() {
         >
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <label className="block text-sm" style={{ color: "var(--muted)" }}>
-              Output sheet name
+              {t("outputSheetName")}
               <input
                 value={sheetName}
                 onChange={(e) => setSheetName(e.target.value)}
@@ -89,7 +89,7 @@ export default function ConvertCsvToXlsx() {
             </label>
 
             <div className="block text-sm" style={{ color: "var(--muted)" }}>
-              Delimiter
+              {t("delimiter")}
               <div className="mt-1 flex flex-wrap items-center gap-2">
                 <input
                   value={delimiter}

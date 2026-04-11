@@ -79,7 +79,7 @@ export default function FindReplace() {
       {loading ? (
         <p className="flex items-center gap-2 text-sm" style={{ color: "var(--muted-2)" }}>
           <span className="tool-spinner" />
-          Uploading and preparing workbook...
+          {t("uploadingPreparingWorkbook")}
         </p>
       ) : null}
 
@@ -107,13 +107,13 @@ export default function FindReplace() {
                 checked={allSheets}
                 onChange={(event) => setAllSheets(event.target.checked)}
               />
-              Apply to all sheets
+              {t("applyToAllSheets")}
             </label>
           </div>
 
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <label className="block text-sm" style={{ color: "var(--muted)" }}>
-              Find
+              {t("find")}
               <input
                 value={findText}
                 onChange={(event) => setFindText(event.target.value)}
@@ -128,7 +128,7 @@ export default function FindReplace() {
             </label>
 
             <label className="block text-sm" style={{ color: "var(--muted)" }}>
-              Replace with
+              {t("replaceWith")}
               <input
                 value={replaceText}
                 onChange={(event) => setReplaceText(event.target.value)}
@@ -150,7 +150,7 @@ export default function FindReplace() {
                 checked={useRegex}
                 onChange={(event) => setUseRegex(event.target.checked)}
               />
-              Use regular expression
+              {t("useRegex")}
             </label>
             <label className="flex items-center gap-2 text-sm" style={{ color: "var(--muted)" }}>
               <input
@@ -158,13 +158,13 @@ export default function FindReplace() {
                 checked={matchCase}
                 onChange={(event) => setMatchCase(event.target.checked)}
               />
-              Match case
+              {t("matchCase")}
             </label>
           </div>
 
           <div>
             <p className="mb-2 text-sm font-medium" style={{ color: "var(--muted)" }}>
-              Sheet
+              {t("sheet")}
             </p>
             <div className="flex flex-wrap gap-2">
               {preview.sheets.map((sheet, index) => (
@@ -198,7 +198,7 @@ export default function FindReplace() {
           <div>
             <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
               <p className="text-sm font-medium" style={{ color: "var(--muted)" }}>
-                Text columns (empty means all columns)
+                {t("textColumnsEmptyMeansAll")}
               </p>
               <div className="flex gap-2">
                 <button
@@ -211,7 +211,7 @@ export default function FindReplace() {
                     color: "var(--tag-text)",
                   }}
                 >
-                  Select all
+                  {t("selectAll")}
                 </button>
                 <button
                   type="button"
@@ -223,14 +223,14 @@ export default function FindReplace() {
                     color: "var(--tag-text)",
                   }}
                 >
-                  Clear
+                  {t("clear")}
                 </button>
               </div>
             </div>
 
             {columnNames.length === 0 ? (
               <p className="text-xs" style={{ color: "var(--muted-2)" }}>
-                This sheet has no named headers. The tool will use all columns.
+                {t("noNamedHeadersAllColumns")}
               </p>
             ) : (
               <div className="flex flex-wrap gap-2">

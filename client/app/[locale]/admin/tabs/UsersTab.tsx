@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   LineChart,
   Line,
@@ -17,9 +18,11 @@ import { fetchAdminUsersList } from "@/lib/admin";
 function ChartCard({
   title,
   data,
+  noDataLabel,
 }: {
   title: string;
   data: { date: string; count: number }[];
+  noDataLabel: string;
 }) {
   if (data.length === 0) {
     return (
@@ -40,7 +43,7 @@ function ChartCard({
           className="py-8 text-center text-sm"
           style={{ color: "var(--muted-2)" }}
         >
-          No data available for the last 30 days.
+          {noDataLabel}
         </p>
       </div>
     );
@@ -102,16 +105,16 @@ function ChartCard({
   );
 }
 
-function timeAgo(iso: string | null): string {
-  if (!iso) return "Never";
+function timeAgo(iso: string | null, t: (key: string, values?: Record<string, string | number>) => string): string {
+  if (!iso) return t("never");
   const diff = Date.now() - new Date(iso).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "Just now";
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 1) return t("justNow");
+  if (mins < 60) return t("minutesAgo", { count: mins });
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return t("hoursAgo", { count: hours });
   const days = Math.floor(hours / 24);
-  return `${days}d ago`;
+  return t("daysAgo", { count: days });
 }
 
 const ROLE_STYLE: Record<string, { bg: string; text: string }> = {
@@ -149,12 +152,14 @@ function UserTable({
   pageSize,
   total,
   onPageChange,
+  t,
 }: {
   users: AdminUserRow[];
   page: number;
   pageSize: number;
   total: number;
   onPageChange: (p: number) => void;
+  t: (key: string, values?: Record<string, string | number>) => string;
 }) {
   const totalPages = Math.ceil(total / pageSize);
 
@@ -174,25 +179,25 @@ function UserTable({
           className="text-sm font-medium"
           style={{ color: "var(--foreground)" }}
         >
-          Registered Users
+          {t("registeredUsers")}
         </h3>
         <span className="text-xs" style={{ color: "var(--muted-2)" }}>
-          {total.toLocaleString()} total
+          {t("total", { count: total.toLocaleString() })}
         </span>
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm" style={{ backgroundColor: "var(--surface-2)" }}>
           <thead>
             <tr style={{ backgroundColor: "var(--surface)" }}>
               {[
-                "Email",
-                "Display Name",
-                "Role",
-                "Status",
-                "Joined",
-                "Last Seen",
-                "Tool Uses",
+                t("email"),
+                t("displayName"),
+                t("role"),
+                t("status"),
+                t("joined"),
+                t("lastSeen"),
+                t("toolUses"),
               ].map((h) => (
                 <th
                   key={h}
@@ -244,7 +249,7 @@ function UserTable({
                     : "—"}
                 </td>
                 <td className="px-4 py-3" style={{ color: "var(--muted-2)" }}>
-                  {timeAgo(u.last_seen_at)}
+                  {timeAgo(u.last_seen_at, t)}
                 </td>
                 <td
                   className="px-4 py-3"
@@ -276,10 +281,10 @@ function UserTable({
               color: "var(--foreground)",
             }}
           >
-            ← Previous
+            {t("previous")}
           </button>
           <span className="text-xs" style={{ color: "var(--muted-2)" }}>
-            Page {page} of {totalPages}
+            {t("pageOf", { page, total: totalPages })}
           </span>
           <button
             type="button"
@@ -291,7 +296,7 @@ function UserTable({
               color: "var(--foreground)",
             }}
           >
-            Next →
+            {t("next")}
           </button>
         </div>
       )}
@@ -300,6 +305,7 @@ function UserTable({
 }
 
 export default function UsersTab({ data }: { data: AdminUsers }) {
+  const t = useTranslations("admin.users");
   const [usersList, setUsersList] = useState<AdminUsersList | null>(null);
   const [page, setPage] = useState(1);
   const [listLoading, setListLoading] = useState(true);
@@ -334,7 +340,7 @@ export default function UsersTab({ data }: { data: AdminUsers }) {
           className="text-xs font-medium uppercase tracking-wide"
           style={{ color: "var(--muted-2)" }}
         >
-          Total Users
+          {t("totalUsers")}
         </p>
         <p
           className="text-2xl font-bold"
@@ -346,12 +352,14 @@ export default function UsersTab({ data }: { data: AdminUsers }) {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <ChartCard
-          title="New Signups per Day (Last 30 Days)"
+          title={t("signupsPerDay")}
           data={data.signups_per_day}
+          noDataLabel={t("noDataAvailable")}
         />
         <ChartCard
-          title="Daily Active Users (Last 30 Days)"
+          title={t("dauPerDay")}
           data={data.dau_per_day}
+          noDataLabel={t("noDataAvailable")}
         />
       </div>
 
@@ -376,6 +384,7 @@ export default function UsersTab({ data }: { data: AdminUsers }) {
             pageSize={usersList.page_size}
             total={usersList.total}
             onPageChange={loadPage}
+            t={t}
           />
         </div>
       ) : null}

@@ -11,6 +11,11 @@ export interface AdminOverview {
   tool_uses_this_month: number;
   overall_success_rate: number;
   avg_response_time_ms: number;
+  total_errors: number;
+  errors_today: number;
+  total_file_uploads: number;
+  file_uploads_today: number;
+  file_uploads_this_week: number;
 }
 
 export interface AdminToolStat {
@@ -25,6 +30,20 @@ export interface AdminToolStat {
 export interface DayCount {
   date: string;
   count: number;
+}
+
+export interface KpiTrendDay {
+  date: string;
+  new_users: number;
+  tool_uses: number;
+  success_rate: number | null;
+  avg_duration_ms: number | null;
+  error_count: number;
+  file_uploads: number;
+}
+
+export interface KpiTrends {
+  series: KpiTrendDay[];
 }
 
 export interface AdminUsers {
@@ -78,6 +97,10 @@ export function fetchAdminOverview() {
 
 export function fetchAdminOverviewTrend() {
   return api.auth.get<DayCount[]>("/api/v1/admin/overview/trend");
+}
+
+export function fetchAdminKpiTrends() {
+  return api.auth.get<KpiTrends>("/api/v1/admin/overview/kpi-trends");
 }
 
 export function fetchAdminTools() {

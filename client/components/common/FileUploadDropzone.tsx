@@ -11,7 +11,21 @@ type FileUploadDropzoneProps = {
   style?: CSSProperties;
   hasError?: boolean;
   maxSizeLabel?: string;
+  unsupportedFileError?: string;
 };
+
+function extractExtensions(accept: string): string[] {
+  return accept
+    .split(",")
+    .map((s) => s.trim().toLowerCase())
+    .filter((s) => s.startsWith("."));
+}
+
+function hasValidExtension(file: File, extensions: string[]): boolean {
+  if (extensions.length === 0) return true;
+  const name = file.name.toLowerCase();
+  return extensions.some((ext) => name.endsWith(ext));
+}
 
 export default function FileUploadDropzone({
   accept,
@@ -22,9 +36,28 @@ export default function FileUploadDropzone({
   style,
   hasError = false,
   maxSizeLabel,
+  unsupportedFileError,
 }: FileUploadDropzoneProps) {
   const [dragOver, setDragOver] = useState(false);
   const [hover, setHover] = useState(false);
+  const [rejectionError, setRejectionError] = useState<string | null>(null);
+
+  const extensions = extractExtensions(accept);
+
+  const validateAndForward = (files: FileList | File[]) => {
+    const arr = Array.from(files);
+    const valid = arr.filter((f) => hasValidExtension(f, extensions));
+    if (valid.length === 0 && arr.length > 0) {
+      setRejectionError(
+        unsupportedFileError ?? "Unsupported file type. Please upload a valid file.",
+      );
+      return;
+    }
+    setRejectionError(null);
+    const dt = new DataTransfer();
+    valid.forEach((f) => dt.items.add(f));
+    onFiles(dt.files);
+  };
 
   const needsTint = !hasError && (dragOver || hover);
 
@@ -51,7 +84,7 @@ export default function FileUploadDropzone({
           e.stopPropagation();
           setDragOver(false);
           const dropped = e.dataTransfer.files;
-          if (dropped.length > 0) onFiles(dropped);
+          if (dropped.length > 0) validateAndForward(dropped);
         }}
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
@@ -86,7 +119,8 @@ export default function FileUploadDropzone({
           multiple={multiple}
           onChange={(e) => {
             const files = e.target.files;
-            if (files && files.length > 0) onFiles(files);
+            if (files && files.length > 0) validateAndForward(files);
+            e.target.value = "";
           }}
         />
         <span className="text-sm" style={{ color: "var(--muted)" }}>
@@ -95,6 +129,11 @@ export default function FileUploadDropzone({
         <span className="text-xs mt-1" style={{ color: "var(--muted-2)" }}>
           {maxSizeLabel ?? "Max 20 MB per file"}
         </span>
+        {rejectionError && (
+          <span className="text-xs mt-1 font-medium" style={{ color: "var(--danger)" }}>
+            {rejectionError}
+          </span>
+        )}
       </label>
   );
 }

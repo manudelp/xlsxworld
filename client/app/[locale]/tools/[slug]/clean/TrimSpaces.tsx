@@ -85,7 +85,7 @@ export default function TrimSpaces() {
       {loading ? (
         <p className="flex items-center gap-2 text-sm" style={{ color: "var(--muted-2)" }}>
           <span className="tool-spinner" />
-          Uploading and preparing workbook...
+          {t("uploadingPreparingWorkbook")}
         </p>
       ) : null}
 
@@ -116,7 +116,7 @@ export default function TrimSpaces() {
               className="text-sm font-medium"
               style={{ color: "var(--muted)" }}
             >
-              1. Where should I clean spaces?
+              {t("whereCleanSpaces")}
             </p>
             <div className="flex flex-wrap gap-3">
               <label
@@ -129,7 +129,7 @@ export default function TrimSpaces() {
                   checked={allSheets}
                   onChange={() => setAllSheets(true)}
                 />
-                All sheets
+                {t("allSheetsOption")}
               </label>
               <label
                 className="flex items-center gap-2 text-sm"
@@ -141,7 +141,7 @@ export default function TrimSpaces() {
                   checked={!allSheets}
                   onChange={() => setAllSheets(false)}
                 />
-                One sheet
+                {t("oneSheetOption")}
               </label>
             </div>
 
@@ -180,7 +180,7 @@ export default function TrimSpaces() {
               className="text-sm font-medium"
               style={{ color: "var(--muted)" }}
             >
-              2. How strict should cleaning be?
+              {t("howStrictCleaning")}
             </p>
             <label
               className="flex items-start gap-2 text-sm"
@@ -214,14 +214,14 @@ export default function TrimSpaces() {
                   }
                 }}
               />
-              3. Only clean specific columns (optional)
+              {t("onlyCleanSpecificColumns")}
             </label>
 
             {onlySpecificColumns ? (
               <div className="flex justify-between items-center">
                 {columnNames.length === 0 ? (
                   <p className="text-xs" style={{ color: "var(--muted-2)" }}>
-                    This sheet has no headers. The tool will clean all columns.
+                    {t("noHeadersCleanAll")}
                   </p>
                 ) : (
                   <div className="flex flex-wrap gap-2">
@@ -261,7 +261,7 @@ export default function TrimSpaces() {
                       color: "var(--tag-text)",
                     }}
                   >
-                    Select all
+                    {t("selectAll")}
                   </button>
                   <button
                     type="button"
@@ -273,7 +273,7 @@ export default function TrimSpaces() {
                       color: "var(--tag-text)",
                     }}
                   >
-                    Clear
+                    {t("clear")}
                   </button>
                 </div>
               </div>

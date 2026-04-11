@@ -69,6 +69,32 @@ async def overview(
     )
     t = tool_q.one()
 
+    # Error count (failed tool uses)
+    error_q = await db.execute(
+        select(func.count())
+        .where(MetricEvent.event_name == "tool_usage")
+        .where(col_success != "true")
+    )
+    total_errors = error_q.scalar_one()
+
+    errors_today_q = await db.execute(
+        select(func.count())
+        .where(MetricEvent.event_name == "tool_usage")
+        .where(col_success != "true")
+        .where(MetricEvent.occurred_at >= today_start)
+    )
+    errors_today = errors_today_q.scalar_one()
+
+    # File uploads
+    upload_q = await db.execute(
+        select(
+            func.count().label("total"),
+            func.count().filter(MetricEvent.occurred_at >= today_start).label("today"),
+            func.count().filter(MetricEvent.occurred_at >= week_ago).label("week"),
+        ).where(MetricEvent.event_name == "file_upload")
+    )
+    fu = upload_q.one()
+
     return {
         "total_users": u.total,
         "new_users_today": u.today,
@@ -80,6 +106,11 @@ async def overview(
         "tool_uses_this_month": t.month,
         "overall_success_rate": round((t.success_rate or 0) * 100, 1),
         "avg_response_time_ms": round(t.avg_duration or 0, 1),
+        "total_errors": total_errors,
+        "errors_today": errors_today,
+        "total_file_uploads": fu.total,
+        "file_uploads_today": fu.today,
+        "file_uploads_this_week": fu.week,
     }
 
 
@@ -105,6 +136,96 @@ async def overview_trend(
         {"date": row.day.strftime("%Y-%m-%d"), "count": row.count}
         for row in result.all()
     ]
+
+
+@router.get("/overview/kpi-trends")
+async def overview_kpi_trends(
+    _: AuthenticatedPrincipal = Depends(require_admin),
+    db: AsyncSession = Depends(get_db_session),
+) -> dict:
+    """Daily breakdowns for each overview KPI (last 30 days)."""
+    month_ago = datetime.now(timezone.utc) - timedelta(days=30)
+    day_col = func.date_trunc("day", MetricEvent.occurred_at)
+
+    col_success = MetricEvent.properties_json["success"].as_string()
+    col_duration = cast(MetricEvent.properties_json["duration_ms"].as_string(), Float)
+
+    # Tool usage per day: count, success rate, avg duration
+    tool_q = await db.execute(
+        select(
+            day_col.label("day"),
+            func.count().label("tool_uses"),
+            func.avg(
+                case((col_success == "true", 1.0), else_=0.0)
+            ).label("success_rate"),
+            func.avg(col_duration).label("avg_duration"),
+        )
+        .where(MetricEvent.event_name == "tool_usage")
+        .where(MetricEvent.occurred_at >= month_ago)
+        .group_by(day_col)
+        .order_by(day_col)
+    )
+    tool_rows = {r.day.strftime("%Y-%m-%d"): r for r in tool_q.all()}
+
+    # New users per day
+    user_q = await db.execute(
+        select(
+            func.date_trunc("day", AppUser.created_at).label("day"),
+            func.count().label("new_users"),
+        )
+        .where(AppUser.created_at >= month_ago)
+        .group_by(text("1"))
+        .order_by(text("1"))
+    )
+    user_rows = {r.day.strftime("%Y-%m-%d"): r.new_users for r in user_q.all()}
+
+    # Error count per day
+    col_success = MetricEvent.properties_json["success"].as_string()
+    error_q = await db.execute(
+        select(
+            day_col.label("day"),
+            func.count().label("error_count"),
+        )
+        .where(MetricEvent.event_name == "tool_usage")
+        .where(col_success != "true")
+        .where(MetricEvent.occurred_at >= month_ago)
+        .group_by(day_col)
+        .order_by(day_col)
+    )
+    error_rows = {r.day.strftime("%Y-%m-%d"): r.error_count for r in error_q.all()}
+
+    # File uploads per day
+    upload_q = await db.execute(
+        select(
+            day_col.label("day"),
+            func.count().label("upload_count"),
+        )
+        .where(MetricEvent.event_name == "file_upload")
+        .where(MetricEvent.occurred_at >= month_ago)
+        .group_by(day_col)
+        .order_by(day_col)
+    )
+    upload_rows = {r.day.strftime("%Y-%m-%d"): r.upload_count for r in upload_q.all()}
+
+    # Build unified daily series
+    all_dates = sorted(set(
+        list(tool_rows.keys()) + list(user_rows.keys())
+        + list(error_rows.keys()) + list(upload_rows.keys())
+    ))
+    series: list[dict] = []
+    for d in all_dates:
+        tr = tool_rows.get(d)
+        series.append({
+            "date": d,
+            "new_users": user_rows.get(d, 0),
+            "tool_uses": tr.tool_uses if tr else 0,
+            "success_rate": round((tr.success_rate or 0) * 100, 1) if tr else None,
+            "avg_duration_ms": round(tr.avg_duration or 0, 1) if tr else None,
+            "error_count": error_rows.get(d, 0),
+            "file_uploads": upload_rows.get(d, 0),
+        })
+
+    return {"series": series}
 
 
 @router.get("/tools")

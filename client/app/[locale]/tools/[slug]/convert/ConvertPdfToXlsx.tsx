@@ -49,7 +49,7 @@ export default function ConvertPdfToXlsx() {
   return (
     <div className="space-y-4">
       <FileUploadDropzone
-        accept=".pdf,application/pdf"
+        accept=".pdf,application/pdf,application/octet-stream"
         message={t("dropPdfConvertXlsx")}
         hasError={!!error}
         onFiles={(files) => {

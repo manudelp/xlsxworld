@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 
 import type { AdminPerformanceStat } from "@/lib/admin";
 
@@ -11,6 +12,7 @@ export default function PerformanceTab({
 }: {
   data: AdminPerformanceStat[];
 }) {
+  const t = useTranslations("admin.performance");
   const filtered = useMemo(
     () => data.filter((r) => !HEALTH_PATHS.includes(r.path)),
     [data],
@@ -26,7 +28,7 @@ export default function PerformanceTab({
           color: "var(--muted-2)",
         }}
       >
-        No endpoint performance data yet.
+        {t("noData")}
       </div>
     );
   }
@@ -36,17 +38,17 @@ export default function PerformanceTab({
       className="overflow-x-auto rounded-lg border"
       style={{ borderColor: "var(--border)" }}
     >
-      <table className="w-full text-sm">
+      <table className="w-full text-sm" style={{ backgroundColor: "var(--surface-2)" }}>
         <thead>
           <tr style={{ backgroundColor: "var(--surface)" }}>
             {[
-              "Method",
-              "Path",
-              "Total Requests",
-              "Avg Response",
-              "P95",
-              "Error Rate",
-              "Last 24h",
+              t("method"),
+              t("path"),
+              t("totalRequests"),
+              t("avgResponse"),
+              t("p95"),
+              t("errorRate"),
+              t("last24h"),
             ].map((h) => (
               <th
                 key={h}
