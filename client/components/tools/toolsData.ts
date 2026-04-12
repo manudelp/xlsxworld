@@ -58,13 +58,6 @@ export const toolItems: ToolItem[] = [
     isNew: true,
   },
   {
-    href: "/tools/pdf-to-xlsx",
-    slug: "pdf-to-xlsx",
-    icon: "📥",
-    category: "Convert",
-    isNew: true,
-  },
-  {
     href: "/tools/xlsx-to-json",
     slug: "xlsx-to-json",
     icon: "🧾",
