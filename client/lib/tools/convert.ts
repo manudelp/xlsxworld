@@ -140,15 +140,3 @@ export async function xlsxToPdf(
       : buildUrl("/api/v1/tools/convert/xlsx-to-pdf", qs);
   return api.postForm<ArrayBuffer>(path, fd);
 }
-
-export async function pdfToXlsx(
-  file: File,
-  includeHeaders = true,
-  oneSheetPerPage = false,
-): Promise<ArrayBuffer> {
-  const fd = new FormData();
-  fd.append("file", file);
-  fd.append("include_headers", String(includeHeaders));
-  fd.append("one_sheet_per_page", String(oneSheetPerPage));
-  return api.postForm<ArrayBuffer>("/api/v1/tools/convert/pdf-to-xlsx", fd);
-}

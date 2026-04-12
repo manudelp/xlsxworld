@@ -111,7 +111,7 @@ Tools (all under `/api/v1/tools/`):
 | Category | Endpoints |
 |---|---|
 | Inspect | `POST .../inspect/preview`, `GET .../inspect/sheet` |
-| Convert | `POST .../convert/csv-to-xlsx`, `xlsx-to-csv`, `xlsx-to-csv-zip`, `json-to-xlsx`, `xlsx-to-json`, `sql-to-xlsx`, `xlsx-to-sql`, `xml-to-xlsx`, `xlsx-to-xml`, `pdf-to-xlsx`, `xlsx-to-pdf` |
+| Convert | `POST .../convert/csv-to-xlsx`, `xlsx-to-csv`, `xlsx-to-csv-zip`, `json-to-xlsx`, `xlsx-to-json`, `sql-to-xlsx`, `xlsx-to-sql`, `xml-to-xlsx`, `xlsx-to-xml`, `xlsx-to-pdf` |
 | Merge | `POST .../merge-sheets`, `POST .../append-workbooks` |
 | Split | `POST .../split-sheet`, `POST .../split-workbook` |
 | Clean | `POST .../clean/find-replace`, `normalize-case`, `remove-duplicates`, `remove-empty-rows`, `trim-spaces` |
