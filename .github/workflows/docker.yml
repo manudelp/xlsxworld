@@ -36,7 +36,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/ilovexlsx-api
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/xlsxworld-api
 
       - name: Build and push
         uses: docker/build-push-action@v6
@@ -45,52 +45,3 @@ jobs:
           push: ${{ github.event_name == 'push' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-  deploy-backend:
-    name: Deploy Backend (self-hosted, server-only)
-    # This job runs directly on the server's self-hosted runner
-    runs-on: self-hosted
-    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
-    environment: production
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Create .env for docker compose (server-only)
-        run: |
-          set -euo pipefail
-          cat > .env << 'EOF'
-          ENVIRONMENT=${{ secrets.ENVIRONMENT }}
-          CORS_ORIGINS=${{ secrets.CORS_ORIGINS }}
-          EOF
-          echo "Generated .env (server-only; values hidden)"
-
-      - name: Ensure external docker network exists
-        run: |
-          docker network create app-network || true
-
-      # Optional: shared certbot volumes, keep if used by your central nginx
-      - name: Ensure shared certbot volumes exist (optional)
-        run: |
-          docker volume create letsencrypt || true
-          docker volume create certbot-webroot || true
-
-      - name: Build and start backend only
-        env:
-          DOCKER_BUILDKIT: 1
-        run: |
-          docker compose build --pull
-          docker compose up -d backend
-
-      - name: Show status and wait for health
-        run: |
-          set -e
-          docker compose ps
-          # Wait briefly for healthchecks
-          for i in $(seq 1 10); do
-            if docker compose exec -T xlsxworld-backend curl -fsS http://localhost:8000/health; then
-              echo "Backend healthy"; break
-            fi
-            echo "Waiting for backend to be healthy... ($i/10)"; sleep 3
-          done
-          # Print last logs for visibility
-          docker logs --tail 100 xlsxworld-backend || true
