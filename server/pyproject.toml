@@ -71,6 +71,8 @@ dependencies = [
   "slowapi>=0.1.9",
   "greenlet>=3.3.2",
   "defusedxml>=0.7.1",
+  "reportlab>=4.4.0",
+  "pdfplumber>=0.11.0",
 ]
 
 [tool.setuptools.packages.find]

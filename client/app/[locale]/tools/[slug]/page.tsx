@@ -178,10 +178,18 @@ export default async function ToolPage({
         />
       )}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-3xl font-semibold mb-2 flex items-center gap-3">
-              <span className="text-4xl" aria-hidden>
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-4">
+          <Link
+            href="/"
+            className="order-1 sm:order-2 inline-flex items-center gap-2 text-sm sm:mt-1 transition-all group shrink-0"
+            style={{ color: "var(--muted)" }}
+          >
+            <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5 group-hover:text-world-300 group-hover:animate-pulse" />
+            <span className="group-hover:underline">{t("backToTools")}</span>
+          </Link>
+          <div className="order-2 sm:order-1">
+            <h1 className="text-2xl sm:text-3xl font-semibold mb-2 flex items-center gap-3">
+              <span className="text-3xl sm:text-4xl" aria-hidden>
                 {tool.icon}
               </span>{" "}
               {td("heading")}
@@ -190,14 +198,6 @@ export default async function ToolPage({
               {td("description")}
             </p>
           </div>
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-sm mb-6 transition-all group"
-            style={{ color: "var(--muted)" }}
-          >
-            <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5 group-hover:text-world-300 group-hover:animate-pulse" />
-            <span className="group-hover:underline">{t("backToTools")}</span>
-          </Link>
         </div>
         <div
           className="border-t pt-8"
@@ -251,10 +251,10 @@ export default async function ToolPage({
                 {faqItems.map((item, i) => (
                   <details
                     key={i}
-                    className="group rounded-xl border p-3 sm:p-5 [&_summary::-webkit-details-marker]:hidden"
+                    className="group rounded-xl border border-border p-3 sm:p-5 [&_summary::-webkit-details-marker]:hidden"
                     style={{
-                      borderColor: "var(--border)",
-                      backgroundColor: "var(--primary-soft)",
+                      backgroundColor:
+                        "color-mix(in srgb, var(--background) 88%, var(--primary) 12%)",
                     }}
                   >
                     <summary className="flex cursor-pointer items-center justify-between gap-1.5 font-medium outline-none">

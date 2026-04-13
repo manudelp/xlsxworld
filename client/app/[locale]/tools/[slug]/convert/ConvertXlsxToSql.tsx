@@ -5,6 +5,7 @@ import React, { useCallback, useMemo, useState } from "react";
 import { uploadForPreview, WorkbookPreview } from "@/lib/tools/inspect";
 import { xlsxToSql } from "@/lib/tools/convert";
 import FileUploadDropzone from "@/components/common/FileUploadDropzone";
+import SheetPillsWithPreview from "@/components/common/SheetPillsWithPreview";
 
 export default function ConvertXlsxToSql() {
   const t = useTranslations("common");
@@ -42,8 +43,11 @@ export default function ConvertXlsxToSql() {
   const selectedSheet = preview?.sheets[activeSheet] ?? null;
   const canConvert = !!file && selectedSheets.length > 0 && !loading;
 
-  const toggleSheet = useCallback((name: string, idx: number) => {
+  const previewSheet = useCallback((idx: number) => {
     setActiveSheet(idx);
+  }, []);
+
+  const toggleSheet = useCallback((name: string) => {
     setSelectedSheets((cur) =>
       cur.includes(name) ? cur.filter((n) => n !== name) : [...cur, name],
     );
@@ -141,27 +145,13 @@ export default function ConvertXlsxToSql() {
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            {preview.sheets.map((sheet, idx) => (
-              <button
-                key={sheet.name}
-                onClick={() => toggleSheet(sheet.name, idx)}
-                className="cursor-pointer rounded-full border px-3 py-1 text-sm transition"
-                style={{
-                  backgroundColor: selectedSet.has(sheet.name)
-                    ? "var(--tag-selected-bg)"
-                    : "var(--tag-bg)",
-                  color: selectedSet.has(sheet.name)
-                    ? "var(--tag-selected-text)"
-                    : "var(--tag-text)",
-                  borderColor: "var(--tag-border)",
-                }}
-                aria-pressed={selectedSet.has(sheet.name)}
-              >
-                {sheet.name}
-              </button>
-            ))}
-          </div>
+          <SheetPillsWithPreview
+            sheets={preview.sheets}
+            selectedSet={selectedSet}
+            activeSheetIdx={activeSheet}
+            onPreview={previewSheet}
+            onToggle={toggleSheet}
+          />
 
           <label
             className="mt-4 block text-sm"

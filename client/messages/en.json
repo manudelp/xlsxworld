@@ -10,7 +10,10 @@
     "trustLine": "Free to use · No account required · No files stored"
   },
   "header": {
-    "login": "Login"
+    "login": "Login",
+    "settings": "Settings",
+    "language": "Language",
+    "theme": "Theme"
   },
   "tools": {
     "noTools": "No tools in this category.",
@@ -537,6 +540,20 @@
     "pageOrientation": "Page orientation",
     "landscape": "Landscape",
     "portrait": "Portrait",
+    "textOverflow": "Text overflow",
+    "ellipsisColumns": "Ellipsis (equal widths)",
+    "wrapText": "Wrap text",
+    "fitColumns": "Fit column widths",
+    "pdfFontSize": "Font size",
+    "fontSizeSmall": "Small",
+    "fontSizeMedium": "Medium",
+    "fontSizeLarge": "Large",
+    "headerStyle": "Header style",
+    "headerStyleColored": "Colored",
+    "headerStyleGray": "Gray",
+    "headerStylePlain": "Plain",
+    "headerColor": "Header color",
+    "pdfPageSize": "Page size",
     "downloadPdf": "Download PDF",
     "pdfExportNote": "PDF output is formatted for printing. Styles and formulas are not preserved.",
     "readingWorkbookStructure": "Reading workbook structure...",

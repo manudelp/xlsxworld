@@ -5,6 +5,56 @@ import React, { useCallback, useMemo, useState } from "react";
 import { uploadForPreview, WorkbookPreview } from "@/lib/tools/inspect";
 import { xlsxToPdf } from "@/lib/tools/convert";
 import FileUploadDropzone from "@/components/common/FileUploadDropzone";
+import SheetPillsWithPreview from "@/components/common/SheetPillsWithPreview";
+
+type ColumnMode = "ellipsis" | "wrap" | "fit";
+type FontSize = "small" | "medium" | "large";
+type HeaderStyle = "colored" | "gray" | "plain";
+type PageSize = "A4" | "Letter" | "A3";
+
+function OptionGroup<T extends string>({
+  label,
+  options,
+  value,
+  onChange,
+  children,
+}: {
+  label: string;
+  options: { value: T; label: string }[];
+  value: T;
+  onChange: (v: T) => void;
+  children?: React.ReactNode;
+}) {
+  return (
+    <div className="mt-4">
+      <label className="block text-sm" style={{ color: "var(--muted)" }}>
+        {label}
+      </label>
+      <div className="mt-1 flex flex-wrap items-center gap-2">
+        {options.map((o) => (
+          <button
+            key={o.value}
+            type="button"
+            onClick={() => onChange(o.value)}
+            className="cursor-pointer rounded-md border px-3 py-1.5 text-sm"
+            style={{
+              borderColor: "var(--tag-border)",
+              backgroundColor:
+                value === o.value ? "var(--tag-selected-bg)" : "var(--tag-bg)",
+              color:
+                value === o.value
+                  ? "var(--tag-selected-text)"
+                  : "var(--tag-text)",
+            }}
+          >
+            {o.label}
+          </button>
+        ))}
+        {children}
+      </div>
+    </div>
+  );
+}
 
 export default function ConvertXlsxToPdf() {
   const t = useTranslations("common");
@@ -12,9 +62,12 @@ export default function ConvertXlsxToPdf() {
   const [file, setFile] = useState<File | null>(null);
   const [activeSheet, setActiveSheet] = useState(0);
   const [selectedSheets, setSelectedSheets] = useState<string[]>([]);
-  const [orientation, setOrientation] = useState<"portrait" | "landscape">(
-    "landscape",
-  );
+  const [orientation, setOrientation] = useState<"portrait" | "landscape">("landscape");
+  const [columnMode, setColumnMode] = useState<ColumnMode>("ellipsis");
+  const [fontSize, setFontSize] = useState<FontSize>("medium");
+  const [headerStyle, setHeaderStyle] = useState<HeaderStyle>("colored");
+  const [headerColor, setHeaderColor] = useState("#2E7D32");
+  const [pageSize, setPageSize] = useState<PageSize>("A4");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,15 +93,15 @@ export default function ConvertXlsxToPdf() {
     [t],
   );
 
-  const selectedSet = useMemo(
-    () => new Set(selectedSheets),
-    [selectedSheets],
-  );
+  const selectedSet = useMemo(() => new Set(selectedSheets), [selectedSheets]);
   const selectedSheet = preview?.sheets[activeSheet] ?? null;
   const canConvert = !!file && selectedSheets.length > 0 && !loading;
 
-  const toggleSheet = useCallback((name: string, idx: number) => {
+  const previewSheet = useCallback((idx: number) => {
     setActiveSheet(idx);
+  }, []);
+
+  const toggleSheet = useCallback((name: string) => {
     setSelectedSheets((cur) =>
       cur.includes(name) ? cur.filter((n) => n !== name) : [...cur, name],
     );
@@ -65,7 +118,16 @@ export default function ConvertXlsxToPdf() {
     setError(null);
     setLoading(true);
     try {
-      const buf = await xlsxToPdf(file, selectedSheets, orientation);
+      const buf = await xlsxToPdf(
+        file,
+        selectedSheets,
+        orientation,
+        columnMode,
+        fontSize,
+        headerStyle,
+        pageSize,
+        headerStyle === "colored" ? headerColor : undefined,
+      );
       const blob = new Blob([buf], { type: "application/pdf" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -81,7 +143,7 @@ export default function ConvertXlsxToPdf() {
     } finally {
       setLoading(false);
     }
-  }, [file, selectedSheets, orientation, t]);
+  }, [file, selectedSheets, orientation, columnMode, fontSize, headerStyle, headerColor, pageSize, t]);
 
   return (
     <div className="space-y-4">
@@ -111,6 +173,7 @@ export default function ConvertXlsxToPdf() {
             backgroundColor: "var(--surface)",
           }}
         >
+          {/* Sheet selection */}
           <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
             <div>
               <h3 className="font-medium">{t("selectSheetsToExportPdf")}</h3>
@@ -146,59 +209,93 @@ export default function ConvertXlsxToPdf() {
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            {preview.sheets.map((sheet, idx) => (
-              <button
-                key={sheet.name}
-                onClick={() => toggleSheet(sheet.name, idx)}
-                className="cursor-pointer rounded-full border px-3 py-1 text-sm transition"
-                style={{
-                  backgroundColor: selectedSet.has(sheet.name)
-                    ? "var(--tag-selected-bg)"
-                    : "var(--tag-bg)",
-                  color: selectedSet.has(sheet.name)
-                    ? "var(--tag-selected-text)"
-                    : "var(--tag-text)",
-                  borderColor: "var(--tag-border)",
-                }}
-                aria-pressed={selectedSet.has(sheet.name)}
-              >
-                {sheet.name}
-              </button>
-            ))}
-          </div>
+          <SheetPillsWithPreview
+            sheets={preview.sheets}
+            selectedSet={selectedSet}
+            activeSheetIdx={activeSheet}
+            onPreview={previewSheet}
+            onToggle={toggleSheet}
+          />
 
-          <div className="mt-4">
-            <label
-              className="block text-sm"
-              style={{ color: "var(--muted)" }}
-            >
-              {t("pageOrientation")}
-            </label>
-            <div className="mt-1 flex flex-wrap gap-2">
-              {(["landscape", "portrait"] as const).map((o) => (
-                <button
-                  key={o}
-                  type="button"
-                  onClick={() => setOrientation(o)}
-                  className="cursor-pointer rounded-md border px-3 py-1.5 text-sm"
+          {/* Text overflow */}
+          <OptionGroup<ColumnMode>
+            label={t("textOverflow")}
+            value={columnMode}
+            onChange={setColumnMode}
+            options={[
+              { value: "ellipsis", label: t("ellipsisColumns") },
+              { value: "wrap", label: t("wrapText") },
+              { value: "fit", label: t("fitColumns") },
+            ]}
+          />
+
+          {/* Page orientation */}
+          <OptionGroup<"portrait" | "landscape">
+            label={t("pageOrientation")}
+            value={orientation}
+            onChange={setOrientation}
+            options={[
+              { value: "landscape", label: t("landscape") },
+              { value: "portrait", label: t("portrait") },
+            ]}
+          />
+
+          {/* Page size */}
+          <OptionGroup<PageSize>
+            label={t("pdfPageSize")}
+            value={pageSize}
+            onChange={setPageSize}
+            options={[
+              { value: "A4", label: "A4" },
+              { value: "Letter", label: "Letter" },
+              { value: "A3", label: "A3" },
+            ]}
+          />
+
+          {/* Font size */}
+          <OptionGroup<FontSize>
+            label={t("pdfFontSize")}
+            value={fontSize}
+            onChange={setFontSize}
+            options={[
+              { value: "small", label: t("fontSizeSmall") },
+              { value: "medium", label: t("fontSizeMedium") },
+              { value: "large", label: t("fontSizeLarge") },
+            ]}
+          />
+
+          {/* Header style + optional color picker */}
+          <OptionGroup<HeaderStyle>
+            label={t("headerStyle")}
+            value={headerStyle}
+            onChange={setHeaderStyle}
+            options={[
+              { value: "colored", label: t("headerStyleColored") },
+              { value: "gray", label: t("headerStyleGray") },
+              { value: "plain", label: t("headerStylePlain") },
+            ]}
+          >
+            {headerStyle === "colored" && (
+              <label
+                className="flex items-center gap-1.5 cursor-pointer"
+                title={t("headerColor")}
+              >
+                <span
+                  className="h-7 w-7 rounded border"
                   style={{
+                    backgroundColor: headerColor,
                     borderColor: "var(--tag-border)",
-                    backgroundColor:
-                      orientation === o
-                        ? "var(--tag-selected-bg)"
-                        : "var(--tag-bg)",
-                    color:
-                      orientation === o
-                        ? "var(--tag-selected-text)"
-                        : "var(--tag-text)",
                   }}
-                >
-                  {t(o === "landscape" ? "landscape" : "portrait")}
-                </button>
-              ))}
-            </div>
-          </div>
+                />
+                <input
+                  type="color"
+                  value={headerColor}
+                  onChange={(e) => setHeaderColor(e.target.value)}
+                  className="sr-only"
+                />
+              </label>
+            )}
+          </OptionGroup>
         </div>
       )}
 

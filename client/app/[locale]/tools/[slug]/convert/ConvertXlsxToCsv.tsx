@@ -11,6 +11,7 @@ import {
   xlsxToCsvZip,
 } from "@/lib/tools/convert";
 import FileUploadDropzone from "@/components/common/FileUploadDropzone";
+import SheetPillsWithPreview from "@/components/common/SheetPillsWithPreview";
 
 export default function ConvertXlsxToCsv() {
   const t = useTranslations("common");
@@ -49,14 +50,16 @@ export default function ConvertXlsxToCsv() {
   const selectedCount = selectedSheets.length;
   const selectedSheetSet = useMemo(() => new Set(selectedSheets), [selectedSheets]);
 
-  const toggleSheet = useCallback((sheet: string, idx: number) => {
+  const previewSheet = useCallback((idx: number) => {
     setActiveSheet(idx);
-    setSelectedSheets((current) => {
-      if (current.includes(sheet)) {
-        return current.filter((name) => name !== sheet);
-      }
-      return [...current, sheet];
-    });
+  }, []);
+
+  const toggleSheet = useCallback((name: string) => {
+    setSelectedSheets((current) =>
+      current.includes(name)
+        ? current.filter((n) => n !== name)
+        : [...current, name],
+    );
   }, []);
 
   const selectAllSheets = useCallback(() => {
@@ -132,27 +135,13 @@ export default function ConvertXlsxToCsv() {
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            {preview.sheets.map((sheet, idx) => (
-              <button
-                key={sheet.name}
-                onClick={() => toggleSheet(sheet.name, idx)}
-                className="cursor-pointer rounded-full border px-3 py-1 text-sm transition"
-                style={{
-                  backgroundColor: selectedSheetSet.has(sheet.name)
-                    ? "var(--tag-selected-bg)"
-                    : "var(--tag-bg)",
-                  color: selectedSheetSet.has(sheet.name)
-                    ? "var(--tag-selected-text)"
-                    : "var(--tag-text)",
-                  borderColor: "var(--tag-border)",
-                }}
-                aria-pressed={selectedSheetSet.has(sheet.name)}
-              >
-                {sheet.name}
-              </button>
-            ))}
-          </div>
+          <SheetPillsWithPreview
+            sheets={preview.sheets}
+            selectedSet={selectedSheetSet}
+            activeSheetIdx={activeSheet}
+            onPreview={previewSheet}
+            onToggle={toggleSheet}
+          />
         </div>
       )}
 

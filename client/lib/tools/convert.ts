@@ -127,10 +127,22 @@ export async function xlsxToPdf(
   file: File,
   sheets?: string[],
   orientation: "portrait" | "landscape" = "landscape",
+  columnMode: "ellipsis" | "wrap" | "fit" = "ellipsis",
+  fontSize: "small" | "medium" | "large" = "medium",
+  headerStyle: "colored" | "gray" | "plain" = "colored",
+  pageSize: "A4" | "Letter" | "A3" = "A4",
+  headerColor?: string,
 ): Promise<ArrayBuffer> {
   const fd = new FormData();
   fd.append("file", file);
-  const qs: Record<string, string> = { orientation };
+  const qs: Record<string, string> = {
+    orientation,
+    column_mode: columnMode,
+    font_size: fontSize,
+    header_style: headerStyle,
+    page_size: pageSize,
+    ...(headerColor ? { header_color: headerColor } : {}),
+  };
   const path =
     sheets && sheets.length > 0
       ? buildUrlWithArrayParams("/api/v1/tools/convert/xlsx-to-pdf", {

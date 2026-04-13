@@ -10,7 +10,10 @@
     "trustLine": "Gratuit · Aucun compte requis · Aucun fichier stocké"
   },
   "header": {
-    "login": "Se connecter"
+    "login": "Se connecter",
+    "settings": "Paramètres",
+    "language": "Langue",
+    "theme": "Thème"
   },
   "tools": {
     "noTools": "Aucun outil dans cette catégorie.",
@@ -537,6 +540,20 @@
     "pageOrientation": "Orientation de la page",
     "landscape": "Paysage",
     "portrait": "Portrait",
+    "textOverflow": "Débordement de texte",
+    "ellipsisColumns": "Ellipse (largeurs égales)",
+    "wrapText": "Retour à la ligne",
+    "fitColumns": "Ajuster les largeurs de colonne",
+    "pdfFontSize": "Taille de police",
+    "fontSizeSmall": "Petite",
+    "fontSizeMedium": "Moyenne",
+    "fontSizeLarge": "Grande",
+    "headerStyle": "Style d'en-tête",
+    "headerStyleColored": "Coloré",
+    "headerStyleGray": "Gris",
+    "headerStylePlain": "Simple",
+    "headerColor": "Couleur de l'en-tête",
+    "pdfPageSize": "Taille de page",
     "downloadPdf": "Télécharger le PDF",
     "pdfExportNote": "Le PDF est formaté pour l'impression. Les styles et formules ne sont pas conservés.",
     "readingWorkbookStructure": "Lecture de la structure du classeur...",
