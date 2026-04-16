@@ -31,6 +31,7 @@ import {
 } from "@/lib/tools/inspect";
 import BackToTopButton from "@/components/common/BackToTopButton";
 import FileUploadDropzone from "@/components/common/FileUploadDropzone";
+import { EXCEL_ACCEPT } from "../clean/shared";
 
 type SortDirection = "asc" | "desc";
 type TableRow = {
@@ -772,7 +773,7 @@ export default function InspectSheets() {
   return (
     <div className="space-y-4">
       <FileUploadDropzone
-        accept=".xls,.xlsx,.xlsm,.xlsb,.xltx,.xltm,.xlam,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.binary.macroEnabled.12,application/vnd.ms-excel.sheet.macroEnabled.12,application/octet-stream"
+        accept={EXCEL_ACCEPT}
         message={t("dropExcelInspect")}
         hasError={!!error}
         onFiles={(files) => {

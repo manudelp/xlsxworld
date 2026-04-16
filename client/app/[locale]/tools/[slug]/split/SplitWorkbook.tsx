@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import React, { useCallback, useMemo, useState } from "react";
 import { Archive, Layers3 } from "lucide-react";
 import { splitWorkbook } from "@/lib/tools/split";
-import { VISUAL_ELEMENTS_WARNING } from "../clean/shared";
+import { EXCEL_ACCEPT, VISUAL_ELEMENTS_WARNING } from "../clean/shared";
 import FileUploadDropzone from "@/components/common/FileUploadDropzone";
 import { uploadForPreview, type WorkbookPreview } from "@/lib/tools/inspect";
 
@@ -98,7 +98,7 @@ export default function SplitWorkbook() {
   return (
     <div className="space-y-4">
       <FileUploadDropzone
-        accept=".xls,.xlsx,.xlsm,.xlsb,.xltx,.xltm,.xlam,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.binary.macroEnabled.12,application/vnd.ms-excel.sheet.macroEnabled.12,application/octet-stream"
+        accept={EXCEL_ACCEPT}
         message={t("dropExcelSplitWorkbook")}
         hasError={!!error}
         onFiles={(files) => {

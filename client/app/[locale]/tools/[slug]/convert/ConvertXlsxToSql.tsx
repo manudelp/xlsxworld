@@ -6,6 +6,7 @@ import { uploadForPreview, WorkbookPreview } from "@/lib/tools/inspect";
 import { xlsxToSql } from "@/lib/tools/convert";
 import FileUploadDropzone from "@/components/common/FileUploadDropzone";
 import SheetPillsWithPreview from "@/components/common/SheetPillsWithPreview";
+import { EXCEL_ACCEPT } from "../clean/shared";
 
 export default function ConvertXlsxToSql() {
   const t = useTranslations("common");
@@ -85,7 +86,7 @@ export default function ConvertXlsxToSql() {
   return (
     <div className="space-y-4">
       <FileUploadDropzone
-        accept=".xls,.xlsx,.xlsm,.xlsb,.xltx,.xltm,.xlam,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.binary.macroEnabled.12,application/vnd.ms-excel.sheet.macroEnabled.12,application/octet-stream"
+        accept={EXCEL_ACCEPT}
         message={t("dropExcelConvertSql")}
         hasError={!!error}
         onFiles={(files) => {

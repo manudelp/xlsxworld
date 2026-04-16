@@ -1,8 +1,28 @@
 import type { ToolFileResult } from "@/lib/api";
 import type { WorkbookPreview } from "@/lib/tools/inspect";
 
-export const EXCEL_ACCEPT =
-  ".xls,.xlsx,.xlsm,.xlsb,.xltx,.xltm,.xlam,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.binary.macroEnabled.12,application/vnd.ms-excel.sheet.macroEnabled.12,application/octet-stream";
+// Excel file accept list.
+//
+// IMPORTANT: validation is by extension first (see FileUploadDropzone). MIME
+// types are inconsistent across browsers and OS versions for Excel files, so
+// we accept a broad list (including the empty string for files where the
+// browser couldn't detect a type).
+export const EXCEL_ACCEPT = [
+  ".xlsx",
+  ".xls",
+  ".xlsb",
+  ".xlsm",
+  ".xltx",
+  ".xltm",
+  ".xlam",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.ms-excel",
+  "application/vnd.ms-excel.sheet.binary.macroEnabled.12",
+  "application/vnd.ms-excel.sheet.macroEnabled.12",
+  "application/vnd.ms-excel.template.macroEnabled.12",
+  "application/octet-stream",
+  "",
+].join(",");
 
 export const VISUAL_ELEMENTS_WARNING =
   "Charts, images, and other visual elements were removed from the output. Only cell data was preserved.";
