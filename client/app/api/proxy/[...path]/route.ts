@@ -28,7 +28,10 @@ async function proxy(
   const path = (resolved?.path || []).join("/");
 
   if (!isAllowedPath(path)) {
-    return NextResponse.json({ detail: "Not found" }, { status: 404 });
+    return NextResponse.json(
+      { detail: "Not found", error_code: "NOT_FOUND" },
+      { status: 404 },
+    );
   }
 
   const url = new URL(req.url);

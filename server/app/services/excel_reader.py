@@ -199,6 +199,10 @@ def parse_excel_bytes(raw: bytes, filename: str | None) -> dict[str, list[list[A
     except HTTPException:
         raise
     except Exception as error:
-        raise HTTPException(status_code=400, detail=f"Failed to parse workbook: {error}") from error
+        # Don't leak internal exception details (file paths, library internals).
+        raise HTTPException(
+            status_code=400,
+            detail="Could not read the workbook. The file may be corrupted or in an unsupported format.",
+        ) from error
 
     raise HTTPException(status_code=400, detail="Unsupported workbook format")

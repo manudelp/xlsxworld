@@ -1,5 +1,33 @@
 export interface ApiError {
   detail: string;
+  errorCode?: string;
+}
+
+export class ApiRequestError extends Error {
+  readonly status: number;
+  readonly errorCode?: string;
+
+  constructor(detail: string, status: number, errorCode?: string) {
+    super(detail);
+    this.name = "ApiRequestError";
+    this.status = status;
+    this.errorCode = errorCode;
+  }
+}
+
+async function extractError(
+  res: Response,
+): Promise<{ detail: string; errorCode?: string }> {
+  let detail = res.statusText || "Request failed";
+  let errorCode: string | undefined;
+  try {
+    const data = await res.json();
+    if (data?.detail) detail = String(data.detail);
+    if (data?.error_code) errorCode = String(data.error_code);
+  } catch {
+    // body wasn't JSON; fall back to status text
+  }
+  return { detail, errorCode };
 }
 
 const APP_ORIGIN =
@@ -106,16 +134,8 @@ async function clearSessionAndRedirect(): Promise<void> {
 
 async function handle<T>(res: Response): Promise<T> {
   if (!res.ok) {
-    let detail = res.statusText;
-    try {
-      const data = await res.json();
-      if (data?.detail) {
-        detail = data.detail;
-      }
-    } catch {
-      // Fall back to the HTTP status text.
-    }
-    throw new Error(detail);
+    const { detail, errorCode } = await extractError(res);
+    throw new ApiRequestError(detail, res.status, errorCode);
   }
 
   if (res.status === 204) {
@@ -182,12 +202,8 @@ export async function postFormForFile(
     credentials: "include",
   });
   if (!res.ok) {
-    let detail = res.statusText;
-    try {
-      const data = await res.json();
-      if (data?.detail) detail = data.detail;
-    } catch { /* use statusText */ }
-    throw new Error(detail);
+    const { detail, errorCode } = await extractError(res);
+    throw new ApiRequestError(detail, res.status, errorCode);
   }
   const buffer = await res.arrayBuffer();
   return {
