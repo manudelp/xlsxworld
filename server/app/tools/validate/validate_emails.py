@@ -38,10 +38,7 @@ async def validate_emails(
     check_excel_file(file)
     raw = await read_with_limit(file)
 
-    try:
-        workbook_data = parse_excel_bytes(raw, file.filename)
-    except Exception as exc:
-        raise HTTPException(status_code=400, detail=f"Failed to parse workbook: {exc}") from exc
+    workbook_data = parse_excel_bytes(raw, file.filename)
 
     if sheet not in workbook_data:
         raise HTTPException(status_code=404, detail="Sheet not found")

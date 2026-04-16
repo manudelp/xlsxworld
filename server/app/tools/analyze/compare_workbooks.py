@@ -71,7 +71,10 @@ async def compare_workbooks(
         wb_b_val = load_workbook(BytesIO(raw_b), data_only=True, read_only=True)
         wb_b_form = load_workbook(BytesIO(raw_b), data_only=False, read_only=True)
     except Exception as exc:
-        raise HTTPException(status_code=400, detail=f"Failed to parse workbook: {exc}") from exc
+        raise HTTPException(
+            status_code=400,
+            detail="Could not read one of the workbooks. The file may be corrupted or in an unsupported format.",
+        ) from exc
 
     sheets_a = {ws.title for ws in wb_a_val.worksheets}
     sheets_b = {ws.title for ws in wb_b_val.worksheets}

@@ -55,9 +55,15 @@ async def csv_to_xlsx(
             out_name,
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
-    except csv.Error as e:
-        raise HTTPException(status_code=400, detail=f"Failed to parse CSV: {e}")
+    except csv.Error:
+        raise HTTPException(
+            status_code=400,
+            detail="Could not read the CSV file. The file may be malformed.",
+        )
     except HTTPException:
         raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Conversion error: {e}")
+    except Exception:
+        raise HTTPException(
+            status_code=500,
+            detail="Conversion failed. Please verify the CSV is well-formed.",
+        )
