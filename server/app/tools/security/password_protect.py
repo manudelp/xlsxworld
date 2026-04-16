@@ -1,12 +1,14 @@
 from __future__ import annotations
 
-from io import BytesIO
-
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
-from openpyxl import load_workbook
 from openpyxl.worksheet.protection import SheetProtection
 
-from app.tools._common import check_excel_file, file_response, read_with_limit, normalize_sheet_selection
+from app.services.excel_editor import (
+    load_workbook_for_edit,
+    save_workbook_to_bytes,
+    supports_inplace_edit,
+)
+from app.tools._common import check_excel_file, file_response, has_visual_elements, read_with_limit, normalize_sheet_selection
 
 router = APIRouter()
 
@@ -27,10 +29,14 @@ async def password_protect(
     check_excel_file(file)
     raw = await read_with_limit(file)
 
-    try:
-        wb = load_workbook(BytesIO(raw))
-    except Exception as exc:
-        raise HTTPException(status_code=400, detail=f"Failed to parse workbook: {exc}") from exc
+    if not supports_inplace_edit(file.filename):
+        raise HTTPException(
+            status_code=400,
+            detail="Password protect requires an .xlsx or .xlsm file.",
+        )
+
+    loaded = load_workbook_for_edit(raw, file.filename)
+    wb = loaded.workbook
 
     selected = normalize_sheet_selection([sheets]) if sheets.strip() else None
     target_names = selected if selected else [ws.title for ws in wb.worksheets]
@@ -49,11 +55,11 @@ async def password_protect(
     if protect_structure:
         wb.security.lockStructure = True
 
-    buf = BytesIO()
-    wb.save(buf)
+    output_bytes = save_workbook_to_bytes(wb)
 
     return file_response(
-        buf.getvalue(),
+        output_bytes,
         "protected.xlsx",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        visual_elements_removed=loaded.visual_elements_lost or has_visual_elements(raw),
     )

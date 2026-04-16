@@ -1,12 +1,14 @@
 from __future__ import annotations
 
-from io import BytesIO
-
 from fastapi import APIRouter, File, HTTPException, UploadFile
-from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 
-from app.tools._common import check_excel_file, file_response, read_with_limit
+from app.services.excel_editor import (
+    load_workbook_for_edit,
+    save_workbook_to_bytes,
+    supports_inplace_edit,
+)
+from app.tools._common import check_excel_file, file_response, has_visual_elements, read_with_limit
 
 router = APIRouter()
 
@@ -26,25 +28,37 @@ async def auto_size_columns(
     check_excel_file(file)
     raw = await read_with_limit(file)
 
-    try:
-        wb = load_workbook(BytesIO(raw))
-    except Exception as exc:
-        raise HTTPException(status_code=400, detail=f"Failed to parse workbook: {exc}") from exc
+    if not supports_inplace_edit(file.filename):
+        raise HTTPException(
+            status_code=400,
+            detail="Auto-size columns requires an .xlsx or .xlsm file.",
+        )
+
+    loaded = load_workbook_for_edit(raw, file.filename)
+    wb = loaded.workbook
 
     for ws in wb.worksheets:
-        for col_cells in ws.columns:
-            col_letter = get_column_letter(col_cells[0].column)
+        # Walking ws.columns on a workbook with merged cells can raise; iterate
+        # over the cell ranges manually so a single problematic sheet doesn't
+        # break the whole tool.
+        max_col = ws.max_column
+        max_row = ws.max_row
+        if max_col == 0 or max_row == 0:
+            continue
+        for col_idx in range(1, max_col + 1):
+            col_letter = get_column_letter(col_idx)
             width = MIN_WIDTH
-            for cell in col_cells:
-                if cell.value is not None:
-                    width = max(width, min(len(str(cell.value)) + PADDING, MAX_WIDTH))
+            for row_idx in range(1, max_row + 1):
+                value = ws.cell(row=row_idx, column=col_idx).value
+                if value is not None:
+                    width = max(width, min(len(str(value)) + PADDING, MAX_WIDTH))
             ws.column_dimensions[col_letter].width = width
 
-    buf = BytesIO()
-    wb.save(buf)
+    output_bytes = save_workbook_to_bytes(wb)
 
     return file_response(
-        buf.getvalue(),
+        output_bytes,
         "auto-sized.xlsx",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        visual_elements_removed=loaded.visual_elements_lost or has_visual_elements(raw),
     )

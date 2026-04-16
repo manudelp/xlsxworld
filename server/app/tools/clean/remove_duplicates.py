@@ -4,12 +4,19 @@ from typing import Any
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 
+from app.services.excel_editor import (
+    header_index_map,
+    load_workbook_for_edit,
+    save_workbook_to_bytes,
+    supports_inplace_edit,
+)
 from app.services.excel_reader import parse_excel_bytes
 from app.tools._common import check_excel_file, file_response, has_visual_elements, read_with_limit
 from app.tools.clean._utils import (
     get_cell,
     parse_columns_arg,
     resolve_column_indexes,
+    resolve_target_sheet_titles,
     resolve_target_sheets,
     workbook_bytes_from_data,
 )
@@ -35,9 +42,61 @@ async def remove_duplicates(
     if keep not in {"first", "last"}:
         raise HTTPException(status_code=400, detail="keep must be either 'first' or 'last'")
 
+    selected_columns = parse_columns_arg(columns)
+
+    if supports_inplace_edit(file.filename):
+        loaded = load_workbook_for_edit(raw, file.filename)
+        workbook = loaded.workbook
+        target_titles = resolve_target_sheet_titles(workbook, sheet, all_sheets)
+
+        for sheet_name in target_titles:
+            ws = workbook[sheet_name]
+            if ws.max_row <= 1:
+                continue
+
+            column_indexes = header_index_map(
+                ws,
+                header_row=1,
+                selected_columns=selected_columns or None,
+            )
+
+            def _row_key(values: list[Any]) -> tuple[Any, ...]:
+                if not column_indexes:
+                    return tuple(values)
+                return tuple(
+                    values[idx - 1] if idx - 1 < len(values) else None
+                    for idx in column_indexes
+                )
+
+            row_records: list[tuple[int, tuple[Any, ...]]] = []
+            for row in ws.iter_rows(min_row=2, max_row=ws.max_row, values_only=False):
+                values = [cell.value for cell in row]
+                row_records.append((row[0].row, _row_key(values)))
+
+            seen: set[tuple[Any, ...]] = set()
+            rows_to_delete: list[int] = []
+            iter_records = (
+                row_records if keep == "first" else list(reversed(row_records))
+            )
+            for row_idx, key in iter_records:
+                if key in seen:
+                    rows_to_delete.append(row_idx)
+                else:
+                    seen.add(key)
+
+            for row_idx in sorted(rows_to_delete, reverse=True):
+                ws.delete_rows(row_idx, 1)
+
+        output_bytes = save_workbook_to_bytes(workbook)
+        return file_response(
+            output_bytes,
+            "remove-duplicates.xlsx",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            visual_elements_removed=loaded.visual_elements_lost or has_visual_elements(raw),
+        )
+
     workbook_data = parse_excel_bytes(raw, file.filename)
     target_sheets = resolve_target_sheets(workbook_data, sheet, all_sheets)
-    selected_columns = parse_columns_arg(columns)
 
     for sheet_name in target_sheets:
         rows = workbook_data[sheet_name]

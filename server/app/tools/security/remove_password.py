@@ -1,11 +1,13 @@
 from __future__ import annotations
 
-from io import BytesIO
-
 from fastapi import APIRouter, File, HTTPException, UploadFile
-from openpyxl import load_workbook
 
-from app.tools._common import check_excel_file, file_response, read_with_limit
+from app.services.excel_editor import (
+    load_workbook_for_edit,
+    save_workbook_to_bytes,
+    supports_inplace_edit,
+)
+from app.tools._common import check_excel_file, file_response, has_visual_elements, read_with_limit
 
 router = APIRouter()
 
@@ -21,10 +23,14 @@ async def remove_password(
     check_excel_file(file)
     raw = await read_with_limit(file)
 
-    try:
-        wb = load_workbook(BytesIO(raw))
-    except Exception as exc:
-        raise HTTPException(status_code=400, detail=f"Failed to parse workbook: {exc}") from exc
+    if not supports_inplace_edit(file.filename):
+        raise HTTPException(
+            status_code=400,
+            detail="Remove password requires an .xlsx or .xlsm file.",
+        )
+
+    loaded = load_workbook_for_edit(raw, file.filename)
+    wb = loaded.workbook
 
     for ws in wb.worksheets:
         ws.protection.sheet = False
@@ -32,11 +38,11 @@ async def remove_password(
 
     wb.security.lockStructure = False
 
-    buf = BytesIO()
-    wb.save(buf)
+    output_bytes = save_workbook_to_bytes(wb)
 
     return file_response(
-        buf.getvalue(),
+        output_bytes,
         "unprotected.xlsx",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        visual_elements_removed=loaded.visual_elements_lost or has_visual_elements(raw),
     )

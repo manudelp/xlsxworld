@@ -4,9 +4,11 @@ import re
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 
+from app.services.excel_editor import supports_inplace_edit
 from app.services.excel_reader import parse_excel_bytes
 from app.tools._common import check_excel_file, file_response, has_visual_elements, read_with_limit
 from app.tools.clean._utils import (
+    apply_value_mutation_inplace,
     get_cell,
     parse_columns_arg,
     resolve_column_indexes,
@@ -47,9 +49,31 @@ async def find_replace(
     except re.error as error:
         raise HTTPException(status_code=400, detail=f"Invalid pattern: {error}") from error
 
+    selected_columns = parse_columns_arg(columns)
+
+    def _replace(value):
+        if not isinstance(value, str):
+            return value
+        return pattern.sub(replace_text, value)
+
+    if supports_inplace_edit(file.filename):
+        output_bytes, visual_lost = apply_value_mutation_inplace(
+            raw,
+            file.filename,
+            sheet=sheet,
+            all_sheets=all_sheets,
+            selected_columns=selected_columns,
+            mutate=_replace,
+        )
+        return file_response(
+            output_bytes,
+            "find-replace.xlsx",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            visual_elements_removed=visual_lost or has_visual_elements(raw),
+        )
+
     workbook_data = parse_excel_bytes(raw, file.filename)
     target_sheets = resolve_target_sheets(workbook_data, sheet, all_sheets)
-    selected_columns = parse_columns_arg(columns)
 
     for sheet_name in target_sheets:
         rows = workbook_data[sheet_name]
