@@ -115,9 +115,9 @@ export default function NormalizeCase() {
             <div className="flex flex-wrap gap-2">
               {([
                 ["lower", "lowercase"],
-                ["upper", "UPPERCASE"],
-                ["title", "Title Case"],
-              ] as const).map(([value, label]) => (
+                ["upper", "uppercase"],
+                ["title", "titleCase"],
+              ] as const).map(([value, labelKey]) => (
                 <button
                   key={value}
                   type="button"
@@ -130,7 +130,7 @@ export default function NormalizeCase() {
                     color: mode === value ? "var(--tag-selected-text)" : "var(--tag-text)",
                   }}
                 >
-                  {label}
+                  {t(labelKey)}
                 </button>
               ))}
             </div>
@@ -138,7 +138,7 @@ export default function NormalizeCase() {
 
           <div>
             <p className="mb-2 text-sm font-medium" style={{ color: "var(--muted)" }}>
-              Sheet
+              {t("sheetLabel")}
             </p>
             <div className="flex flex-wrap gap-2">
               {preview.sheets.map((sheet, index) => (

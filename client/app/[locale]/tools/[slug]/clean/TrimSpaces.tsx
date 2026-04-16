@@ -106,8 +106,7 @@ export default function TrimSpaces() {
           <div>
             <h3 className="font-medium">{t("trimExtraSpaces")}</h3>
             <p className="text-sm" style={{ color: "var(--muted-2)" }}>
-              {fileName} - {preview.sheet_count} sheet
-              {preview.sheet_count === 1 ? "" : "s"}
+              {fileName} - {t("sheetCount", { count: preview.sheet_count })}
             </p>
           </div>
 
@@ -290,10 +289,10 @@ export default function TrimSpaces() {
           >
             {allSheets
               ? t("willCleanAllSheets")
-              : `Will clean only \"${selectedSheetName}\"`}
+              : t("willCleanOnly", { name: selectedSheetName })}
             {onlySpecificColumns && columnNames.length > 0
-              ? `, in ${selectedColumns.length} selected column${selectedColumns.length === 1 ? "" : "s"}.`
-              : ", in all columns."}
+              ? t("inSelectedColumns", { count: selectedColumns.length })
+              : t("inAllColumns")}
           </div>
 
           <div className="flex justify-end">

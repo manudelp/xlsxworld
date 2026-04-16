@@ -9,12 +9,12 @@ import { splitColumn } from "@/lib/tools/data";
 import { EXCEL_ACCEPT, downloadToolResult, getSheetColumnNames, VISUAL_ELEMENTS_WARNING } from "../clean/shared";
 
 const DELIMITERS = [
-  { value: "comma", label: "Comma (,)" },
-  { value: "space", label: "Space" },
-  { value: "dash", label: "Dash (-)" },
-  { value: "semicolon", label: "Semicolon (;)" },
-  { value: "pipe", label: "Pipe (|)" },
-];
+  { value: "comma", labelKey: "delimiterComma" },
+  { value: "space", labelKey: "delimiterSpace" },
+  { value: "dash", labelKey: "delimiterDash" },
+  { value: "semicolon", labelKey: "delimiterSemicolon" },
+  { value: "pipe", labelKey: "delimiterPipe" },
+] as const;
 
 export default function SplitColumn() {
   const t = useTranslations("common");
@@ -101,7 +101,7 @@ export default function SplitColumn() {
           <div className="flex flex-wrap items-center gap-2">
             <select value={delimiter} onChange={(e) => setDelimiter(e.target.value)}
               className="rounded border px-2 py-1.5 text-sm" style={{ borderColor: "var(--border)", backgroundColor: "var(--surface-2)", color: "var(--foreground)" }}>
-              {DELIMITERS.map((d) => <option key={d.value} value={d.value}>{d.label}</option>)}
+              {DELIMITERS.map((d) => <option key={d.value} value={d.value}>{td(d.labelKey)}</option>)}
               <option value="custom">{t("custom")}</option>
             </select>
             {delimiter === "custom" && (

@@ -376,7 +376,11 @@ export default function RemoveDuplicates() {
                   color: "var(--muted)",
                 }}
               >
-                Sheet: <strong>{activeSheetPreview?.name}</strong> | Columns selected: <strong>{selectedColumnsCount}</strong>
+                {t.rich("sheetAndColumnsSelected", {
+                  sheet: activeSheetPreview?.name ?? "",
+                  count: selectedColumnsCount,
+                  strong: (chunks) => <strong>{chunks}</strong>,
+                })}
               </div>
 
               <div className="mb-2 flex items-center justify-between gap-2">
@@ -384,7 +388,7 @@ export default function RemoveDuplicates() {
                   {t("pickColumnsDuplicate")}
                 </p>
                 <span className="text-xs" style={{ color: "var(--muted-2)" }}>
-                  Sheet: {activeSheetPreview?.name}
+                  {t("sheetLabel")}: {activeSheetPreview?.name}
                 </span>
               </div>
 
@@ -471,7 +475,7 @@ export default function RemoveDuplicates() {
                                   // Checkbox state is controlled by selectedColumns.
                                 }}
                               />
-                              <span>{String(header ?? "") || `Column ${index + 1}`}</span>
+                              <span>{String(header ?? "") || t("columnNumber", { number: index + 1 })}</span>
                             </label>
                           </th>
                         );
@@ -539,7 +543,7 @@ export default function RemoveDuplicates() {
                     color: "var(--tag-text)",
                   }}
                 >
-                  Back
+                  {t("back")}
                 </button>
                 <button
                   type="button"
@@ -565,13 +569,20 @@ export default function RemoveDuplicates() {
                 }}
               >
                 <div className="mb-1 text-xs" style={{ color: "var(--muted)" }}>
-                  Review
+                  {t("review")}
                 </div>
                 <div>
-                  Sheet: <strong>{activeSheetPreview?.name}</strong> | Columns: <strong>{selectedColumnsCount}</strong>
+                  {t.rich("sheetAndColumns", {
+                    sheet: activeSheetPreview?.name ?? "",
+                    count: selectedColumnsCount,
+                    strong: (chunks) => <strong>{chunks}</strong>,
+                  })}
                 </div>
                 <div>
-                  Duplicates: <strong>{countingDuplicates ? t("counting") : (duplicateCount?.toLocaleString() ?? "0")}</strong>
+                  {t.rich("duplicatesFound", {
+                    value: countingDuplicates ? t("counting") : (duplicateCount?.toLocaleString() ?? "0"),
+                    strong: (chunks) => <strong>{chunks}</strong>,
+                  })}
                 </div>
               </div>
 
@@ -616,7 +627,7 @@ export default function RemoveDuplicates() {
                   }}
                 />
                 <span className="mt-1 block text-xs" style={{ color: "var(--muted-2)" }}>
-                  Final file: {resolvedOutputName}.xlsx
+                  {t("finalFile", { name: resolvedOutputName })}
                 </span>
               </label>
 
@@ -631,7 +642,7 @@ export default function RemoveDuplicates() {
                     color: "var(--tag-text)",
                   }}
                 >
-                  Back
+                  {t("back")}
                 </button>
                 <button
                   type="button"
