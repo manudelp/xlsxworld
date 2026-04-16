@@ -49,11 +49,15 @@ async def split_column(
         raise HTTPException(status_code=400, detail=f"Column '{column}' not found")
 
     sep = _DELIMITERS.get(delimiter, delimiter)
+    if not sep:
+        raise HTTPException(status_code=400, detail="Delimiter cannot be empty")
 
     max_parts = 1
+    matched_any = False
     for row in data_rows:
         val = row[col_idx] if col_idx < len(row) else None
-        if val is not None and isinstance(val, str):
+        if val is not None and isinstance(val, str) and sep in val:
+            matched_any = True
             max_parts = max(max_parts, len(val.split(sep)))
 
     new_header: list[Any] = []
@@ -85,9 +89,16 @@ async def split_column(
     workbook_data[sheet] = new_rows
     output_bytes = workbook_bytes_from_data(workbook_data)
 
-    return file_response(
+    response = file_response(
         output_bytes,
         "split-column.xlsx",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         visual_elements_removed=has_visuals,
     )
+    if not matched_any:
+        response.headers["X-Split-Warning"] = "no-delimiters-found"
+        exposed = response.headers.get("Access-Control-Expose-Headers", "")
+        response.headers["Access-Control-Expose-Headers"] = (
+            f"{exposed}, X-Split-Warning".lstrip(", ")
+        )
+    return response

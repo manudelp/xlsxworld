@@ -40,18 +40,48 @@ async def merge_sheets(
     out_ws = out_wb.active
     out_ws.title = output_sheet[:31] if output_sheet else "Merged"
 
-    header_written = False
+    # Build the union of headers across selected sheets so columns line up
+    # even when different sheets present different column orders or names.
+    merged_headers: list[str] = []
+    seen_headers: set[str] = set()
+    sheet_headers: dict[str, list[str]] = {}
     for sheet_name in selected:
         rows = workbook_data[sheet_name]
-        for i, row in enumerate(rows):
-            if i == 0:
-                if not header_written:
-                    out_ws.append(["" if v is None else v for v in row])
-                    header_written = True
-                elif row and any(x is not None for x in row):
-                    continue
+        if not rows:
+            sheet_headers[sheet_name] = []
+            continue
+        header_row = ["" if v is None else str(v) for v in rows[0]]
+        sheet_headers[sheet_name] = header_row
+        for column in header_row:
+            if column and column not in seen_headers:
+                seen_headers.add(column)
+                merged_headers.append(column)
+
+    if merged_headers:
+        out_ws.append(merged_headers)
+
+    for sheet_name in selected:
+        rows = workbook_data[sheet_name]
+        if len(rows) <= 1:
+            continue
+        headers = sheet_headers.get(sheet_name, [])
+        # Map each merged-column to the index in this sheet's row, or None.
+        column_index_map: list[int | None] = []
+        for column in merged_headers:
+            if column in headers:
+                column_index_map.append(headers.index(column))
             else:
-                out_ws.append(["" if v is None else v for v in row])
+                column_index_map.append(None)
+
+        for row in rows[1:]:
+            mapped_row = []
+            for source_index in column_index_map:
+                if source_index is None or source_index >= len(row):
+                    mapped_row.append("")
+                else:
+                    value = row[source_index]
+                    mapped_row.append("" if value is None else value)
+            out_ws.append(mapped_row)
 
     output = BytesIO()
     out_wb.save(output)

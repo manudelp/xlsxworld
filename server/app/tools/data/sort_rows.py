@@ -12,16 +12,21 @@ from app.tools.clean._utils import workbook_bytes_from_data
 router = APIRouter()
 
 
-def _sort_key(row: list[Any], col_indexes: list[int], directions: list[str]):
-    parts: list[tuple[Any, ...]] = []
-    for idx, direction in zip(col_indexes, directions):
-        val = row[idx] if idx < len(row) else None
-        if val is None:
-            val = ""
-        if isinstance(val, str):
-            val = val.lower()
-        parts.append((val,))
-    return parts
+def _comparable(value: Any) -> tuple[int, Any]:
+    """Return a tuple safe to compare across mixed types (numbers, strings, None).
+
+    The leading int is a "type bucket" so that numbers compare against
+    numbers, strings against strings, and None always sorts last.
+    """
+    if value is None or value == "":
+        return (3, "")
+    if isinstance(value, bool):
+        return (1, int(value))
+    if isinstance(value, (int, float)):
+        return (1, float(value))
+    if isinstance(value, str):
+        return (2, value.casefold())
+    return (2, str(value).casefold())
 
 
 @router.post(
@@ -50,40 +55,52 @@ async def sort_rows(
 
     rows = workbook_data[sheet]
     if not rows:
+        workbook_data[sheet] = []
+        output_bytes = workbook_bytes_from_data(workbook_data)
         return file_response(
-            (await read_with_limit(file)) if False else b"",
+            output_bytes,
             "sorted.xlsx",
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            visual_elements_removed=has_visuals,
         )
 
     header = rows[0] if has_header else None
-    data_rows = rows[1:] if has_header else rows
+    data_rows = list(rows[1:] if has_header else rows)
 
-    header_map = {}
+    header_map: dict[str, int] = {}
     if header:
         for i, h in enumerate(header):
-            header_map[str(h).strip()] = i
+            header_map[str("" if h is None else h).strip()] = i
 
     col_indexes: list[int] = []
     directions: list[str] = []
+    missing_columns: list[str] = []
     for key in keys[:3]:
-        col_name = key.get("column", "")
-        direction = key.get("direction", "asc")
+        col_name = str(key.get("column", "")).strip()
+        direction = str(key.get("direction", "asc")).lower()
+        if direction not in {"asc", "desc"}:
+            direction = "asc"
+        if not col_name:
+            continue
         if col_name in header_map:
             col_indexes.append(header_map[col_name])
             directions.append(direction)
+        else:
+            missing_columns.append(col_name)
+
+    if missing_columns:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Sort column not found in sheet: {missing_columns[0]}",
+        )
 
     if not col_indexes:
-        raise HTTPException(status_code=400, detail="No valid sort columns found")
+        raise HTTPException(status_code=400, detail="No sort columns provided")
 
     for idx, direction in reversed(list(zip(col_indexes, directions))):
         reverse = direction == "desc"
         data_rows.sort(
-            key=lambda r, i=idx: (
-                (0, r[i].lower() if isinstance(r[i] if i < len(r) else None, str) else r[i] if i < len(r) else "")
-                if (i < len(r) and r[i] is not None)
-                else (1, "")
-            ),
+            key=lambda r, i=idx: _comparable(r[i] if i < len(r) else None),
             reverse=reverse,
         )
 

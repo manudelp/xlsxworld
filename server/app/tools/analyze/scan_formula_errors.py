@@ -86,7 +86,10 @@ async def scan_formula_errors(
         wb = load_workbook(BytesIO(raw), data_only=True, read_only=True)
         wb_formulas = load_workbook(BytesIO(raw), data_only=False, read_only=True)
     except Exception as exc:
-        raise HTTPException(status_code=400, detail=f"Failed to parse workbook: {exc}") from exc
+        raise HTTPException(
+            status_code=400,
+            detail="Could not read the workbook. The file may be corrupted or in an unsupported format.",
+        ) from exc
 
     details: list[dict[str, str]] = []
     error_counts: dict[str, int] = {}
@@ -223,5 +226,9 @@ async def scan_formula_errors(
     )
     resp.headers["X-Total-Errors"] = str(total_errors)
     resp.headers["X-Error-Breakdown"] = json.dumps(error_counts)
-    resp.headers["Access-Control-Expose-Headers"] = "X-Total-Errors, X-Error-Breakdown"
+    exposed_headers = ["X-Total-Errors", "X-Error-Breakdown"]
+    if total_errors == 0:
+        resp.headers["X-Scan-Result"] = "no-errors"
+        exposed_headers.append("X-Scan-Result")
+    resp.headers["Access-Control-Expose-Headers"] = ", ".join(exposed_headers)
     return resp
