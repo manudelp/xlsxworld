@@ -19,9 +19,9 @@
 | Task | Status | Commit |
 |---|---|---|
 | 1. `tool_jobs` model + migration | ✅ done | `f794e33` |
-| 2. Storage service | ⬜ pending | — |
+| 2. Storage service | ✅ done | `332235c` |
 | 3. Optional-auth dependency | ✅ done | `77e1134` |
-| 4. JobsService | ⬜ pending | — |
+| 4. JobsService | ✅ done | `c5a7d90` |
 | 5. `record_and_respond` helper + `trim-spaces` integration | ⬜ pending | — |
 | 6. `/me/jobs` API | ⬜ pending | — |
 | 7. Cleanup CLI | ⬜ pending | — |
@@ -370,7 +370,9 @@ Expected: exits 0 and creates the `tool_jobs` table with its indexes and `update
 
 ---
 
-## Task 2: Storage service (Supabase Storage REST)
+## Task 2: Storage service (Supabase Storage REST) — ✅ COMPLETED (commit `332235c`)
+
+> **Implementation note:** Tests use a `FakeAsyncClient` that replaces `httpx.AsyncClient` instead of the nested `AsyncMock(...)` pattern originally planned — clearer intent, fewer magic-method quirks. Shipped 7 tests (added a 404-tolerance case for idempotent cleanup) rather than the 4 originally planned.
 
 **Files:**
 - Create: `server/app/services/storage_service.py`
@@ -380,7 +382,7 @@ Expected: exits 0 and creates the `tool_jobs` table with its indexes and `update
 
 The storage service speaks to Supabase Storage via raw HTTP (matching the auth_service pattern, no extra dependency). All methods are async; all I/O goes through `httpx.AsyncClient`.
 
-- [ ] **Step 1: Add the bucket name setting**
+- [x] **Step 1: Add the bucket name setting**
 
 Edit `server/app/core/config.py` — add a field next to the other Supabase fields:
 
@@ -398,7 +400,7 @@ Edit `server/app/core/config.py` — add a field next to the other Supabase fiel
         return self.supabase_url.rstrip("/") + "/storage/v1"
 ```
 
-- [ ] **Step 2: Re-create `.env.example`**
+- [x] **Step 2: Re-create `.env.example`**
 
 Create `server/.env.example` (overwrite if present). Use the contents from before plus the new var:
 
@@ -424,7 +426,7 @@ CORS_ORIGINS=http://localhost:3000
 
 (If the previous `.env.example` had additional values that were intentionally removed, the operator should reconcile during review. Mention that in the commit message.)
 
-- [ ] **Step 3: Write the failing storage service test**
+- [x] **Step 3: Write the failing storage service test** *(replaced with FakeAsyncClient-based tests, 7 cases)*
 
 Create `server/tests/test_storage_service.py`:
 
@@ -517,7 +519,7 @@ async def test_delete_calls_remove_endpoint() -> None:
     assert "abc/file.xlsx" in str(args[1])
 ```
 
-- [ ] **Step 4: Run the failing tests**
+- [x] **Step 4: Run the failing tests**
 
 ```bash
 cd server && uv run pytest tests/test_storage_service.py -v
@@ -525,7 +527,7 @@ cd server && uv run pytest tests/test_storage_service.py -v
 
 Expected: FAIL with import error.
 
-- [ ] **Step 5: Implement the storage service**
+- [x] **Step 5: Implement the storage service**
 
 Create `server/app/services/storage_service.py`:
 
@@ -619,23 +621,15 @@ class StorageService:
                 ) from exc
 ```
 
-- [ ] **Step 6: Run the tests to verify they pass**
+- [x] **Step 6: Run the tests to verify they pass**
 
 ```bash
 cd server && uv run pytest tests/test_storage_service.py -v
 ```
 
-Expected: PASS (4 tests).
+Expected: PASS (7 tests — shipped more than originally planned).
 
-- [ ] **Step 7: Commit**
-
-```bash
-git add server/app/services/storage_service.py \
-        server/app/core/config.py \
-        server/.env.example \
-        server/tests/test_storage_service.py
-git commit -m "feat(storage): supabase storage service + bucket config"
-```
+- [x] **Step 7: Commit** *(done: `332235c feat(storage): supabase storage service + bucket config`)*
 
 ---
 
@@ -723,7 +717,9 @@ Expected: PASS (5 tests — slightly more than originally planned).
 
 ---
 
-## Task 4: JobsService
+## Task 4: JobsService — ✅ COMPLETED (commit `c5a7d90`)
+
+> **Implementation note:** Tests use a `RecordingSession` (mock-session pattern, matching the existing `DummyAsyncSession` in `test_database_layer.py`) instead of the real-DB fixture assumed in the original draft. For the filter-heavy query paths, tests compile the SQLAlchemy statement to a literal-binds SQL string and assert on its shape — imperfect but pragmatic until/unless we build a real test-DB harness. Live-DB coverage for these paths arrives with the `/me/jobs` API tests in Task 6.
 
 **Files:**
 - Create: `server/app/services/jobs_service.py`
@@ -736,7 +732,7 @@ Expected: PASS (5 tests — slightly more than originally planned).
 - `delete_for_user(user_id, job_id)`
 - `cleanup_expired(now)` — used by the cleanup cron.
 
-- [ ] **Step 1: Write the failing service tests**
+- [x] **Step 1: Write the failing service tests** *(replaced with RecordingSession-based tests, 15 cases covering record success/failure, upload+insert ordering, orphan cleanup, list filter shape, get/delete ownership, cleanup storage+row prune, object-path extension handling)*
 
 Create `server/tests/test_jobs_service.py`:
 
@@ -912,7 +908,7 @@ async def test_delete_other_users_job_raises(
         await service.delete_for_user(user.id, job.id)
 ```
 
-- [ ] **Step 2: Run the failing tests**
+- [x] **Step 2: Run the failing tests**
 
 ```bash
 cd server && uv run pytest tests/test_jobs_service.py -v
@@ -920,7 +916,7 @@ cd server && uv run pytest tests/test_jobs_service.py -v
 
 Expected: FAIL with import error.
 
-- [ ] **Step 3: Implement the service**
+- [x] **Step 3: Implement the service**
 
 Create `server/app/services/jobs_service.py`:
 
@@ -1094,21 +1090,15 @@ class JobsService:
         return len(expired)
 ```
 
-- [ ] **Step 4: Verify the tests pass**
+- [x] **Step 4: Verify the tests pass**
 
 ```bash
 cd server && uv run pytest tests/test_jobs_service.py -v
 ```
 
-Expected: PASS (5 tests).
+Expected: PASS (15 tests — shipped more than originally planned).
 
-- [ ] **Step 5: Commit**
-
-```bash
-git add server/app/services/jobs_service.py \
-        server/tests/test_jobs_service.py
-git commit -m "feat(jobs): JobsService for record/list/get/delete/cleanup"
-```
+- [x] **Step 5: Commit** *(done: `c5a7d90 feat(jobs): JobsService for record/list/get/delete/cleanup`)*
 
 ---
 
