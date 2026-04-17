@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import time
 from typing import Any
 
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile
 
+from app.core.security import AuthenticatedPrincipal
 from app.services.excel_editor import (
     header_index_map,
     load_workbook_for_edit,
@@ -11,7 +13,13 @@ from app.services.excel_editor import (
     supports_inplace_edit,
 )
 from app.services.excel_reader import parse_excel_bytes
-from app.tools._common import check_excel_file, file_response, has_visual_elements, read_with_limit
+from app.services.jobs_service import JobsService
+from app.tools._common import check_excel_file, has_visual_elements, read_with_limit
+from app.tools._recording import (
+    get_current_user_optional,
+    jobs_service_dep,
+    record_and_respond,
+)
 from app.tools.clean._utils import (
     get_cell,
     parse_columns_arg,
@@ -24,18 +32,26 @@ from app.tools.clean._utils import (
 router = APIRouter()
 
 
+_OUTPUT_FILENAME = "remove-duplicates.xlsx"
+_XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+
 @router.post(
     "/remove-duplicates",
     summary="Remove Duplicates",
     description="Removes duplicate data rows based on selected columns.",
 )
 async def remove_duplicates(
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(..., description="Excel file"),
     sheet: str = Form("", description="Sheet name (required if all_sheets=false)"),
     all_sheets: bool = Form(False, description="Apply to all sheets"),
     columns: str = Form("", description="Comma-separated column names (empty=all columns)"),
     keep: str = Form("first", description="Duplicate retention strategy: first or last"),
+    principal: AuthenticatedPrincipal | None = Depends(get_current_user_optional),
+    jobs_service: JobsService = Depends(jobs_service_dep),
 ):
+    started = time.perf_counter()
     check_excel_file(file)
     raw = await read_with_limit(file)
 
@@ -88,10 +104,19 @@ async def remove_duplicates(
                 ws.delete_rows(row_idx, 1)
 
         output_bytes = save_workbook_to_bytes(workbook)
-        return file_response(
-            output_bytes,
-            "remove-duplicates.xlsx",
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        return await record_and_respond(
+            principal=principal,
+            background_tasks=background_tasks,
+            jobs_service=jobs_service,
+            tool_slug="remove-duplicates",
+            tool_name="Remove Duplicates",
+            original_filename=file.filename,
+            output_bytes=output_bytes,
+            output_filename=_OUTPUT_FILENAME,
+            mime_type=_XLSX_MIME,
+            success=True,
+            error_type=None,
+            duration_ms=int((time.perf_counter() - started) * 1000),
             visual_elements_removed=loaded.visual_elements_lost or has_visual_elements(raw),
         )
 
@@ -137,9 +162,18 @@ async def remove_duplicates(
 
     output_bytes = workbook_bytes_from_data(workbook_data)
 
-    return file_response(
-        output_bytes,
-        "remove-duplicates.xlsx",
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    return await record_and_respond(
+        principal=principal,
+        background_tasks=background_tasks,
+        jobs_service=jobs_service,
+        tool_slug="remove-duplicates",
+        tool_name="Remove Duplicates",
+        original_filename=file.filename,
+        output_bytes=output_bytes,
+        output_filename=_OUTPUT_FILENAME,
+        mime_type=_XLSX_MIME,
+        success=True,
+        error_type=None,
+        duration_ms=int((time.perf_counter() - started) * 1000),
         visual_elements_removed=has_visual_elements(raw),
     )

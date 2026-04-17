@@ -1,12 +1,20 @@
 from __future__ import annotations
 
 import re
+import time
 
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile
 
+from app.core.security import AuthenticatedPrincipal
 from app.services.excel_editor import supports_inplace_edit
 from app.services.excel_reader import parse_excel_bytes
-from app.tools._common import check_excel_file, file_response, has_visual_elements, read_with_limit
+from app.services.jobs_service import JobsService
+from app.tools._common import check_excel_file, has_visual_elements, read_with_limit
+from app.tools._recording import (
+    get_current_user_optional,
+    jobs_service_dep,
+    record_and_respond,
+)
 from app.tools.clean._utils import (
     apply_value_mutation_inplace,
     get_cell,
@@ -20,6 +28,8 @@ from app.tools.clean._utils import (
 router = APIRouter()
 
 _VALID_MODES = {"lower", "upper", "title"}
+_OUTPUT_FILENAME = "normalize-case.xlsx"
+_XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
 def _title_case(value: str) -> str:
@@ -45,12 +55,16 @@ def _normalizer(mode: str):
     description="Normalizes text columns to lower, upper, or title case.",
 )
 async def normalize_case(
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(..., description="Excel file"),
     mode: str = Form("lower", description="Case mode: lower, upper, or title"),
     sheet: str = Form("", description="Sheet name (required if all_sheets=false)"),
     all_sheets: bool = Form(False, description="Apply to all sheets"),
     columns: str = Form("", description="Comma-separated column names (empty=all columns)"),
+    principal: AuthenticatedPrincipal | None = Depends(get_current_user_optional),
+    jobs_service: JobsService = Depends(jobs_service_dep),
 ):
+    started = time.perf_counter()
     check_excel_file(file)
     raw = await read_with_limit(file)
 
@@ -68,10 +82,19 @@ async def normalize_case(
             selected_columns=selected_columns,
             mutate=_normalizer(mode),
         )
-        return file_response(
-            output_bytes,
-            "normalize-case.xlsx",
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        return await record_and_respond(
+            principal=principal,
+            background_tasks=background_tasks,
+            jobs_service=jobs_service,
+            tool_slug="normalize-case",
+            tool_name="Normalize Case",
+            original_filename=file.filename,
+            output_bytes=output_bytes,
+            output_filename=_OUTPUT_FILENAME,
+            mime_type=_XLSX_MIME,
+            success=True,
+            error_type=None,
+            duration_ms=int((time.perf_counter() - started) * 1000),
             visual_elements_removed=visual_lost or has_visual_elements(raw),
         )
 
@@ -109,9 +132,18 @@ async def normalize_case(
 
     output_bytes = workbook_bytes_from_data(workbook_data)
 
-    return file_response(
-        output_bytes,
-        "normalize-case.xlsx",
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    return await record_and_respond(
+        principal=principal,
+        background_tasks=background_tasks,
+        jobs_service=jobs_service,
+        tool_slug="normalize-case",
+        tool_name="Normalize Case",
+        original_filename=file.filename,
+        output_bytes=output_bytes,
+        output_filename=_OUTPUT_FILENAME,
+        mime_type=_XLSX_MIME,
+        success=True,
+        error_type=None,
+        duration_ms=int((time.perf_counter() - started) * 1000),
         visual_elements_removed=has_visual_elements(raw),
     )
