@@ -17,14 +17,12 @@ import {
   fetchAdminTools,
   fetchAdminUsers,
   fetchAdminPerformance,
-  fetchAdminActivity,
 } from "@/lib/admin";
 import type {
   AdminOverview,
   AdminToolStat,
   AdminUsers,
   AdminPerformanceStat,
-  AdminActivityItem,
   KpiTrendDay,
 } from "@/lib/admin";
 
@@ -95,9 +93,6 @@ export default function AdminDashboard() {
   const [toolsData, setToolsData] = useState<AdminToolStat[] | null>(null);
   const [usersData, setUsersData] = useState<AdminUsers | null>(null);
   const [perfData, setPerfData] = useState<AdminPerformanceStat[] | null>(null);
-  const [activityData, setActivityData] = useState<AdminActivityItem[] | null>(
-    null,
-  );
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -109,9 +104,26 @@ export default function AdminDashboard() {
     performance: null,
     activity: null,
   });
+  const [refreshTokens, setRefreshTokens] = useState<Record<Tab, number>>({
+    overview: 0,
+    tools: 0,
+    users: 0,
+    performance: 0,
+    activity: 0,
+  });
+
+  const markTabUpdated = useCallback((tab: Tab) => {
+    setLastUpdated((prev) => ({ ...prev, [tab]: Date.now() }));
+  }, []);
 
   const loadTab = useCallback(
     async (tab: Tab, options: { background?: boolean } = {}) => {
+      if (tab === "activity") {
+        setLoading(false);
+        setError(null);
+        setRefreshTokens((prev) => ({ ...prev, activity: prev.activity + 1 }));
+        return;
+      }
       if (options.background) {
         setRefreshing(true);
       } else {
@@ -135,14 +147,11 @@ export default function AdminDashboard() {
           }
           case "users": {
             setUsersData(await fetchAdminUsers());
+            setRefreshTokens((prev) => ({ ...prev, users: prev.users + 1 }));
             break;
           }
           case "performance": {
             setPerfData(await fetchAdminPerformance());
-            break;
-          }
-          case "activity": {
-            setActivityData(await fetchAdminActivity());
             break;
           }
         }
@@ -317,13 +326,20 @@ export default function AdminDashboard() {
             <ToolsTab data={toolsData} />
           )}
           {activeTab === "users" && usersData && (
-            <UsersTab data={usersData} />
+            <UsersTab
+              data={usersData}
+              refreshToken={refreshTokens.users}
+              onListLoaded={() => markTabUpdated("users")}
+            />
           )}
           {activeTab === "performance" && perfData && (
             <PerformanceTab data={perfData} />
           )}
-          {activeTab === "activity" && activityData && (
-            <ActivityTab data={activityData} />
+          {activeTab === "activity" && (
+            <ActivityTab
+              refreshToken={refreshTokens.activity}
+              onLoaded={() => markTabUpdated("activity")}
+            />
           )}
         </div>
       )}

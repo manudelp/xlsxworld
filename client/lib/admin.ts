@@ -113,15 +113,41 @@ export function fetchAdminUsers() {
   return api.auth.get<AdminUsers>("/api/v1/admin/users");
 }
 
-export function fetchAdminUsersList(page = 1, pageSize = 20) {
-  return api.auth.get<AdminUsersList>("/api/v1/admin/users/list", {
-    page,
-    page_size: pageSize,
-  });
+export interface UsersListFilters {
+  search?: string;
+  role?: string;
+  status?: string;
 }
 
-export function fetchAdminActivity() {
-  return api.auth.get<AdminActivityItem[]>("/api/v1/admin/activity");
+export function fetchAdminUsersList(
+  page = 1,
+  pageSize = 20,
+  filters: UsersListFilters = {},
+) {
+  const qs: Record<string, string | number | boolean | undefined> = {
+    page,
+    page_size: pageSize,
+  };
+  if (filters.search) qs.search = filters.search;
+  if (filters.role) qs.role = filters.role;
+  if (filters.status) qs.status = filters.status;
+  return api.auth.get<AdminUsersList>("/api/v1/admin/users/list", qs);
+}
+
+export interface ActivityFilters {
+  limit?: number;
+  offset?: number;
+  success?: boolean;
+  tool_slug?: string;
+}
+
+export function fetchAdminActivity(filters: ActivityFilters = {}) {
+  const qs: Record<string, string | number | boolean | undefined> = {};
+  if (filters.limit != null) qs.limit = filters.limit;
+  if (filters.offset != null) qs.offset = filters.offset;
+  if (filters.success != null) qs.success = filters.success;
+  if (filters.tool_slug) qs.tool_slug = filters.tool_slug;
+  return api.auth.get<AdminActivityItem[]>("/api/v1/admin/activity", qs);
 }
 
 export function fetchAdminPerformance() {

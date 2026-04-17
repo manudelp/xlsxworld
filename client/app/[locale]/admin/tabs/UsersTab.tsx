@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useFormatter, useLocale, useTranslations } from "next-intl";
 import {
   LineChart,
   Line,
@@ -19,10 +19,12 @@ function ChartCard({
   title,
   data,
   noDataLabel,
+  locale,
 }: {
   title: string;
   data: { date: string; count: number }[];
   noDataLabel: string;
+  locale: string;
 }) {
   if (data.length === 0) {
     return (
@@ -51,7 +53,7 @@ function ChartCard({
 
   const formatted = data.map((d) => ({
     ...d,
-    label: new Date(d.date).toLocaleDateString(undefined, {
+    label: new Date(d.date).toLocaleDateString(locale, {
       month: "short",
       day: "numeric",
     }),
@@ -155,6 +157,8 @@ function UserTable({
   total,
   onPageChange,
   t,
+  formatNumber,
+  formatJoinedDate,
 }: {
   users: AdminUserRow[];
   page: number;
@@ -162,6 +166,8 @@ function UserTable({
   total: number;
   onPageChange: (p: number) => void;
   t: (key: string, values?: Record<string, string | number>) => string;
+  formatNumber: (n: number) => string;
+  formatJoinedDate: (iso: string | null) => string;
 }) {
   const totalPages = Math.ceil(total / pageSize);
 
@@ -184,7 +190,7 @@ function UserTable({
           {t("registeredUsers")}
         </h3>
         <span className="text-xs" style={{ color: "var(--muted-2)" }}>
-          {t("total", { count: total.toLocaleString() })}
+          {t("total", { count: formatNumber(total) })}
         </span>
       </div>
 
@@ -226,13 +232,7 @@ function UserTable({
               )}
               <dt style={{ color: "var(--muted-2)" }}>{t("joined")}</dt>
               <dd className="text-right" style={{ color: "var(--muted-2)" }}>
-                {u.created_at
-                  ? new Date(u.created_at).toLocaleDateString(undefined, {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })
-                  : "—"}
+                {formatJoinedDate(u.created_at)}
               </dd>
               <dt style={{ color: "var(--muted-2)" }}>{t("lastSeen")}</dt>
               <dd className="text-right" style={{ color: "var(--muted-2)" }}>
@@ -302,13 +302,7 @@ function UserTable({
                   />
                 </td>
                 <td className="px-4 py-3" style={{ color: "var(--muted-2)" }}>
-                  {u.created_at
-                    ? new Date(u.created_at).toLocaleDateString(undefined, {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })
-                    : "—"}
+                  {formatJoinedDate(u.created_at)}
                 </td>
                 <td className="px-4 py-3" style={{ color: "var(--muted-2)" }}>
                   {timeAgo(u.last_seen_at, t)}
@@ -369,28 +363,71 @@ function UserTable({
   );
 }
 
-export default function UsersTab({ data }: { data: AdminUsers }) {
+export default function UsersTab({
+  data,
+  refreshToken = 0,
+  onListLoaded,
+}: {
+  data: AdminUsers;
+  refreshToken?: number;
+  onListLoaded?: () => void;
+}) {
   const t = useTranslations("admin.users");
+  const format = useFormatter();
+  const locale = useLocale();
+  const formatNumber = useMemo(() => (n: number) => format.number(n), [format]);
+  const formatJoinedDate = useMemo(
+    () => (iso: string | null) => {
+      if (!iso) return "—";
+      return format.dateTime(new Date(iso), {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+    },
+    [format],
+  );
+
   const [usersList, setUsersList] = useState<AdminUsersList | null>(null);
   const [page, setPage] = useState(1);
   const [listLoading, setListLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [roleFilter, setRoleFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
 
-  const loadPage = useCallback(async (p: number) => {
-    setListLoading(true);
-    try {
-      const result = await fetchAdminUsersList(p);
-      setUsersList(result);
-      setPage(p);
-    } catch {
-      // keep previous data on error
-    } finally {
-      setListLoading(false);
-    }
-  }, []);
+  const onListLoadedRef = useRef(onListLoaded);
+  onListLoadedRef.current = onListLoaded;
+
+  useEffect(() => {
+    const handle = window.setTimeout(() => setDebouncedSearch(search), 300);
+    return () => window.clearTimeout(handle);
+  }, [search]);
+
+  const loadPage = useCallback(
+    async (p: number) => {
+      setListLoading(true);
+      try {
+        const result = await fetchAdminUsersList(p, 20, {
+          search: debouncedSearch || undefined,
+          role: roleFilter || undefined,
+          status: statusFilter || undefined,
+        });
+        setUsersList(result);
+        setPage(p);
+        onListLoadedRef.current?.();
+      } catch {
+        // keep previous data on error
+      } finally {
+        setListLoading(false);
+      }
+    },
+    [debouncedSearch, roleFilter, statusFilter],
+  );
 
   useEffect(() => {
     loadPage(1);
-  }, [loadPage]);
+  }, [loadPage, refreshToken]);
 
   return (
     <div className="space-y-6">
@@ -411,7 +448,7 @@ export default function UsersTab({ data }: { data: AdminUsers }) {
           className="text-2xl font-bold"
           style={{ color: "var(--foreground)" }}
         >
-          {data.total_users.toLocaleString()}
+          {formatNumber(data.total_users)}
         </p>
       </div>
 
@@ -420,12 +457,63 @@ export default function UsersTab({ data }: { data: AdminUsers }) {
           title={t("signupsPerDay")}
           data={data.signups_per_day}
           noDataLabel={t("noDataAvailable")}
+          locale={locale}
         />
         <ChartCard
           title={t("dauPerDay")}
           data={data.dau_per_day}
           noDataLabel={t("noDataAvailable")}
+          locale={locale}
         />
+      </div>
+
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+        <input
+          type="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder={t("searchPlaceholder")}
+          aria-label={t("searchPlaceholder")}
+          className="flex-1 rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2"
+          style={{
+            borderColor: "var(--border)",
+            backgroundColor: "var(--surface)",
+            color: "var(--foreground)",
+            minWidth: 0,
+          }}
+        />
+        <select
+          value={roleFilter}
+          onChange={(e) => setRoleFilter(e.target.value)}
+          aria-label={t("role")}
+          className="rounded-md border px-3 py-2 text-sm sm:w-40"
+          style={{
+            borderColor: "var(--border)",
+            backgroundColor: "var(--surface)",
+            color: "var(--foreground)",
+          }}
+        >
+          <option value="">{t("allRoles")}</option>
+          <option value="admin">admin</option>
+          <option value="member">member</option>
+        </select>
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          aria-label={t("status")}
+          className="rounded-md border px-3 py-2 text-sm sm:w-40"
+          style={{
+            borderColor: "var(--border)",
+            backgroundColor: "var(--surface)",
+            color: "var(--foreground)",
+          }}
+        >
+          <option value="">{t("allStatuses")}</option>
+          <option value="active">active</option>
+          <option value="suspended">suspended</option>
+          <option value="pending">pending</option>
+          <option value="deleted">deleted</option>
+        </select>
       </div>
 
       {listLoading && !usersList ? (
@@ -441,6 +529,19 @@ export default function UsersTab({ data }: { data: AdminUsers }) {
             style={{ backgroundColor: "var(--border)" }}
           />
         </div>
+      ) : usersList && usersList.users.length === 0 ? (
+        <div
+          className="rounded-lg border p-8 text-center text-sm"
+          style={{
+            borderColor: "var(--border)",
+            backgroundColor: "var(--surface)",
+            color: "var(--muted-2)",
+          }}
+        >
+          {debouncedSearch || roleFilter || statusFilter
+            ? t("noResults")
+            : t("noDataAvailable")}
+        </div>
       ) : usersList ? (
         <div style={{ opacity: listLoading ? 0.5 : 1 }}>
           <UserTable
@@ -450,6 +551,8 @@ export default function UsersTab({ data }: { data: AdminUsers }) {
             total={usersList.total}
             onPageChange={loadPage}
             t={t}
+            formatNumber={formatNumber}
+            formatJoinedDate={formatJoinedDate}
           />
         </div>
       ) : null}

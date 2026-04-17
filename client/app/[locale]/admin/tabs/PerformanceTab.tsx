@@ -1,11 +1,19 @@
 "use client";
 
-import { useMemo } from "react";
-import { useTranslations } from "next-intl";
+import { useMemo, useState } from "react";
+import { useFormatter, useTranslations } from "next-intl";
 
 import type { AdminPerformanceStat } from "@/lib/admin";
 
 const HEALTH_PATHS = ["/health", "/api/health"];
+
+type PerfSortKey =
+  | "path"
+  | "total_requests"
+  | "avg_response_time_ms"
+  | "p95_response_time_ms"
+  | "error_rate"
+  | "requests_last_24h";
 
 export default function PerformanceTab({
   data,
@@ -13,12 +21,59 @@ export default function PerformanceTab({
   data: AdminPerformanceStat[];
 }) {
   const t = useTranslations("admin.performance");
-  const filtered = useMemo(
+  const format = useFormatter();
+  const formatNumber = (n: number) => format.number(n);
+  const [search, setSearch] = useState("");
+  const [methodFilter, setMethodFilter] = useState<string>("");
+  const [sortKey, setSortKey] = useState<PerfSortKey>("total_requests");
+  const [sortAsc, setSortAsc] = useState(false);
+
+  const baseData = useMemo(
     () => data.filter((r) => !HEALTH_PATHS.includes(r.path)),
     [data],
   );
 
-  if (filtered.length === 0) {
+  const methodOptions = useMemo(() => {
+    const set = new Set<string>();
+    baseData.forEach((r) => set.add(r.method));
+    return Array.from(set).sort();
+  }, [baseData]);
+
+  const filtered = useMemo(() => {
+    const needle = search.trim().toLowerCase();
+    let rows = baseData;
+    if (needle) {
+      rows = rows.filter((r) => r.path.toLowerCase().includes(needle));
+    }
+    if (methodFilter) {
+      rows = rows.filter((r) => r.method === methodFilter);
+    }
+    const copy = [...rows];
+    copy.sort((a, b) => {
+      const av = a[sortKey];
+      const bv = b[sortKey];
+      if (typeof av === "number" && typeof bv === "number") {
+        return sortAsc ? av - bv : bv - av;
+      }
+      return sortAsc
+        ? String(av ?? "").localeCompare(String(bv ?? ""))
+        : String(bv ?? "").localeCompare(String(av ?? ""));
+    });
+    return copy;
+  }, [baseData, search, methodFilter, sortKey, sortAsc]);
+
+  function handleSort(key: PerfSortKey) {
+    if (sortKey === key) {
+      setSortAsc((v) => !v);
+    } else {
+      setSortKey(key);
+      setSortAsc(false);
+    }
+  }
+  const arrow = (key: PerfSortKey) =>
+    sortKey === key ? (sortAsc ? " ↑" : " ↓") : "";
+
+  if (baseData.length === 0) {
     return (
       <div
         className="rounded-lg border p-8 text-center"
@@ -37,7 +92,55 @@ export default function PerformanceTab({
     rate > 5 ? "#ef4444" : rate > 1 ? "#eab308" : "#22c55e";
 
   return (
-    <>
+    <div className="space-y-3">
+      {/* Filter controls */}
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <input
+          type="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder={t("searchPlaceholder")}
+          aria-label={t("searchPlaceholder")}
+          className="flex-1 rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2"
+          style={{
+            borderColor: "var(--border)",
+            backgroundColor: "var(--surface)",
+            color: "var(--foreground)",
+          }}
+        />
+        <select
+          value={methodFilter}
+          onChange={(e) => setMethodFilter(e.target.value)}
+          aria-label={t("method")}
+          className="rounded-md border px-3 py-2 text-sm sm:w-40"
+          style={{
+            borderColor: "var(--border)",
+            backgroundColor: "var(--surface)",
+            color: "var(--foreground)",
+          }}
+        >
+          <option value="">{t("allMethods")}</option>
+          {methodOptions.map((m) => (
+            <option key={m} value={m}>
+              {m}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {filtered.length === 0 ? (
+        <div
+          className="rounded-lg border p-8 text-center text-sm"
+          style={{
+            borderColor: "var(--border)",
+            backgroundColor: "var(--surface)",
+            color: "var(--muted-2)",
+          }}
+        >
+          {t("noResults")}
+        </div>
+      ) : (
+        <>
       {/* Mobile cards */}
       <div className="space-y-2 sm:hidden">
         {filtered.map((row) => {
@@ -75,7 +178,7 @@ export default function PerformanceTab({
               <dl className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs">
                 <dt style={{ color: "var(--muted-2)" }}>{t("totalRequests")}</dt>
                 <dd className="text-right" style={{ color: "var(--foreground)" }}>
-                  {row.total_requests.toLocaleString()}
+                  {formatNumber(row.total_requests)}
                 </dd>
                 <dt style={{ color: "var(--muted-2)" }}>{t("avgResponse")}</dt>
                 <dd className="text-right" style={{ color: "var(--foreground)" }}>
@@ -94,7 +197,7 @@ export default function PerformanceTab({
                 </dd>
                 <dt style={{ color: "var(--muted-2)" }}>{t("last24h")}</dt>
                 <dd className="text-right" style={{ color: "var(--foreground)" }}>
-                  {row.requests_last_24h.toLocaleString()}
+                  {formatNumber(row.requests_last_24h)}
                 </dd>
               </dl>
             </div>
@@ -110,24 +213,45 @@ export default function PerformanceTab({
         <table className="w-full text-sm" style={{ backgroundColor: "var(--surface-2)" }}>
           <thead>
             <tr style={{ backgroundColor: "var(--surface)" }}>
-              {[
-                t("method"),
-                t("path"),
-                t("totalRequests"),
-                t("avgResponse"),
-                t("p95"),
-                t("errorRate"),
-                t("last24h"),
-              ].map((h) => (
+              {(
+                [
+                  { key: null, label: t("method") },
+                  { key: "path" as PerfSortKey, label: t("path") },
+                  { key: "total_requests" as PerfSortKey, label: t("totalRequests") },
+                  { key: "avg_response_time_ms" as PerfSortKey, label: t("avgResponse") },
+                  { key: "p95_response_time_ms" as PerfSortKey, label: t("p95") },
+                  { key: "error_rate" as PerfSortKey, label: t("errorRate") },
+                  { key: "requests_last_24h" as PerfSortKey, label: t("last24h") },
+                ] as Array<{ key: PerfSortKey | null; label: string }>
+              ).map((col) => (
                 <th
-                  key={h}
+                  key={col.label}
                   className="px-4 py-3 text-left font-medium"
                   style={{
                     color: "var(--muted-2)",
                     borderBottom: "1px solid var(--border)",
                   }}
+                  aria-sort={
+                    col.key && sortKey === col.key
+                      ? sortAsc
+                        ? "ascending"
+                        : "descending"
+                      : undefined
+                  }
                 >
-                  {h}
+                  {col.key ? (
+                    <button
+                      type="button"
+                      onClick={() => handleSort(col.key as PerfSortKey)}
+                      className="font-medium hover:underline"
+                      style={{ color: "var(--muted-2)" }}
+                    >
+                      {col.label}
+                      {arrow(col.key)}
+                    </button>
+                  ) : (
+                    col.label
+                  )}
                 </th>
               ))}
             </tr>
@@ -164,7 +288,7 @@ export default function PerformanceTab({
                     {row.path}
                   </td>
                   <td className="px-4 py-3" style={{ color: "var(--foreground)" }}>
-                    {row.total_requests.toLocaleString()}
+                    {formatNumber(row.total_requests)}
                   </td>
                   <td className="px-4 py-3" style={{ color: "var(--foreground)" }}>
                     {row.avg_response_time_ms} ms
@@ -178,7 +302,7 @@ export default function PerformanceTab({
                     </span>
                   </td>
                   <td className="px-4 py-3" style={{ color: "var(--foreground)" }}>
-                    {row.requests_last_24h.toLocaleString()}
+                    {formatNumber(row.requests_last_24h)}
                   </td>
                 </tr>
               );
@@ -186,6 +310,8 @@ export default function PerformanceTab({
           </tbody>
         </table>
       </div>
-    </>
+        </>
+      )}
+    </div>
   );
 }

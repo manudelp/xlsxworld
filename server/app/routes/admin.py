@@ -326,6 +326,9 @@ async def users_list(
     db: AsyncSession = Depends(get_db_session),
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
+    search: str | None = Query(default=None, max_length=200),
+    role: str | None = Query(default=None, max_length=50),
+    status_filter: str | None = Query(default=None, alias="status", max_length=50),
 ) -> dict:
     # Subquery: tool uses per user
     tool_counts = (
@@ -338,10 +341,23 @@ async def users_list(
         .subquery()
     )
 
-    total_q = await db.execute(select(func.count()).select_from(AppUser))
+    filters = []
+    if search:
+        needle = f"%{search.strip().lower()}%"
+        if needle.strip("%"):
+            filters.append(func.lower(AppUser.email).like(needle))
+    if role:
+        filters.append(AppUser.role == role)
+    if status_filter:
+        filters.append(AppUser.status == status_filter)
+
+    total_stmt = select(func.count()).select_from(AppUser)
+    for f in filters:
+        total_stmt = total_stmt.where(f)
+    total_q = await db.execute(total_stmt)
     total = total_q.scalar_one()
 
-    rows_q = await db.execute(
+    rows_stmt = (
         select(
             AppUser.id,
             AppUser.email,
@@ -357,6 +373,9 @@ async def users_list(
         .offset((page - 1) * page_size)
         .limit(page_size)
     )
+    for f in filters:
+        rows_stmt = rows_stmt.where(f)
+    rows_q = await db.execute(rows_stmt)
     rows = rows_q.all()
 
     return {
@@ -383,6 +402,10 @@ async def users_list(
 async def activity(
     _: AuthenticatedPrincipal = Depends(require_admin),
     db: AsyncSession = Depends(get_db_session),
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+    success: bool | None = Query(default=None),
+    tool_slug: str | None = Query(default=None, max_length=100),
 ) -> list[dict]:
     col_slug = MetricEvent.properties_json["tool_slug"].as_string()
     col_name = MetricEvent.properties_json["tool_name"].as_string()
@@ -390,7 +413,7 @@ async def activity(
     col_success = MetricEvent.properties_json["success"].as_string()
     col_error = MetricEvent.properties_json["error_type"].as_string()
 
-    result = await db.execute(
+    stmt = (
         select(
             MetricEvent.occurred_at,
             MetricEvent.user_id,
@@ -404,8 +427,17 @@ async def activity(
         .outerjoin(AppUser, MetricEvent.user_id == AppUser.id)
         .where(MetricEvent.event_name == "tool_usage")
         .order_by(MetricEvent.occurred_at.desc())
-        .limit(50)
+        .limit(limit)
+        .offset(offset)
     )
+    if success is True:
+        stmt = stmt.where(col_success == "true")
+    elif success is False:
+        stmt = stmt.where(col_success != "true")
+    if tool_slug:
+        stmt = stmt.where(col_slug == tool_slug)
+
+    result = await db.execute(stmt)
     rows = result.all()
 
     def _as_float(value):

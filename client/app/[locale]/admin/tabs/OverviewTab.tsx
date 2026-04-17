@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import {
   LineChart,
   Line,
@@ -63,13 +63,6 @@ function errorColor(count: number) {
   if (count === 0) return "#22c55e";
   if (count < 10) return "#eab308";
   return "#ef4444";
-}
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-  });
 }
 
 function Sparkline({
@@ -176,6 +169,8 @@ export default function OverviewTab({
   onPeriodChange: (days: number) => void;
 }) {
   const t = useTranslations("admin.overview");
+  const format = useFormatter();
+  const formatNumber = (n: number) => format.number(n);
   const [activeKpi, setActiveKpi] = useState<KpiKey>("tool_uses");
 
   const kpis: KpiConfig[] = [
@@ -183,7 +178,7 @@ export default function OverviewTab({
       key: "total_users",
       trendKey: "new_users",
       labelKey: "totalUsers",
-      value: data.total_users.toLocaleString(),
+      value: formatNumber(data.total_users),
       subtext: t("thisWeek", { count: data.new_users_this_week }),
       color: "#6366f1",
     },
@@ -191,7 +186,7 @@ export default function OverviewTab({
       key: "new_users",
       trendKey: "new_users",
       labelKey: "newUsersThisMonth",
-      value: data.new_users_this_month.toLocaleString(),
+      value: formatNumber(data.new_users_this_month),
       subtext: t("today", { count: data.new_users_today }),
       color: "#8b5cf6",
     },
@@ -199,7 +194,7 @@ export default function OverviewTab({
       key: "tool_uses",
       trendKey: "tool_uses",
       labelKey: "totalToolUses",
-      value: data.total_tool_uses.toLocaleString(),
+      value: formatNumber(data.total_tool_uses),
       subtext: t("thisWeek", { count: data.tool_uses_this_week }),
       color: "#3b82f6",
     },
@@ -207,8 +202,8 @@ export default function OverviewTab({
       key: "tool_uses_today",
       trendKey: "tool_uses",
       labelKey: "toolUsesToday",
-      value: data.tool_uses_today.toLocaleString(),
-      subtext: t("thisMonth", { count: data.tool_uses_this_month.toLocaleString() }),
+      value: formatNumber(data.tool_uses_today),
+      subtext: t("thisMonth", { count: formatNumber(data.tool_uses_this_month) }),
       color: "#06b6d4",
     },
     {
@@ -233,7 +228,7 @@ export default function OverviewTab({
       key: "error_count",
       trendKey: "error_count",
       labelKey: "errorCount",
-      value: data.total_errors.toLocaleString(),
+      value: formatNumber(data.total_errors),
       subtext: t("errorsToday", { count: data.errors_today }),
       color: errorColor(data.total_errors),
       valueColor: errorColor(data.total_errors),
@@ -242,7 +237,7 @@ export default function OverviewTab({
       key: "file_uploads",
       trendKey: "file_uploads",
       labelKey: "fileUploads",
-      value: data.total_file_uploads.toLocaleString(),
+      value: formatNumber(data.total_file_uploads),
       subtext: t("thisWeek", { count: data.file_uploads_this_week }),
       color: "#f59e0b",
     },
@@ -273,11 +268,14 @@ export default function OverviewTab({
   const detailChartData = useMemo(
     () =>
       kpiTrends.map((d) => ({
-        label: formatDate(d.date),
+        label: format.dateTime(new Date(d.date), {
+          month: "short",
+          day: "numeric",
+        }),
         date: d.date,
         value: d[activeConfig.trendKey],
       })),
-    [kpiTrends, activeConfig.trendKey],
+    [kpiTrends, activeConfig.trendKey, format],
   );
 
   const chartLabel = t(activeConfig.labelKey);

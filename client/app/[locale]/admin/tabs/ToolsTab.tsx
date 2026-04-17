@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 
 import type { AdminToolStat } from "@/lib/admin";
 
@@ -13,24 +13,35 @@ function rateColor(rate: number) {
   return "#ef4444";
 }
 
-function formatDate(iso: string | null, neverUsedLabel: string) {
-  if (!iso) return neverUsedLabel;
-  return new Date(iso).toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
 export default function ToolsTab({ data }: { data: AdminToolStat[] }) {
   const t = useTranslations("admin.tools");
+  const format = useFormatter();
+
+  const formatDate = (iso: string | null) => {
+    if (!iso) return t("neverUsed");
+    return format.dateTime(new Date(iso), {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+  const formatNumber = (n: number) => format.number(n);
   const [sortKey, setSortKey] = useState<SortKey>("total_uses");
   const [sortAsc, setSortAsc] = useState(false);
+  const [search, setSearch] = useState("");
 
   const sorted = useMemo(() => {
-    const copy = [...data];
+    const needle = search.trim().toLowerCase();
+    const filtered = needle
+      ? data.filter(
+          (tool) =>
+            tool.tool_name.toLowerCase().includes(needle) ||
+            tool.tool_slug.toLowerCase().includes(needle),
+        )
+      : data;
+    const copy = [...filtered];
     copy.sort((a, b) => {
       let av: number | string = a[sortKey] ?? "";
       let bv: number | string = b[sortKey] ?? "";
@@ -46,7 +57,7 @@ export default function ToolsTab({ data }: { data: AdminToolStat[] }) {
         : String(bv).localeCompare(String(av));
     });
     return copy;
-  }, [data, sortKey, sortAsc]);
+  }, [data, search, sortKey, sortAsc]);
 
   function handleSort(key: SortKey) {
     if (sortKey === key) {
@@ -59,6 +70,14 @@ export default function ToolsTab({ data }: { data: AdminToolStat[] }) {
 
   const arrow = (key: SortKey) =>
     sortKey === key ? (sortAsc ? " ↑" : " ↓") : "";
+
+  const columns: [SortKey, string][] = [
+    ["tool_name", t("toolName")],
+    ["total_uses", t("totalUses")],
+    ["success_rate", t("successRate")],
+    ["avg_duration_ms", t("avgDuration")],
+    ["last_used_at", t("lastUsed")],
+  ];
 
   if (data.length === 0) {
     return (
@@ -75,16 +94,34 @@ export default function ToolsTab({ data }: { data: AdminToolStat[] }) {
     );
   }
 
-  const columns: [SortKey, string][] = [
-    ["tool_name", t("toolName")],
-    ["total_uses", t("totalUses")],
-    ["success_rate", t("successRate")],
-    ["avg_duration_ms", t("avgDuration")],
-    ["last_used_at", t("lastUsed")],
-  ];
-
   return (
-    <>
+    <div className="space-y-3">
+      <input
+        type="search"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder={t("searchPlaceholder")}
+        aria-label={t("searchPlaceholder")}
+        className="w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2"
+        style={{
+          borderColor: "var(--border)",
+          backgroundColor: "var(--surface)",
+          color: "var(--foreground)",
+        }}
+      />
+      {sorted.length === 0 ? (
+        <div
+          className="rounded-lg border p-8 text-center text-sm"
+          style={{
+            borderColor: "var(--border)",
+            backgroundColor: "var(--surface)",
+            color: "var(--muted-2)",
+          }}
+        >
+          {t("noResults")}
+        </div>
+      ) : (
+        <>
       {/* Mobile sort selector + cards */}
       <div className="space-y-2 sm:hidden">
         <div className="flex items-center gap-2">
@@ -148,7 +185,7 @@ export default function ToolsTab({ data }: { data: AdminToolStat[] }) {
                 className="text-right"
                 style={{ color: "var(--foreground)" }}
               >
-                {tool.total_uses.toLocaleString()}
+                {formatNumber(tool.total_uses)}
               </dd>
               <dt style={{ color: "var(--muted-2)" }}>{t("successRate")}</dt>
               <dd
@@ -169,7 +206,7 @@ export default function ToolsTab({ data }: { data: AdminToolStat[] }) {
                 className="text-right"
                 style={{ color: "var(--muted-2)" }}
               >
-                {formatDate(tool.last_used_at, t("neverUsed"))}
+                {formatDate(tool.last_used_at)}
               </dd>
             </dl>
           </div>
@@ -207,7 +244,7 @@ export default function ToolsTab({ data }: { data: AdminToolStat[] }) {
                   {tool.tool_name}
                 </td>
                 <td className="px-4 py-3" style={{ color: "var(--foreground)" }}>
-                  {tool.total_uses.toLocaleString()}
+                  {formatNumber(tool.total_uses)}
                 </td>
                 <td className="px-4 py-3">
                   <span style={{ color: rateColor(tool.success_rate) }}>
@@ -218,13 +255,15 @@ export default function ToolsTab({ data }: { data: AdminToolStat[] }) {
                   {tool.avg_duration_ms} ms
                 </td>
                 <td className="px-4 py-3" style={{ color: "var(--muted-2)" }}>
-                  {formatDate(tool.last_used_at, t("neverUsed"))}
+                  {formatDate(tool.last_used_at)}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-    </>
+        </>
+      )}
+    </div>
   );
 }
