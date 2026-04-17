@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -13,6 +13,7 @@ from app.routes import platform_routers
 from app.tools import tool_routers
 from app.core.openapi_custom import attach_custom_openapi
 from app.core.rate_limit import limiter, _rate_limit_exceeded_handler
+from app.core.quota_guard import enforce_quota
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
@@ -56,7 +57,7 @@ def create_app() -> FastAPI:
         app.include_router(router)
 
     for router in tool_routers:
-        app.include_router(router)
+        app.include_router(router, dependencies=[Depends(enforce_quota)])
 
     attach_custom_openapi(app)
     return app
