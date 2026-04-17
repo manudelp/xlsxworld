@@ -14,6 +14,7 @@ from app.db.base import Base
 if TYPE_CHECKING:
     from app.db.models.analytics import MetricDataPoint, MetricEvent, UserActivityDaily
     from app.db.models.billing import BillingInvoice, UserSubscription
+    from app.db.models.jobs import ToolJob
 
 
 class UserRole(str, Enum):
@@ -69,6 +70,7 @@ class AppUser(Base):
     metric_data_points: Mapped[list["MetricDataPoint"]] = relationship(back_populates="user")
     subscriptions: Mapped[list["UserSubscription"]] = relationship(back_populates="user")
     invoices: Mapped[list["BillingInvoice"]] = relationship(back_populates="user")
+    tool_jobs: Mapped[list["ToolJob"]] = relationship(back_populates="user")
 
     __table_args__ = (
         Index("ix_users_role_status", "role", "status"),
