@@ -89,6 +89,9 @@ export default function AdminDashboard() {
 
   const [overviewData, setOverviewData] = useState<AdminOverview | null>(null);
   const [kpiTrends, setKpiTrends] = useState<KpiTrendDay[] | null>(null);
+  const [periodDays, setPeriodDays] = useState(30);
+  const periodDaysRef = useRef(periodDays);
+  periodDaysRef.current = periodDays;
   const [toolsData, setToolsData] = useState<AdminToolStat[] | null>(null);
   const [usersData, setUsersData] = useState<AdminUsers | null>(null);
   const [perfData, setPerfData] = useState<AdminPerformanceStat[] | null>(null);
@@ -120,7 +123,7 @@ export default function AdminDashboard() {
           case "overview": {
             const [overview, kpi] = await Promise.all([
               fetchAdminOverview(),
-              fetchAdminKpiTrends(),
+              fetchAdminKpiTrends(periodDaysRef.current),
             ]);
             setOverviewData(overview);
             setKpiTrends(kpi.series);
@@ -158,6 +161,21 @@ export default function AdminDashboard() {
   useEffect(() => {
     loadTab(activeTab);
   }, [activeTab, loadTab]);
+
+  const handlePeriodChange = useCallback(async (days: number) => {
+    setPeriodDays(days);
+    setRefreshing(true);
+    try {
+      const res = await fetchAdminKpiTrends(days);
+      setKpiTrends(res.series);
+      setLastUpdated((prev) => ({ ...prev, overview: Date.now() }));
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      setError(message);
+    } finally {
+      setRefreshing(false);
+    }
+  }, []);
 
   const relativeUpdated = useRelativeTime(
     lastUpdated[activeTab],
@@ -288,7 +306,12 @@ export default function AdminDashboard() {
       ) : (
         <div style={{ opacity: refreshing ? 0.6 : 1, transition: "opacity 150ms" }}>
           {activeTab === "overview" && overviewData && (
-            <OverviewTab data={overviewData} kpiTrends={kpiTrends ?? []} />
+            <OverviewTab
+              data={overviewData}
+              kpiTrends={kpiTrends ?? []}
+              periodDays={periodDays}
+              onPeriodChange={handlePeriodChange}
+            />
           )}
           {activeTab === "tools" && toolsData && (
             <ToolsTab data={toolsData} />

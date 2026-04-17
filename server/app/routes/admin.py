@@ -142,9 +142,10 @@ async def overview_trend(
 async def overview_kpi_trends(
     _: AuthenticatedPrincipal = Depends(require_admin),
     db: AsyncSession = Depends(get_db_session),
+    days: int = Query(default=30, ge=1, le=365),
 ) -> dict:
-    """Daily breakdowns for each overview KPI (last 30 days)."""
-    month_ago = datetime.now(timezone.utc) - timedelta(days=30)
+    """Daily breakdowns for each overview KPI over the requested window."""
+    window_start = datetime.now(timezone.utc) - timedelta(days=days)
     day_col = func.date_trunc("day", MetricEvent.occurred_at)
 
     col_success = MetricEvent.properties_json["success"].as_string()
@@ -161,7 +162,7 @@ async def overview_kpi_trends(
             func.avg(col_duration).label("avg_duration"),
         )
         .where(MetricEvent.event_name == "tool_usage")
-        .where(MetricEvent.occurred_at >= month_ago)
+        .where(MetricEvent.occurred_at >= window_start)
         .group_by(day_col)
         .order_by(day_col)
     )
@@ -173,7 +174,7 @@ async def overview_kpi_trends(
             func.date_trunc("day", AppUser.created_at).label("day"),
             func.count().label("new_users"),
         )
-        .where(AppUser.created_at >= month_ago)
+        .where(AppUser.created_at >= window_start)
         .group_by(text("1"))
         .order_by(text("1"))
     )
@@ -188,7 +189,7 @@ async def overview_kpi_trends(
         )
         .where(MetricEvent.event_name == "tool_usage")
         .where(col_success != "true")
-        .where(MetricEvent.occurred_at >= month_ago)
+        .where(MetricEvent.occurred_at >= window_start)
         .group_by(day_col)
         .order_by(day_col)
     )
@@ -201,7 +202,7 @@ async def overview_kpi_trends(
             func.count().label("upload_count"),
         )
         .where(MetricEvent.event_name == "file_upload")
-        .where(MetricEvent.occurred_at >= month_ago)
+        .where(MetricEvent.occurred_at >= window_start)
         .group_by(day_col)
         .order_by(day_col)
     )

@@ -162,12 +162,18 @@ function SparkCard({
   );
 }
 
+const PERIOD_OPTIONS: number[] = [7, 14, 30];
+
 export default function OverviewTab({
   data,
   kpiTrends,
+  periodDays,
+  onPeriodChange,
 }: {
   data: AdminOverview;
   kpiTrends: KpiTrendDay[];
+  periodDays: number;
+  onPeriodChange: (days: number) => void;
 }) {
   const t = useTranslations("admin.overview");
   const [activeKpi, setActiveKpi] = useState<KpiKey>("tool_uses");
@@ -319,12 +325,45 @@ export default function OverviewTab({
           backgroundColor: "var(--surface)",
         }}
       >
-        <h3
-          className="mb-4 text-sm font-medium"
-          style={{ color: "var(--muted-2)" }}
-        >
-          {chartLabel} — {t("chartTitle")}
-        </h3>
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <h3
+            className="text-sm font-medium"
+            style={{ color: "var(--muted-2)" }}
+          >
+            {chartLabel} — {t("chartTitle", { days: periodDays })}
+          </h3>
+          <div
+            className="inline-flex overflow-hidden rounded-md border"
+            style={{ borderColor: "var(--border)" }}
+            role="group"
+            aria-label={t("periodSelectorLabel")}
+          >
+            {PERIOD_OPTIONS.map((option, index) => {
+              const isActive = option === periodDays;
+              return (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() => onPeriodChange(option)}
+                  className="px-2.5 py-1 text-xs font-medium transition-colors"
+                  style={{
+                    backgroundColor: isActive
+                      ? "var(--tag-selected-bg)"
+                      : "var(--surface-2)",
+                    color: isActive
+                      ? "var(--tag-selected-text)"
+                      : "var(--muted-2)",
+                    borderLeft:
+                      index === 0 ? undefined : "1px solid var(--border)",
+                  }}
+                  aria-pressed={isActive}
+                >
+                  {t("daysShort", { count: option })}
+                </button>
+              );
+            })}
+          </div>
+        </div>
         {detailChartData.length === 0 ? (
           <p
             className="py-8 text-center text-sm"

@@ -99,8 +99,10 @@ export function fetchAdminOverviewTrend() {
   return api.auth.get<DayCount[]>("/api/v1/admin/overview/trend");
 }
 
-export function fetchAdminKpiTrends() {
-  return api.auth.get<KpiTrends>("/api/v1/admin/overview/kpi-trends");
+export function fetchAdminKpiTrends(days = 30) {
+  return api.auth.get<KpiTrends>("/api/v1/admin/overview/kpi-trends", {
+    days,
+  });
 }
 
 export function fetchAdminTools() {
