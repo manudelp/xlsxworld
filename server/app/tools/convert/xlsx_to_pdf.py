@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import re
+import time
 from io import BytesIO
 
-from fastapi import APIRouter, File, HTTPException, Query, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, Query, UploadFile
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_LEFT
 from reportlab.lib.pagesizes import A3, A4, landscape, letter
@@ -11,12 +12,18 @@ from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
 from reportlab.platypus import PageBreak, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
+from app.core.security import AuthenticatedPrincipal
 from app.services.excel_reader import ensure_supported_excel_filename, parse_excel_bytes
+from app.services.jobs_service import JobsService
 from app.tools._common import (
-    file_response,
     normalize_sheet_selection,
     read_with_limit,
     safe_base_filename,
+)
+from app.tools._recording import (
+    get_current_user_optional,
+    jobs_service_dep,
+    record_and_respond,
 )
 
 router = APIRouter()
@@ -294,6 +301,7 @@ def _build_pdf(
     description="Uploads an Excel file and exports selected sheets as a formatted PDF.",
 )
 async def xlsx_to_pdf(
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(..., description="Excel file"),
     sheets: list[str] = Query(default=None, description="Sheet names to export (empty = all)"),
     orientation: str = Query(default="landscape", description="portrait | landscape"),
@@ -302,7 +310,10 @@ async def xlsx_to_pdf(
     header_style: str = Query(default="colored", description="colored | gray | plain"),
     page_size: str = Query(default="A4", description="A4 | Letter | A3"),
     header_color: str = Query(default="#2E7D32", description="Hex color for colored header, e.g. #2E7D32"),
+    principal: AuthenticatedPrincipal | None = Depends(get_current_user_optional),
+    jobs_service: JobsService = Depends(jobs_service_dep),
 ):
+    started = time.perf_counter()
     ensure_supported_excel_filename(file.filename)
     raw = await read_with_limit(file)
     workbook_data = parse_excel_bytes(raw, file.filename)
@@ -332,4 +343,17 @@ async def xlsx_to_pdf(
         font_size, header_style, page_size, header_color,
     )
     download_name = f"{safe_base_filename(file.filename, 'workbook')}.pdf"
-    return file_response(pdf_bytes, download_name, "application/pdf")
+    return await record_and_respond(
+        principal=principal,
+        background_tasks=background_tasks,
+        jobs_service=jobs_service,
+        tool_slug="xlsx-to-pdf",
+        tool_name="XLSX to PDF",
+        original_filename=file.filename,
+        output_bytes=pdf_bytes,
+        output_filename=download_name,
+        mime_type="application/pdf",
+        success=True,
+        error_type=None,
+        duration_ms=int((time.perf_counter() - started) * 1000),
+    )

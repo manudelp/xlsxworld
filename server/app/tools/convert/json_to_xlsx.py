@@ -1,23 +1,32 @@
 from __future__ import annotations
 
 import json
+import time as _time
 from collections.abc import Iterable
 from datetime import date, datetime, time
 from io import BytesIO
 
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile
 from openpyxl import Workbook
 
+from app.core.security import AuthenticatedPrincipal
+from app.services.jobs_service import JobsService
 from app.tools._common import (
     dedupe_headers,
-    file_response,
     read_with_limit,
     safe_base_filename,
     safe_sheet_title,
     unique_sheet_title,
 )
+from app.tools._recording import (
+    get_current_user_optional,
+    jobs_service_dep,
+    record_and_respond,
+)
 
 router = APIRouter()
+
+_XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 _JSON_CONTENT_TYPES = {"application/json", "text/json", "application/ld+json"}
 
@@ -177,9 +186,13 @@ def _iter_sheet_map(sheet_map: dict[str, list[list]]) -> Iterable[tuple[str, lis
     description="Uploads a JSON file and converts it into an XLSX workbook.",
 )
 async def json_to_xlsx(
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(..., description="JSON file to convert"),
     include_headers: bool = Form(True, description="Include a header row when columns are inferred"),
+    principal: AuthenticatedPrincipal | None = Depends(get_current_user_optional),
+    jobs_service: JobsService = Depends(jobs_service_dep),
 ):
+    started = _time.perf_counter()
     filename = (file.filename or "").lower()
     content_type = (file.content_type or "").lower()
     if not filename.endswith(".json") and content_type not in _JSON_CONTENT_TYPES:
@@ -214,8 +227,17 @@ async def json_to_xlsx(
 
     out_name = f"{safe_base_filename(file.filename, 'converted')}.xlsx"
 
-    return file_response(
-        output.getvalue(),
-        out_name,
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    return await record_and_respond(
+        principal=principal,
+        background_tasks=background_tasks,
+        jobs_service=jobs_service,
+        tool_slug="json-to-xlsx",
+        tool_name="JSON to XLSX",
+        original_filename=file.filename,
+        output_bytes=output.getvalue(),
+        output_filename=out_name,
+        mime_type=_XLSX_MIME,
+        success=True,
+        error_type=None,
+        duration_ms=int((_time.perf_counter() - started) * 1000),
     )

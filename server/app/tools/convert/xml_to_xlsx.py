@@ -1,20 +1,29 @@
 from __future__ import annotations
 
+import time
 from io import BytesIO
 
 import defusedxml.ElementTree as ET
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile
 from openpyxl import Workbook
 
+from app.core.security import AuthenticatedPrincipal
+from app.services.jobs_service import JobsService
 from app.tools._common import (
-    file_response,
     read_with_limit,
     safe_base_filename,
     safe_sheet_title,
     unique_sheet_title,
 )
+from app.tools._recording import (
+    get_current_user_optional,
+    jobs_service_dep,
+    record_and_respond,
+)
 
 router = APIRouter()
+
+_XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 _XML_CONTENT_TYPES = {"application/xml", "text/xml"}
 
@@ -81,9 +90,13 @@ def _extract_tables(root: ET.Element) -> dict[str, dict]:
     description="Parses an XML file and converts tabular data into an XLSX workbook.",
 )
 async def xml_to_xlsx(
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(..., description="XML file to convert"),
     include_headers: bool = Form(True, description="Include column headers"),
+    principal: AuthenticatedPrincipal | None = Depends(get_current_user_optional),
+    jobs_service: JobsService = Depends(jobs_service_dep),
 ):
+    started = time.perf_counter()
     filename = (file.filename or "").lower()
     content_type = (file.content_type or "").lower()
     if not filename.endswith(".xml") and content_type not in _XML_CONTENT_TYPES:
@@ -124,8 +137,17 @@ async def xml_to_xlsx(
 
     out_name = f"{safe_base_filename(file.filename, 'converted')}.xlsx"
 
-    return file_response(
-        output.getvalue(),
-        out_name,
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    return await record_and_respond(
+        principal=principal,
+        background_tasks=background_tasks,
+        jobs_service=jobs_service,
+        tool_slug="xml-to-xlsx",
+        tool_name="XML to XLSX",
+        original_filename=file.filename,
+        output_bytes=output.getvalue(),
+        output_filename=out_name,
+        mime_type=_XLSX_MIME,
+        success=True,
+        error_type=None,
+        duration_ms=int((time.perf_counter() - started) * 1000),
     )
