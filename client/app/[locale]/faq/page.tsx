@@ -109,10 +109,11 @@ function FAQContent() {
                 {group.questions.map((item, itemIdx) => (
                   <details
                     key={itemIdx}
-                    className="group rounded-xl border border-border p-3 sm:p-5 [&_summary::-webkit-details-marker]:hidden"
+                    name="faq-accordion"
+                    className="group rounded-xl border border-border [&_summary::-webkit-details-marker]:hidden [interpolate-size:allow-keywords] [&::details-content]:h-0 [&::details-content]:opacity-0 [&::details-content]:overflow-hidden [&::details-content]:transition-[height,opacity,content-visibility] [&::details-content]:duration-300 [&::details-content]:ease-out [&::details-content]:[transition-behavior:allow-discrete] [&[open]::details-content]:h-auto [&[open]::details-content]:opacity-100"
                     style={{ backgroundColor: "color-mix(in srgb, var(--background) 88%, var(--primary) 12%)" }}
                   >
-                    <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-foreground font-medium outline-none">
+                    <summary className="flex cursor-pointer items-center justify-between gap-1.5 p-3 sm:p-5 text-foreground font-medium outline-none">
                       <span className="text-lg">{item.q}</span>
                       <span className="shrink-0 transition duration-300 group-open:-rotate-180">
                         <svg
@@ -132,7 +133,7 @@ function FAQContent() {
                       </span>
                     </summary>
 
-                    <p className="mt-4 leading-relaxed text-muted text-base">
+                    <p className="px-3 pb-3 sm:px-5 sm:pb-5 leading-relaxed text-muted text-base">
                       {item.a}
                     </p>
                   </details>
