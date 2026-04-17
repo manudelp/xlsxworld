@@ -114,7 +114,7 @@ async def test_signup_triggers_users_upsert(monkeypatch: pytest.MonkeyPatch):
 
     service = auth_service_module.AuthService(fake_db)
     response = await service.signup(
-        AuthSignupRequest(email="db@example.com", password="password123", display_name="DB User")
+        AuthSignupRequest(email="db@example.com", password="Password123!", display_name="DB User")
     )
 
     assert fake_db.commit_calls == 1

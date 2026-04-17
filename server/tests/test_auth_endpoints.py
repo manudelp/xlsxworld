@@ -105,14 +105,14 @@ async def test_signup_and_duplicate_email(app: FastAPI, client: AsyncClient):
 
     response = await client.post(
         "/auth/signup",
-        json={"email": "new@example.com", "password": "password123", "display_name": "New User"},
+        json={"email": "new@example.com", "password": "Password123!", "display_name": "New User"},
     )
     assert response.status_code == 200
     assert response.json()["user"]["email"] == "new@example.com"
 
     duplicate = await client.post(
         "/auth/signup",
-        json={"email": "new@example.com", "password": "password123", "display_name": "Again"},
+        json={"email": "new@example.com", "password": "Password123!", "display_name": "Again"},
     )
     assert duplicate.status_code == 409
     assert duplicate.json()["detail"] == "An account with that email already exists"
@@ -125,10 +125,10 @@ async def test_login_happy_and_wrong_password(app: FastAPI, client: AsyncClient)
 
     await client.post(
         "/auth/signup",
-        json={"email": "member@example.com", "password": "password123", "display_name": "Member"},
+        json={"email": "member@example.com", "password": "Password123!", "display_name": "Member"},
     )
 
-    ok = await client.post("/auth/login", json={"email": "member@example.com", "password": "password123"})
+    ok = await client.post("/auth/login", json={"email": "member@example.com", "password": "Password123!"})
     assert ok.status_code == 200
     assert ok.json()["access_token"] == "access-token"
 
@@ -147,7 +147,7 @@ async def test_refresh_happy_and_invalid_token(app: FastAPI, client: AsyncClient
 
     await client.post(
         "/auth/signup",
-        json={"email": "refresh@example.com", "password": "password123", "display_name": "Refresh"},
+        json={"email": "refresh@example.com", "password": "Password123!", "display_name": "Refresh"},
     )
 
     ok = await client.post("/auth/refresh", json={"refresh_token": "refresh-token"})

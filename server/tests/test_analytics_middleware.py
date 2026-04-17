@@ -7,8 +7,22 @@ import pytest
 from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
 
+from app.core.config import get_settings
 from app.middleware.analytics import AnalyticsMiddleware
 from app.services.analytics_service import AnalyticsService
+
+
+@pytest.fixture()
+def production_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Force APP_ENV=production for the duration of the test.
+
+    The analytics middleware short-circuits in non-production environments
+    (see commit 3b51fb9), so tests that want to assert its behaviour must
+    opt into production mode. ``get_settings`` is ``lru_cache``d, so we
+    patch the cached instance rather than the environment variable.
+    """
+
+    monkeypatch.setattr(get_settings(), "app_env", "production")
 
 
 class SpyAnalyticsService:
@@ -61,7 +75,9 @@ def app(monkeypatch: pytest.MonkeyPatch) -> FastAPI:
 
 
 @pytest.mark.asyncio
-async def test_excluded_health_and_docs_paths_emit_no_events(app: FastAPI):
+async def test_excluded_health_and_docs_paths_emit_no_events(
+    app: FastAPI, production_env: None
+):
     spy = SpyAnalyticsService()
     app.state.analytics_service = spy
 
@@ -78,7 +94,9 @@ async def test_excluded_health_and_docs_paths_emit_no_events(app: FastAPI):
 
 
 @pytest.mark.asyncio
-async def test_tool_path_emits_endpoint_and_tool_events(app: FastAPI):
+async def test_tool_path_emits_endpoint_and_tool_events(
+    app: FastAPI, production_env: None
+):
     spy = SpyAnalyticsService()
     app.state.analytics_service = spy
 
@@ -91,7 +109,7 @@ async def test_tool_path_emits_endpoint_and_tool_events(app: FastAPI):
 
 
 @pytest.mark.asyncio
-async def test_auth_me_get_is_not_tracked(app: FastAPI):
+async def test_auth_me_get_is_not_tracked(app: FastAPI, production_env: None):
     spy = SpyAnalyticsService()
     app.state.analytics_service = spy
 
@@ -105,7 +123,11 @@ async def test_auth_me_get_is_not_tracked(app: FastAPI):
 
 
 @pytest.mark.asyncio
-async def test_analytics_service_fire_and_forget_does_not_block_response(app: FastAPI, monkeypatch: pytest.MonkeyPatch):
+async def test_analytics_service_fire_and_forget_does_not_block_response(
+    app: FastAPI,
+    production_env: None,
+    monkeypatch: pytest.MonkeyPatch,
+):
     service = AnalyticsService()
     app.state.analytics_service = service
 
