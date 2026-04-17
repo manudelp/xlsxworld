@@ -54,12 +54,20 @@ class RecordingSession:
     deleted: list[Any] = field(default_factory=list)
     executed: list[Any] = field(default_factory=list)
     flushes: int = 0
+    commits: int = 0
+    rollbacks: int = 0
 
     def add(self, obj: Any) -> None:
         self.added.append(obj)
 
     async def flush(self) -> None:
         self.flushes += 1
+
+    async def commit(self) -> None:
+        self.commits += 1
+
+    async def rollback(self) -> None:
+        self.rollbacks += 1
 
     async def delete(self, obj: Any) -> None:
         self.deleted.append(obj)
@@ -130,6 +138,12 @@ async def test_record_uploads_then_inserts_row_with_retention() -> None:
     delta = row.expires_at - row.created_at if row.created_at else timedelta(days=RETENTION_DAYS_FREE)
     # created_at may be None (server_default not applied in unit tests) — sanity-check against now.
     assert row.expires_at > datetime.now(timezone.utc) + timedelta(days=RETENTION_DAYS_FREE - 1)
+    # The request-scoped session never auto-commits. Without an explicit
+    # commit here the background-task insert would be rolled back on
+    # close and the tool_jobs table would stay empty — regression guard
+    # for the bug observed in production after the first rollout.
+    assert session.commits == 1
+    assert session.rollbacks == 0
 
 
 async def test_record_returns_none_and_skips_insert_on_upload_failure() -> None:
@@ -183,6 +197,10 @@ async def test_record_cleans_up_storage_when_db_insert_fails() -> None:
 
     assert job_id is None
     storage.delete.assert_awaited_once()
+    # DB insert blew up, so we must rollback and never commit partial
+    # state — regression guard paired with the happy-path commit check.
+    assert session.commits == 0
+    assert session.rollbacks == 1
 
 
 async def test_list_passes_filters_into_the_statement() -> None:
@@ -271,6 +289,9 @@ async def test_delete_calls_storage_then_session_delete() -> None:
 
     storage.delete.assert_awaited_once_with("u/123.xlsx")
     assert session.deleted == [row]
+    # DELETE must commit — otherwise the row survives when the request
+    # session closes and /me/jobs keeps returning the "deleted" job.
+    assert session.commits == 1
 
 
 async def test_delete_still_removes_row_when_storage_fails() -> None:

@@ -104,8 +104,17 @@ class JobsService:
             )
             self._db.add(job)
             await self._db.flush()
+            # Explicit commit: this method is invoked from a FastAPI
+            # BackgroundTask and the request-scoped session only performs
+            # an implicit rollback on close. Without committing the row
+            # would be silently discarded when the session tears down.
+            await self._db.commit()
         except Exception as exc:  # noqa: BLE001
             log.warning("jobs.record: db insert failed: %s", exc)
+            try:
+                await self._db.rollback()
+            except Exception:  # noqa: BLE001
+                pass
             # Best-effort cleanup of the orphaned object.
             try:
                 await self._storage.delete(path)
@@ -181,6 +190,9 @@ class JobsService:
                 )
         await self._db.delete(job)
         await self._db.flush()
+        # Request-scoped sessions from get_db_session() don't auto-commit;
+        # without this the DELETE would be silently rolled back on close.
+        await self._db.commit()
 
     async def cleanup_expired(self, now: datetime) -> int:
         """Drop Storage objects for expired rows and prune ancient rows.
