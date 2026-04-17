@@ -34,6 +34,7 @@ class Settings(BaseSettings):
     supabase_url: str | None = Field(default=None, alias="SUPABASE_URL")
     supabase_publishable_key: str | None = Field(default=None, alias="SUPABASE_PUBLISHABLE_KEY")
     supabase_secret_key: str | None = Field(default=None, alias="SUPABASE_SECRET_KEY")
+    supabase_storage_bucket: str = Field(default="tool-outputs", alias="SUPABASE_STORAGE_BUCKET")
 
     @property
     def async_database_url(self) -> str:
@@ -75,6 +76,14 @@ class Settings(BaseSettings):
         """Return the Supabase JWKS discovery URL."""
 
         return self.supabase_auth_url + "/.well-known/jwks.json"
+
+    @property
+    def supabase_storage_url(self) -> str:
+        """Return the Supabase Storage REST base URL."""
+
+        if not self.supabase_url:
+            raise RuntimeError("SUPABASE_URL is not configured")
+        return self.supabase_url.rstrip("/") + "/storage/v1"
 
     @property
     def supabase_issuer(self) -> str:
