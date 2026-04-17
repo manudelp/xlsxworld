@@ -135,6 +135,48 @@ describe("proxy route", () => {
     fetchMock.mockRestore();
   });
 
+  it("allows /api/v1/me/ (history endpoints)", async () => {
+    const fetchMock = jest.spyOn(global, "fetch").mockResolvedValue(
+      new Response(JSON.stringify({ items: [] }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+
+    const request = new NextRequest(
+      "http://localhost:3000/api/proxy/api/v1/me/jobs?limit=50",
+      {
+        method: "GET",
+        headers: { cookie: `${AUTH_ACCESS_COOKIE}=token-123` },
+      },
+    );
+
+    const response = await GET(request, {
+      params: Promise.resolve({ path: ["api", "v1", "me", "jobs"] }),
+    });
+
+    expect(response.status).toBe(200);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    fetchMock.mockRestore();
+  });
+
+  it("rejects paths outside the allowlist with 404", async () => {
+    const fetchMock = jest.spyOn(global, "fetch");
+
+    const request = new NextRequest(
+      "http://localhost:3000/api/proxy/api/v1/internal/dangerous",
+      { method: "GET" },
+    );
+
+    const response = await GET(request, {
+      params: Promise.resolve({ path: ["api", "v1", "internal", "dangerous"] }),
+    });
+
+    expect(response.status).toBe(404);
+    expect(fetchMock).not.toHaveBeenCalled();
+    fetchMock.mockRestore();
+  });
+
   it("drops stale content-encoding for JSON responses", async () => {
     const fetchMock = jest.spyOn(global, "fetch").mockResolvedValue(
       new Response(JSON.stringify({ ok: true }), {
