@@ -76,7 +76,7 @@ export default function MergeSheets() {
 
       return next;
     });
-  }, []);
+  }, [t]);
 
   const dropSheetAt = useCallback((sourceName: string, targetName: string) => {
     if (sourceName === targetName) {
@@ -102,7 +102,7 @@ export default function MergeSheets() {
 
     setDragOverSheet(null);
     setDraggedSheet(null);
-  }, []);
+  }, [t]);
 
   const orderSheetsAsc = useCallback(() => {
     setSelectedSheets((current) => {
@@ -113,7 +113,7 @@ export default function MergeSheets() {
       setHighlightedSheet(null);
       return next;
     });
-  }, []);
+  }, [t]);
 
   const orderSheetsDesc = useCallback(() => {
     setSelectedSheets((current) => {
@@ -124,7 +124,7 @@ export default function MergeSheets() {
       setHighlightedSheet(null);
       return next;
     });
-  }, []);
+  }, [t]);
 
   const clearCustomOrder = useCallback(() => {
     if (!preview) return;
@@ -138,7 +138,7 @@ export default function MergeSheets() {
       setHighlightedSheet(null);
       return next;
     });
-  }, [preview]);
+  }, [preview, t]);
 
   useEffect(() => {
     if (!orderFeedback) return;

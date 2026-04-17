@@ -88,7 +88,7 @@ export default function AppendWorkbooks() {
         return next;
       });
     },
-    [fileKey],
+    [fileKey, t],
   );
 
   const dropFileAt = useCallback(
@@ -117,7 +117,7 @@ export default function AppendWorkbooks() {
       setDragOverFileKey(null);
       setDraggedFileKey(null);
     },
-    [fileKey],
+    [fileKey, t],
   );
 
   const orderFilesAsc = useCallback(() => {
@@ -132,7 +132,7 @@ export default function AppendWorkbooks() {
       setHighlightedFile(null);
       return next;
     });
-  }, []);
+  }, [t]);
 
   const orderFilesDesc = useCallback(() => {
     setFiles((current) => {
@@ -146,7 +146,7 @@ export default function AppendWorkbooks() {
       setHighlightedFile(null);
       return next;
     });
-  }, []);
+  }, [t]);
 
   const clearCustomOrder = useCallback(() => {
     if (originalOrder.length === 0) return;
@@ -158,7 +158,7 @@ export default function AppendWorkbooks() {
       setHighlightedFile(null);
       return next;
     });
-  }, [fileKey, originalOrder]);
+  }, [fileKey, originalOrder, t]);
 
   useEffect(() => {
     if (!orderFeedback) return;
