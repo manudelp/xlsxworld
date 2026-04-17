@@ -20,10 +20,12 @@ import logging
 import uuid
 from datetime import datetime, timedelta, timezone
 
+from fastapi import Depends
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import ToolJob
+from app.db.session import get_db_session
 from app.services.storage_service import StorageService, StorageServiceError
 
 log = logging.getLogger(__name__)
@@ -139,6 +141,20 @@ class JobsService:
         result = await self._db.execute(stmt)
         return list(result.scalars().all())
 
+    async def create_download_url(
+        self, storage_path: str, *, expires_in_seconds: int
+    ) -> str:
+        """Ask Storage for a signed URL for an owned object.
+
+        Ownership and expiry must have been verified by the caller; this
+        method is a thin pass-through so routes never need to reach
+        into ``self._storage`` directly.
+        """
+
+        return await self._storage.create_signed_url(
+            storage_path, expires_in_seconds=expires_in_seconds
+        )
+
     async def get_for_user(
         self, user_id: uuid.UUID, job_id: uuid.UUID
     ) -> ToolJob:
@@ -198,3 +214,16 @@ class JobsService:
         await self._db.flush()
 
         return removed
+
+
+async def get_jobs_service(
+    db: AsyncSession = Depends(get_db_session),
+) -> JobsService:
+    """Request-scoped :class:`JobsService` factory.
+
+    ``StorageService`` is a thin ``httpx`` wrapper with no per-request
+    state, so a fresh instance per call is fine — negligible overhead in
+    a hot path and keeps the dependency graph explicit.
+    """
+
+    return JobsService(db, StorageService())

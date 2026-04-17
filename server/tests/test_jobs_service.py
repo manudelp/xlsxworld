@@ -245,6 +245,20 @@ async def test_get_returns_job_when_found() -> None:
     assert result is row
 
 
+async def test_create_download_url_delegates_to_storage() -> None:
+    session = RecordingSession()
+    storage = AsyncMock()
+    storage.create_signed_url = AsyncMock(return_value="https://example.com/signed")
+
+    service = JobsService(session, storage)
+    url = await service.create_download_url("u/abc.xlsx", expires_in_seconds=900)
+
+    assert url == "https://example.com/signed"
+    storage.create_signed_url.assert_awaited_once_with(
+        "u/abc.xlsx", expires_in_seconds=900
+    )
+
+
 async def test_delete_calls_storage_then_session_delete() -> None:
     user_id = uuid.uuid4()
     row = _make_tool_job(user_id=user_id, storage_path="u/123.xlsx")

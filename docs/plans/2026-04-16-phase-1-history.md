@@ -23,7 +23,7 @@
 | 3. Optional-auth dependency | ✅ done | `77e1134` |
 | 4. JobsService | ✅ done | `c5a7d90` |
 | 5. `record_and_respond` helper + `trim-spaces` integration | ✅ done | _pending commit_ |
-| 6. `/me/jobs` API | ⬜ pending | — |
+| 6. `/me/jobs` API | ✅ done | _pending commit_ |
 | 7. Cleanup CLI | ⬜ pending | — |
 | 8. `client/lib/jobs.ts` | ⬜ pending | — |
 | 9. `/my-account/history` page | ⬜ pending | — |
@@ -1540,7 +1540,21 @@ git commit -m "feat(jobs): record_and_respond helper, wire trim-spaces"
 
 ---
 
-## Task 6: `/me/jobs` API endpoints
+## Task 6: `/me/jobs` API endpoints ✅
+
+**Status:** ✅ done.
+
+**Files (landed):**
+- `server/app/schemas/jobs.py` — `JobItem`, `JobsListResponse`, `JobDownloadResponse`.
+- `server/app/routes/me.py` — `GET /api/v1/me/jobs`, `GET /api/v1/me/jobs/{job_id}/download`, `DELETE /api/v1/me/jobs/{job_id}`.
+- `server/app/routes/__init__.py` — registers `me_router` in `platform_routers`.
+- `server/tests/test_routes_me_jobs.py` — 9 tests (list paginates/search/success filter & 401 when unauthenticated; download returns signed URL, 410 for cleared-storage, 410 for past `expires_at`, 404 when missing; delete 204 and 404).
+
+**Adaptations from the original plan:**
+- Promoted the `JobsService` factory from `app/tools/_recording.py` to `app/services/jobs_service.py` as `get_jobs_service` so both tool routes and `/me/jobs` share one dependency (the tool helper keeps a `jobs_service_dep = get_jobs_service` alias for the old import path). Tests override a single symbol.
+- Added `JobsService.create_download_url(...)` so the route doesn't reach into `service._storage`. Covered by a new test in `tests/test_jobs_service.py`.
+- Download endpoint now treats `expires_at < now` as expired even when `storage_path` is still populated — a background cleanup race would otherwise let a user sign a URL that points at an object Storage is about to delete.
+- All route tests are mock-based (`AsyncMock` + `dependency_overrides`), matching the rest of the project's test style. Ownership checks and SQL shaping are covered in the service-level tests.
 
 **Files:**
 - Create: `server/app/schemas/jobs.py`

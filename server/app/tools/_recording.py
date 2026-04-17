@@ -10,27 +10,20 @@ download.
 
 from __future__ import annotations
 
-from fastapi import BackgroundTasks, Depends, Response
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import BackgroundTasks, Response
 
 from app.core.security import AuthenticatedPrincipal, get_current_user_optional
-from app.db.session import get_db_session
-from app.services.jobs_service import JobsService
-from app.services.storage_service import StorageService
+from app.services.jobs_service import JobsService, get_jobs_service
 from app.tools._common import file_response
 
 
-async def jobs_service_dep(
-    db: AsyncSession = Depends(get_db_session),
-) -> JobsService:
-    """Request-scoped factory for :class:`JobsService`.
+jobs_service_dep = get_jobs_service
+"""Backwards-compatible alias for :func:`get_jobs_service`.
 
-    The :class:`StorageService` is a thin ``httpx`` wrapper with no
-    per-request state, so we build a fresh one each call; in a hot path
-    this is negligible overhead.
-    """
-
-    return JobsService(db, StorageService())
+Tool routes imported this symbol from ``app.tools._recording`` before
+the factory was promoted to the services layer. Keeping the alias lets
+existing imports continue to work.
+"""
 
 
 async def record_and_respond(
