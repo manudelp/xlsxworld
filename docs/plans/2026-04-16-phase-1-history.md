@@ -36,11 +36,11 @@
 | Batch | Tools | Status | Commit |
 |---|---|---|---|
 | 1. `clean/` | find-replace, normalize-case, remove-duplicates, remove-empty-rows (trim-spaces already done in Task 5) | ✅ done | `a9716dc` |
-| 2. `convert/` | csv-to-xlsx, xlsx-to-csv, xlsx-to-csv-zip, json-to-xlsx, xlsx-to-json, xml-to-xlsx, xlsx-to-xml, sql-to-xlsx, xlsx-to-sql, xlsx-to-pdf | ✅ done | _pending_ |
+| 2. `convert/` | csv-to-xlsx, xlsx-to-csv, xlsx-to-csv-zip, json-to-xlsx, xlsx-to-json, xml-to-xlsx, xlsx-to-xml, sql-to-xlsx, xlsx-to-sql, xlsx-to-pdf | ✅ done | `f33783c` |
 | 3. `merge/` + `split/` | append-workbooks, merge-sheets, split-sheet, split-workbook | ⬜ pending | — |
 | 4. `analyze/` + `format/` | compare-workbooks, scan-formula-errors, summary-stats, auto-size-columns, freeze-header | ⬜ pending | — |
 | 5. `data/` + `validate/` + `security/` | sort-rows, split-column, transpose-sheet, detect-blanks, validate-emails, password-protect, remove-password | ⬜ pending | — |
-| 6. `inspect/` (special — returns JSON; record only when an export happens) | inspect endpoints | ⬜ pending | — |
+| 6. `inspect/` (special — returns JSON, not files) | `page_sheet` (GET), `preview` (POST) — both return JSON metadata, never call `file_response`, so **no wiring needed** in current shape. Revisit only if/when an `inspect/export-*` endpoint is added that returns a downloadable artifact. | ✅ n/a | — |
 
 **Operator step:** `uv run alembic upgrade head` — applied to the dev database on 2026-04-17 (revision `20260417_0001`). Note: `alembic/env.py` was updated in the same batch to use `settings.async_database_pool_url` when present, because Supabase Free-tier direct hostnames (`db.<project>.supabase.co`) are IPv6-only and unreachable from IPv4-only networks. The running app already uses the pooler; alembic now follows suit and also passes `prepared_statement_cache_size=0` to match.
 
