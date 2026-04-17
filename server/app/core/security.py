@@ -95,6 +95,32 @@ async def get_current_user(token: str = Depends(get_bearer_token)) -> Authentica
     return await verify_supabase_token(token)
 
 
+async def get_current_user_optional(
+    authorization: Annotated[str | None, Header(alias="Authorization")] = None,
+) -> AuthenticatedPrincipal | None:
+    """Like get_current_user, but returns None for missing/invalid tokens.
+
+    Used by tool routes that need to optionally record history for signed-in
+    users while remaining fully usable for anonymous visitors.
+    """
+
+    if not authorization:
+        return None
+
+    prefix = "Bearer "
+    if not authorization.startswith(prefix):
+        return None
+
+    token = authorization[len(prefix) :].strip()
+    if not token:
+        return None
+
+    try:
+        return await verify_supabase_token(token)
+    except HTTPException:
+        return None
+
+
 async def verify_supabase_token(token: str) -> AuthenticatedPrincipal:
     try:
         header = jwt.get_unverified_header(token)
