@@ -1355,6 +1355,12 @@
     },
     "failedToLoad": "Falha ao carregar dados: {error}",
     "retry": "Tentar novamente",
+    "refresh": "Atualizar",
+    "lastUpdated": "Atualizado {time}",
+    "justNow": "agora mesmo",
+    "secondsAgo": "há {count}s",
+    "minutesAgo": "há {count}min",
+    "hoursAgo": "há {count}h",
     "overview": {
       "totalUsers": "Usuários totais",
       "newUsersThisMonth": "Novos usuários este mês",

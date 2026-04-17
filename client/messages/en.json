@@ -1355,6 +1355,12 @@
     },
     "failedToLoad": "Failed to load data: {error}",
     "retry": "Retry",
+    "refresh": "Refresh",
+    "lastUpdated": "Updated {time}",
+    "justNow": "just now",
+    "secondsAgo": "{count}s ago",
+    "minutesAgo": "{count}m ago",
+    "hoursAgo": "{count}h ago",
     "overview": {
       "totalUsers": "Total Users",
       "newUsersThisMonth": "New Users This Month",

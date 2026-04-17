@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
@@ -48,5 +50,9 @@ export default async function AdminPage({
     redirect(`/${locale}`);
   }
 
-  return <AdminDashboard />;
+  return (
+    <Suspense fallback={null}>
+      <AdminDashboard />
+    </Suspense>
+  );
 }

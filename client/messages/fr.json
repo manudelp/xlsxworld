@@ -1355,6 +1355,12 @@
     },
     "failedToLoad": "Échec du chargement des données : {error}",
     "retry": "Réessayer",
+    "refresh": "Actualiser",
+    "lastUpdated": "Mis à jour {time}",
+    "justNow": "à l’instant",
+    "secondsAgo": "il y a {count}s",
+    "minutesAgo": "il y a {count}m",
+    "hoursAgo": "il y a {count}h",
     "overview": {
       "totalUsers": "Utilisateurs totaux",
       "newUsersThisMonth": "Nouveaux utilisateurs ce mois",

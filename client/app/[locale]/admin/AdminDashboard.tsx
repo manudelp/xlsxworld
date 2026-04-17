@@ -1,7 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+} from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { Loader2, RefreshCw } from "lucide-react";
 
 import {
   fetchAdminOverview,
@@ -30,9 +38,54 @@ type Tab = "overview" | "tools" | "users" | "performance" | "activity";
 
 const TAB_KEYS: Tab[] = ["overview", "tools", "users", "performance", "activity"];
 
+function parseTabParam(raw: string | null): Tab {
+  return TAB_KEYS.includes(raw as Tab) ? (raw as Tab) : "overview";
+}
+
+function useRelativeTime(timestamp: number | null, t: (k: string, values?: Record<string, number>) => string) {
+  const [, setTick] = useState(0);
+
+  useEffect(() => {
+    if (timestamp == null) return;
+    const interval = window.setInterval(() => setTick((v) => v + 1), 15_000);
+    return () => window.clearInterval(interval);
+  }, [timestamp]);
+
+  if (timestamp == null) return null;
+  const diff = Math.max(0, Math.floor((Date.now() - timestamp) / 1000));
+  if (diff < 5) return t("justNow");
+  if (diff < 60) return t("secondsAgo", { count: diff });
+  const mins = Math.floor(diff / 60);
+  if (mins < 60) return t("minutesAgo", { count: mins });
+  const hours = Math.floor(mins / 60);
+  return t("hoursAgo", { count: hours });
+}
+
 export default function AdminDashboard() {
   const t = useTranslations("admin");
-  const [activeTab, setActiveTab] = useState<Tab>("overview");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const activeTab = parseTabParam(searchParams.get("tab"));
+
+  const tabRefs = useRef<Record<Tab, HTMLButtonElement | null>>({
+    overview: null,
+    tools: null,
+    users: null,
+    performance: null,
+    activity: null,
+  });
+
+  const setActiveTab = useCallback(
+    (next: Tab) => {
+      if (next === activeTab) return;
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("tab", next);
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [activeTab, pathname, router, searchParams],
+  );
 
   const [overviewData, setOverviewData] = useState<AdminOverview | null>(null);
   const [kpiTrends, setKpiTrends] = useState<KpiTrendDay[] | null>(null);
@@ -44,59 +97,128 @@ export default function AdminDashboard() {
   );
 
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Record<Tab, number | null>>({
+    overview: null,
+    tools: null,
+    users: null,
+    performance: null,
+    activity: null,
+  });
 
-  const loadTab = useCallback(async (tab: Tab) => {
-    setLoading(true);
-    setError(null);
-    try {
-      switch (tab) {
-        case "overview": {
-          const [overview, kpi] = await Promise.all([
-            fetchAdminOverview(),
-            fetchAdminKpiTrends(),
-          ]);
-          setOverviewData(overview);
-          setKpiTrends(kpi.series);
-          break;
-        }
-        case "tools": {
-          setToolsData(await fetchAdminTools());
-          break;
-        }
-        case "users": {
-          setUsersData(await fetchAdminUsers());
-          break;
-        }
-        case "performance": {
-          setPerfData(await fetchAdminPerformance());
-          break;
-        }
-        case "activity": {
-          setActivityData(await fetchAdminActivity());
-          break;
-        }
+  const loadTab = useCallback(
+    async (tab: Tab, options: { background?: boolean } = {}) => {
+      if (options.background) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
       }
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : String(err);
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+      setError(null);
+      try {
+        switch (tab) {
+          case "overview": {
+            const [overview, kpi] = await Promise.all([
+              fetchAdminOverview(),
+              fetchAdminKpiTrends(),
+            ]);
+            setOverviewData(overview);
+            setKpiTrends(kpi.series);
+            break;
+          }
+          case "tools": {
+            setToolsData(await fetchAdminTools());
+            break;
+          }
+          case "users": {
+            setUsersData(await fetchAdminUsers());
+            break;
+          }
+          case "performance": {
+            setPerfData(await fetchAdminPerformance());
+            break;
+          }
+          case "activity": {
+            setActivityData(await fetchAdminActivity());
+            break;
+          }
+        }
+        setLastUpdated((prev) => ({ ...prev, [tab]: Date.now() }));
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        setError(message);
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     loadTab(activeTab);
   }, [activeTab, loadTab]);
 
+  const relativeUpdated = useRelativeTime(
+    lastUpdated[activeTab],
+    t as unknown as (k: string, values?: Record<string, number>) => string,
+  );
+
+  const handleTabKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
+    const currentIndex = TAB_KEYS.indexOf(activeTab);
+    let nextIndex: number | null = null;
+    if (event.key === "ArrowRight") nextIndex = (currentIndex + 1) % TAB_KEYS.length;
+    else if (event.key === "ArrowLeft")
+      nextIndex = (currentIndex - 1 + TAB_KEYS.length) % TAB_KEYS.length;
+    else if (event.key === "Home") nextIndex = 0;
+    else if (event.key === "End") nextIndex = TAB_KEYS.length - 1;
+    if (nextIndex == null) return;
+    event.preventDefault();
+    const nextTab = TAB_KEYS[nextIndex];
+    setActiveTab(nextTab);
+    tabRefs.current[nextTab]?.focus();
+  };
+
   return (
     <div className="mx-auto max-w-7xl px-3 py-6 sm:px-6 sm:py-8">
-      <h1
-        className="mb-4 text-xl font-bold sm:mb-6 sm:text-2xl"
-        style={{ color: "var(--foreground)" }}
-      >
-        {t("title")}
-      </h1>
+      <div className="mb-4 flex items-start justify-between gap-3 sm:mb-6">
+        <div className="min-w-0 flex-1">
+          <h1
+            className="text-xl font-bold sm:text-2xl"
+            style={{ color: "var(--foreground)" }}
+          >
+            {t("title")}
+          </h1>
+          {relativeUpdated && !loading && !error && (
+            <p
+              className="mt-1 text-xs"
+              style={{ color: "var(--muted-2)" }}
+              aria-live="polite"
+            >
+              {t("lastUpdated", { time: relativeUpdated })}
+            </p>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={() => loadTab(activeTab, { background: true })}
+          disabled={loading || refreshing}
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium transition-opacity hover:opacity-80 disabled:opacity-50 sm:px-3 sm:text-sm"
+          style={{
+            borderColor: "var(--border)",
+            backgroundColor: "var(--surface)",
+            color: "var(--foreground)",
+          }}
+          aria-label={t("refresh")}
+        >
+          {refreshing || loading ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <RefreshCw className="h-3.5 w-3.5" />
+          )}
+          <span className="hidden sm:inline">{t("refresh")}</span>
+        </button>
+      </div>
 
       <div
         className="admin-tab-scroll mb-6 flex gap-1 overflow-x-auto rounded-lg border p-1"
@@ -110,10 +232,15 @@ export default function AdminDashboard() {
         {TAB_KEYS.map((key) => (
           <button
             key={key}
+            ref={(el) => {
+              tabRefs.current[key] = el;
+            }}
             type="button"
             role="tab"
             aria-selected={activeTab === key}
+            tabIndex={activeTab === key ? 0 : -1}
             onClick={() => setActiveTab(key)}
+            onKeyDown={handleTabKeyDown}
             className="shrink-0 rounded-md px-3 py-2 text-xs font-medium transition-colors sm:px-4 sm:text-sm"
             style={{
               backgroundColor:
@@ -159,7 +286,7 @@ export default function AdminDashboard() {
       ) : loading ? (
         <LoadingSkeleton tab={activeTab} />
       ) : (
-        <>
+        <div style={{ opacity: refreshing ? 0.6 : 1, transition: "opacity 150ms" }}>
           {activeTab === "overview" && overviewData && (
             <OverviewTab data={overviewData} kpiTrends={kpiTrends ?? []} />
           )}
@@ -173,14 +300,9 @@ export default function AdminDashboard() {
             <PerformanceTab data={perfData} />
           )}
           {activeTab === "activity" && activityData && (
-            <ActivityTab
-              data={activityData}
-              onRefresh={async () => {
-                setActivityData(await fetchAdminActivity());
-              }}
-            />
+            <ActivityTab data={activityData} />
           )}
-        </>
+        </div>
       )}
     </div>
   );
