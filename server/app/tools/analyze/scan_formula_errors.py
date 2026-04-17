@@ -11,7 +11,7 @@ from openpyxl.styles import Font, PatternFill
 
 from app.core.security import AuthenticatedPrincipal
 from app.services.jobs_service import JobsService
-from app.tools._common import check_excel_file, read_with_limit, safe_base_filename
+from app.tools._common import check_excel_file, read_upload_for_principal, safe_base_filename
 from app.tools._recording import (
     get_current_user_optional,
     jobs_service_dep,
@@ -94,7 +94,7 @@ async def scan_formula_errors(
 ):
     started = time.perf_counter()
     check_excel_file(file)
-    raw = await read_with_limit(file)
+    raw = await read_upload_for_principal(file, principal=principal)
 
     try:
         wb = load_workbook(BytesIO(raw), data_only=True, read_only=True)

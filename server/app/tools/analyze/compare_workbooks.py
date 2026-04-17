@@ -11,7 +11,7 @@ from openpyxl.styles import Font, PatternFill
 from app.core.security import AuthenticatedPrincipal
 from app.services.jobs_service import JobsService
 from app.tools._common import (
-    check_excel_file, read_with_limit,
+    check_excel_file, read_upload_for_principal,
     safe_base_filename, unique_sheet_title,
 )
 from app.tools._recording import (
@@ -76,8 +76,8 @@ async def compare_workbooks(
     started = time.perf_counter()
     check_excel_file(file_a)
     check_excel_file(file_b)
-    raw_a = await read_with_limit(file_a)
-    raw_b = await read_with_limit(file_b)
+    raw_a = await read_upload_for_principal(file_a, principal=principal)
+    raw_b = await read_upload_for_principal(file_b, principal=principal)
 
     try:
         wb_a_val = load_workbook(BytesIO(raw_a), data_only=True, read_only=True)

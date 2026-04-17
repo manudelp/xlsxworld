@@ -9,7 +9,7 @@ from openpyxl import Workbook
 
 from app.core.security import AuthenticatedPrincipal
 from app.services.jobs_service import JobsService
-from app.tools._common import read_with_limit, safe_base_filename
+from app.tools._common import read_upload_for_principal, safe_base_filename
 from app.tools._recording import (
     get_current_user_optional,
     jobs_service_dep,
@@ -38,7 +38,7 @@ async def csv_to_xlsx(
     if not file.filename.lower().endswith(".csv") and ".csv" not in file.content_type:
         raise HTTPException(status_code=400, detail="Unsupported file type, expected CSV")
 
-    raw = await read_with_limit(file)
+    raw = await read_upload_for_principal(file, principal=principal)
 
     if len(delimiter) != 1:
         raise HTTPException(status_code=400, detail="Delimiter must be a single character")

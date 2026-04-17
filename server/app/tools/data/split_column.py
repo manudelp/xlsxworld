@@ -8,7 +8,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPExcepti
 from app.core.security import AuthenticatedPrincipal
 from app.services.excel_reader import parse_excel_bytes
 from app.services.jobs_service import JobsService
-from app.tools._common import check_excel_file, has_visual_elements, read_with_limit
+from app.tools._common import check_excel_file, has_visual_elements, read_upload_for_principal
 from app.tools._recording import (
     get_current_user_optional,
     jobs_service_dep,
@@ -40,7 +40,7 @@ async def split_column(
 ):
     started = time.perf_counter()
     check_excel_file(file)
-    raw = await read_with_limit(file)
+    raw = await read_upload_for_principal(file, principal=principal)
     workbook_data = parse_excel_bytes(raw, file.filename)
     has_visuals = has_visual_elements(raw)
 

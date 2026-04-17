@@ -3,11 +3,12 @@ from __future__ import annotations
 import secrets
 from typing import Any, Dict, List
 
-from fastapi import APIRouter, File, Query, UploadFile
+from fastapi import APIRouter, Depends, File, Query, UploadFile
 from pydantic import BaseModel
 
+from app.core.security import AuthenticatedPrincipal, get_current_user_optional
 from app.services.excel_reader import ensure_supported_excel_filename, parse_excel_bytes
-from app.tools._common import read_with_limit
+from app.tools._common import read_upload_for_principal
 from app.tools.inspect._store import store_workbook
 
 router = APIRouter()
@@ -35,9 +36,10 @@ class WorkbookPreview(BaseModel):
 async def preview_workbook(
     file: UploadFile = File(..., description="Excel file to inspect"),
     sample_rows: int = Query(25, ge=1, le=500),
+    principal: AuthenticatedPrincipal | None = Depends(get_current_user_optional),
 ):
     ensure_supported_excel_filename(file.filename)
-    raw = await read_with_limit(file)
+    raw = await read_upload_for_principal(file, principal=principal)
 
     workbook_data = parse_excel_bytes(raw, file.filename)
     token = secrets.token_urlsafe(16)

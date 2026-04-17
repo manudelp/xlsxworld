@@ -12,7 +12,7 @@ from app.services.excel_editor import (
     supports_inplace_edit,
 )
 from app.services.jobs_service import JobsService
-from app.tools._common import check_excel_file, has_visual_elements, read_with_limit
+from app.tools._common import check_excel_file, has_visual_elements, read_upload_for_principal
 from app.tools._recording import (
     get_current_user_optional,
     jobs_service_dep,
@@ -37,7 +37,7 @@ async def remove_password(
 ):
     started = time.perf_counter()
     check_excel_file(file)
-    raw = await read_with_limit(file)
+    raw = await read_upload_for_principal(file, principal=principal)
 
     if not supports_inplace_edit(file.filename):
         raise HTTPException(

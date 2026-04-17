@@ -13,7 +13,7 @@ from app.tools._common import (
     _INVALID_SHEET_CHARS,
     check_excel_file,
     has_visual_elements,
-    read_with_limit,
+    read_upload_for_principal,
     safe_sheet_title,
     unique_sheet_title,
 )
@@ -55,7 +55,7 @@ async def append_workbooks(
         source_name = _INVALID_SHEET_CHARS.sub("_", source_name)
 
         check_excel_file(file)
-        raw = await read_with_limit(file)
+        raw = await read_upload_for_principal(file, principal=principal)
         if not any_visuals:
             any_visuals = has_visual_elements(raw)
 

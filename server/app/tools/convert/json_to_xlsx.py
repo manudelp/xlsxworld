@@ -13,7 +13,7 @@ from app.core.security import AuthenticatedPrincipal
 from app.services.jobs_service import JobsService
 from app.tools._common import (
     dedupe_headers,
-    read_with_limit,
+    read_upload_for_principal,
     safe_base_filename,
     safe_sheet_title,
     unique_sheet_title,
@@ -198,7 +198,7 @@ async def json_to_xlsx(
     if not filename.endswith(".json") and content_type not in _JSON_CONTENT_TYPES:
         raise HTTPException(status_code=400, detail="Unsupported file type, expected JSON")
 
-    raw = await read_with_limit(file)
+    raw = await read_upload_for_principal(file, principal=principal)
 
     try:
         payload = json.loads(raw.decode("utf-8-sig"))

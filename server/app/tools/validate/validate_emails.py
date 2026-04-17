@@ -12,7 +12,7 @@ from openpyxl.styles import Font, PatternFill
 from app.core.security import AuthenticatedPrincipal
 from app.services.excel_reader import parse_excel_bytes
 from app.services.jobs_service import JobsService
-from app.tools._common import check_excel_file, read_with_limit, safe_base_filename
+from app.tools._common import check_excel_file, read_upload_for_principal, safe_base_filename
 from app.tools._recording import (
     get_current_user_optional,
     jobs_service_dep,
@@ -50,7 +50,7 @@ async def validate_emails(
 ):
     started = time.perf_counter()
     check_excel_file(file)
-    raw = await read_with_limit(file)
+    raw = await read_upload_for_principal(file, principal=principal)
 
     workbook_data = parse_excel_bytes(raw, file.filename)
 

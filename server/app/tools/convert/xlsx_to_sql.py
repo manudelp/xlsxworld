@@ -11,7 +11,7 @@ from app.services.excel_reader import ensure_supported_excel_filename, parse_exc
 from app.services.jobs_service import JobsService
 from app.tools._common import (
     normalize_sheet_selection,
-    read_with_limit,
+    read_upload_for_principal,
     safe_base_filename,
 )
 from app.tools._recording import (
@@ -122,7 +122,7 @@ async def xlsx_to_sql(
 ):
     started = _time.perf_counter()
     ensure_supported_excel_filename(file.filename)
-    raw = await read_with_limit(file)
+    raw = await read_upload_for_principal(file, principal=principal)
 
     workbook_data = parse_excel_bytes(raw, file.filename)
 

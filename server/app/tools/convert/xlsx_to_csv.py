@@ -11,7 +11,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, Qu
 from app.core.security import AuthenticatedPrincipal
 from app.services.excel_reader import ensure_supported_excel_filename, parse_excel_bytes
 from app.services.jobs_service import JobsService
-from app.tools._common import read_with_limit, safe_base_filename
+from app.tools._common import read_upload_for_principal, safe_base_filename
 from app.tools._recording import (
     get_current_user_optional,
     jobs_service_dep,
@@ -63,7 +63,7 @@ async def xlsx_to_csv(
 ):
     started = time.perf_counter()
     ensure_supported_excel_filename(file.filename)
-    raw = await read_with_limit(file)
+    raw = await read_upload_for_principal(file, principal=principal)
 
     workbook_data = parse_excel_bytes(raw, file.filename)
     if sheet not in workbook_data:
@@ -108,7 +108,7 @@ async def xlsx_to_csv_zip(
 ):
     started = time.perf_counter()
     ensure_supported_excel_filename(file.filename)
-    raw = await read_with_limit(file)
+    raw = await read_upload_for_principal(file, principal=principal)
 
     workbook_data = parse_excel_bytes(raw, file.filename)
 

@@ -10,7 +10,7 @@ from openpyxl import Workbook
 from app.core.security import AuthenticatedPrincipal
 from app.services.jobs_service import JobsService
 from app.tools._common import (
-    read_with_limit,
+    read_upload_for_principal,
     safe_base_filename,
     safe_sheet_title,
     unique_sheet_title,
@@ -102,7 +102,7 @@ async def xml_to_xlsx(
     if not filename.endswith(".xml") and content_type not in _XML_CONTENT_TYPES:
         raise HTTPException(status_code=400, detail="Unsupported file type, expected XML")
 
-    raw = await read_with_limit(file)
+    raw = await read_upload_for_principal(file, principal=principal)
 
     try:
         root = ET.fromstring(raw, forbid_dtd=True, forbid_entities=True, forbid_external=True)
