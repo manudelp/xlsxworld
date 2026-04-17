@@ -176,6 +176,11 @@
   font-style: normal;
 }
 
+html {
+  overflow-x: clip;
+  max-width: 100%;
+}
+
 body {
   font-family: "Alan Sans", sans-serif;
   background-color: var(--background);
@@ -186,7 +191,8 @@ body {
   );
   background-size: 24px 24px;
   color: var(--foreground);
-  overflow-x: hidden;
+  overflow-x: clip;
+  max-width: 100%;
   transition:
     background-color 200ms ease,
     color 200ms ease;

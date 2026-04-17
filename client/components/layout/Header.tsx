@@ -120,7 +120,7 @@ export default function Header() {
 
   return (
     <header
-      className="w-full h-[60px] z-50 fixed right-0 left-0 top-0 px-2 sm:px-6 flex items-center justify-between gap-4"
+      className="h-[60px] z-50 fixed right-0 left-0 top-0 px-2 sm:px-6 flex items-center justify-between gap-4"
       style={{
         backgroundColor: "var(--background)",
         color: "var(--foreground)",

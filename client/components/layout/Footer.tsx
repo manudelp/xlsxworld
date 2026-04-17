@@ -138,7 +138,7 @@ export default function Footer() {
             <span
               ref={tooltipRef}
               role="tooltip"
-              className="pointer-events-none absolute z-10 w-max max-w-[16rem] rounded border px-2 py-1 text-left text-[11px] leading-snug opacity-0 shadow-sm transition-opacity group-hover:opacity-100 group-focus-within:opacity-100"
+              className="pointer-events-none absolute z-10 w-max max-w-[min(16rem,calc(100vw-1rem))] rounded border px-2 py-1 text-left text-[11px] leading-snug opacity-0 shadow-sm transition-opacity group-hover:opacity-100 group-focus-within:opacity-100"
               style={{
                 borderColor: "var(--border)",
                 backgroundColor: "var(--surface-2)",
