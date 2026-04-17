@@ -1,21 +1,31 @@
 from __future__ import annotations
 
 import re
+import time
 from io import BytesIO
 from typing import Any
 
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill
 
+from app.core.security import AuthenticatedPrincipal
 from app.services.excel_reader import parse_excel_bytes
-from app.tools._common import check_excel_file, file_response, read_with_limit, safe_base_filename
+from app.services.jobs_service import JobsService
+from app.tools._common import check_excel_file, read_with_limit, safe_base_filename
+from app.tools._recording import (
+    get_current_user_optional,
+    jobs_service_dep,
+    record_and_respond,
+)
 from app.tools.analyze._styles import (
     ALT_ROW_FILL, BODY_FONT, THIN_BORDER, WHITE_FILL,
     apply_header_row, auto_size,
 )
 
 router = APIRouter()
+
+_XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 _EMAIL_RE = re.compile(r"^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$")
 
@@ -31,10 +41,14 @@ WHITE_FONT = Font(name="Arial", bold=True, color="FFFFFF", size=10)
     description="Scans selected columns for email addresses and validates format.",
 )
 async def validate_emails(
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(..., description="Excel file"),
     sheet: str = Form(..., description="Sheet name"),
     column: str = Form(..., description="Column header name containing emails"),
+    principal: AuthenticatedPrincipal | None = Depends(get_current_user_optional),
+    jobs_service: JobsService = Depends(jobs_service_dep),
 ):
+    started = time.perf_counter()
     check_excel_file(file)
     raw = await read_with_limit(file)
 
@@ -112,10 +126,20 @@ async def validate_emails(
     out.save(buf)
     base = safe_base_filename(file.filename, "workbook")
 
-    resp = file_response(
-        buf.getvalue(),
-        f"email-validation-{base}.xlsx",
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    output_name = f"email-validation-{base}.xlsx"
+    resp = await record_and_respond(
+        principal=principal,
+        background_tasks=background_tasks,
+        jobs_service=jobs_service,
+        tool_slug="validate-emails",
+        tool_name="Validate Emails",
+        original_filename=file.filename,
+        output_bytes=buf.getvalue(),
+        output_filename=output_name,
+        mime_type=_XLSX_MIME,
+        success=True,
+        error_type=None,
+        duration_ms=int((time.perf_counter() - started) * 1000),
     )
     resp.headers["X-Valid-Count"] = str(valid_count)
     resp.headers["X-Invalid-Count"] = str(invalid_count)

@@ -1,15 +1,25 @@
 from __future__ import annotations
 
 import json
+import time
 from typing import Any
 
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile
 
+from app.core.security import AuthenticatedPrincipal
 from app.services.excel_reader import parse_excel_bytes
-from app.tools._common import check_excel_file, file_response, has_visual_elements, read_with_limit
+from app.services.jobs_service import JobsService
+from app.tools._common import check_excel_file, has_visual_elements, read_with_limit
+from app.tools._recording import (
+    get_current_user_optional,
+    jobs_service_dep,
+    record_and_respond,
+)
 from app.tools.clean._utils import workbook_bytes_from_data
 
 router = APIRouter()
+
+_XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
 def _comparable(value: Any) -> tuple[int, Any]:
@@ -35,11 +45,15 @@ def _comparable(value: Any) -> tuple[int, Any]:
     description="Sorts rows in a selected sheet by one or more columns.",
 )
 async def sort_rows(
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(..., description="Excel file"),
     sheet: str = Form(..., description="Sheet name"),
     sort_keys: str = Form(..., description='JSON array: [{"column":"Name","direction":"asc"}]'),
     has_header: bool = Form(True, description="Whether first row is header"),
+    principal: AuthenticatedPrincipal | None = Depends(get_current_user_optional),
+    jobs_service: JobsService = Depends(jobs_service_dep),
 ):
+    started = time.perf_counter()
     check_excel_file(file)
     raw = await read_with_limit(file)
     workbook_data = parse_excel_bytes(raw, file.filename)
@@ -57,10 +71,19 @@ async def sort_rows(
     if not rows:
         workbook_data[sheet] = []
         output_bytes = workbook_bytes_from_data(workbook_data)
-        return file_response(
-            output_bytes,
-            "sorted.xlsx",
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        return await record_and_respond(
+            principal=principal,
+            background_tasks=background_tasks,
+            jobs_service=jobs_service,
+            tool_slug="sort-rows",
+            tool_name="Sort Rows",
+            original_filename=file.filename,
+            output_bytes=output_bytes,
+            output_filename="sorted.xlsx",
+            mime_type=_XLSX_MIME,
+            success=True,
+            error_type=None,
+            duration_ms=int((time.perf_counter() - started) * 1000),
             visual_elements_removed=has_visuals,
         )
 
@@ -107,9 +130,18 @@ async def sort_rows(
     workbook_data[sheet] = ([header] if header else []) + data_rows
     output_bytes = workbook_bytes_from_data(workbook_data)
 
-    return file_response(
-        output_bytes,
-        "sorted.xlsx",
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    return await record_and_respond(
+        principal=principal,
+        background_tasks=background_tasks,
+        jobs_service=jobs_service,
+        tool_slug="sort-rows",
+        tool_name="Sort Rows",
+        original_filename=file.filename,
+        output_bytes=output_bytes,
+        output_filename="sorted.xlsx",
+        mime_type=_XLSX_MIME,
+        success=True,
+        error_type=None,
+        duration_ms=int((time.perf_counter() - started) * 1000),
         visual_elements_removed=has_visuals,
     )
