@@ -406,13 +406,22 @@ async def activity(
         .limit(50)
     )
     rows = result.all()
+
+    def _as_float(value):
+        if value is None:
+            return None
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return None
+
     return [
         {
             "occurred_at": r.occurred_at.isoformat() if r.occurred_at else None,
             "user_id": str(r.user_id) if r.user_id else None,
             "tool_slug": r.tool_slug,
             "tool_name": r.tool_name,
-            "duration_ms": r.duration_ms,
+            "duration_ms": _as_float(r.duration_ms),
             "success": r.success == "true" if r.success else False,
             "error_type": r.error_type if r.error_type and r.error_type != "null" else None,
             "user_email": r.user_email,

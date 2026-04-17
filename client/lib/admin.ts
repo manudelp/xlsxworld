@@ -85,7 +85,7 @@ export interface AdminActivityItem {
   user_id: string | null;
   tool_slug: string | null;
   tool_name: string | null;
-  duration_ms: string | null;
+  duration_ms: number | null;
   success: boolean;
   error_type: string | null;
   user_email: string | null;

@@ -5,7 +5,6 @@ import { useTranslations } from "next-intl";
 
 import {
   fetchAdminOverview,
-  fetchAdminOverviewTrend,
   fetchAdminKpiTrends,
   fetchAdminTools,
   fetchAdminUsers,
@@ -18,7 +17,6 @@ import type {
   AdminUsers,
   AdminPerformanceStat,
   AdminActivityItem,
-  DayCount,
   KpiTrendDay,
 } from "@/lib/admin";
 
@@ -37,7 +35,6 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>("overview");
 
   const [overviewData, setOverviewData] = useState<AdminOverview | null>(null);
-  const [trendData, setTrendData] = useState<DayCount[] | null>(null);
   const [kpiTrends, setKpiTrends] = useState<KpiTrendDay[] | null>(null);
   const [toolsData, setToolsData] = useState<AdminToolStat[] | null>(null);
   const [usersData, setUsersData] = useState<AdminUsers | null>(null);
@@ -55,13 +52,11 @@ export default function AdminDashboard() {
     try {
       switch (tab) {
         case "overview": {
-          const [overview, trend, kpi] = await Promise.all([
+          const [overview, kpi] = await Promise.all([
             fetchAdminOverview(),
-            fetchAdminOverviewTrend(),
             fetchAdminKpiTrends(),
           ]);
           setOverviewData(overview);
-          setTrendData(trend);
           setKpiTrends(kpi.series);
           break;
         }
@@ -141,16 +136,28 @@ export default function AdminDashboard() {
             color: "var(--foreground)",
           }}
         >
-          <p className="text-sm" style={{ color: "var(--muted-2)" }}>
+          <p className="mb-4 text-sm" style={{ color: "var(--muted-2)" }}>
             {t("failedToLoad", { error })}
           </p>
+          <button
+            type="button"
+            onClick={() => loadTab(activeTab)}
+            className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium transition-opacity hover:opacity-80"
+            style={{
+              borderColor: "var(--border)",
+              backgroundColor: "var(--surface-2)",
+              color: "var(--foreground)",
+            }}
+          >
+            {t("retry")}
+          </button>
         </div>
       ) : loading ? (
         <LoadingSkeleton tab={activeTab} />
       ) : (
         <>
           {activeTab === "overview" && overviewData && (
-            <OverviewTab data={overviewData} trend={trendData ?? []} kpiTrends={kpiTrends ?? []} />
+            <OverviewTab data={overviewData} kpiTrends={kpiTrends ?? []} />
           )}
           {activeTab === "tools" && toolsData && (
             <ToolsTab data={toolsData} />

@@ -14,7 +14,7 @@ import {
   AreaChart,
 } from "recharts";
 
-import type { AdminOverview, DayCount, KpiTrendDay } from "@/lib/admin";
+import type { AdminOverview, KpiTrendDay } from "@/lib/admin";
 
 type KpiKey =
   | "new_users"
@@ -35,6 +35,17 @@ interface KpiConfig {
   color: string;
   valueColor?: string;
 }
+
+const KPI_TREND_KEYS: Record<KpiKey, keyof KpiTrendDay> = {
+  total_users: "new_users",
+  new_users: "new_users",
+  tool_uses: "tool_uses",
+  tool_uses_today: "tool_uses",
+  success_rate: "success_rate",
+  avg_duration_ms: "avg_duration_ms",
+  error_count: "error_count",
+  file_uploads: "file_uploads",
+};
 
 function rateColor(rate: number) {
   if (rate >= 95) return "#22c55e";
@@ -153,11 +164,9 @@ function SparkCard({
 
 export default function OverviewTab({
   data,
-  trend,
   kpiTrends,
 }: {
   data: AdminOverview;
-  trend: DayCount[];
   kpiTrends: KpiTrendDay[];
 }) {
   const t = useTranslations("admin.overview");
@@ -234,12 +243,22 @@ export default function OverviewTab({
   ];
 
   const sparkDataMap = useMemo(() => {
-    const map: Record<string, { value: number | null }[]> = {};
-    for (const kpi of kpis) {
-      map[kpi.key] = kpiTrends.map((d) => ({
-        value: d[kpi.trendKey] as number | null,
+    const map: Record<KpiKey, { value: number | null }[]> = {
+      total_users: [],
+      new_users: [],
+      tool_uses: [],
+      tool_uses_today: [],
+      success_rate: [],
+      avg_duration_ms: [],
+      error_count: [],
+      file_uploads: [],
+    };
+    (Object.keys(KPI_TREND_KEYS) as KpiKey[]).forEach((key) => {
+      const trendKey = KPI_TREND_KEYS[key];
+      map[key] = kpiTrends.map((d) => ({
+        value: d[trendKey] as number | null,
       }));
-    }
+    });
     return map;
   }, [kpiTrends]);
 

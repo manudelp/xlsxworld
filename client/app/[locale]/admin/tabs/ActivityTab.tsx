@@ -130,7 +130,9 @@ export default function ActivityTab({
                       {item.user_email || t("anonymous")}
                     </span>
                     <span style={{ color: "var(--muted-2)" }}>
-                      {item.duration_ms ? `${item.duration_ms} ms` : "—"}
+                      {item.duration_ms != null
+                        ? `${Math.round(item.duration_ms)} ms`
+                        : "—"}
                     </span>
                     {item.error_type && (
                       <span style={{ color: "#ef4444" }}>

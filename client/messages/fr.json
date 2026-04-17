@@ -1354,6 +1354,7 @@
       "activity": "Activité"
     },
     "failedToLoad": "Échec du chargement des données : {error}",
+    "retry": "Réessayer",
     "overview": {
       "totalUsers": "Utilisateurs totaux",
       "newUsersThisMonth": "Nouveaux utilisateurs ce mois",
