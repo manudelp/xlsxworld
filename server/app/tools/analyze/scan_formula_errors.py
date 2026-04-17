@@ -1,14 +1,22 @@
 from __future__ import annotations
 
 import json
+import time
 from datetime import datetime, timezone
 from io import BytesIO
 
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, UploadFile
 from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Font, PatternFill
 
-from app.tools._common import check_excel_file, file_response, read_with_limit, safe_base_filename
+from app.core.security import AuthenticatedPrincipal
+from app.services.jobs_service import JobsService
+from app.tools._common import check_excel_file, read_with_limit, safe_base_filename
+from app.tools._recording import (
+    get_current_user_optional,
+    jobs_service_dep,
+    record_and_respond,
+)
 from app.tools.analyze._styles import (
     ALT_ROW_FILL, BODY_FONT, BOLD_FONT, CENTER_ALIGNMENT, THIN_BORDER,
     WHITE_FILL, WRAP_ALIGNMENT,
@@ -16,6 +24,8 @@ from app.tools.analyze._styles import (
 )
 
 router = APIRouter()
+
+_XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 FORMULA_ERRORS = {"#REF!", "#VALUE!", "#DIV/0!", "#N/A", "#NAME?", "#NULL!", "#NUM!"}
 
@@ -77,8 +87,12 @@ _REFERENCE_ROWS: list[list[str]] = [
     description="Scan every cell across all sheets for formula errors and return an XLSX report.",
 )
 async def scan_formula_errors(
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(..., description="Excel file"),
+    principal: AuthenticatedPrincipal | None = Depends(get_current_user_optional),
+    jobs_service: JobsService = Depends(jobs_service_dep),
 ):
+    started = time.perf_counter()
     check_excel_file(file)
     raw = await read_with_limit(file)
 
@@ -219,10 +233,20 @@ async def scan_formula_errors(
     out.save(buf)
     base = safe_base_filename(original_name, "workbook")
 
-    resp = file_response(
-        buf.getvalue(),
-        f"formula-errors-{base}.xlsx",
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    output_name = f"formula-errors-{base}.xlsx"
+    resp = await record_and_respond(
+        principal=principal,
+        background_tasks=background_tasks,
+        jobs_service=jobs_service,
+        tool_slug="scan-formula-errors",
+        tool_name="Scan Formula Errors",
+        original_filename=file.filename,
+        output_bytes=buf.getvalue(),
+        output_filename=output_name,
+        mime_type=_XLSX_MIME,
+        success=True,
+        error_type=None,
+        duration_ms=int((time.perf_counter() - started) * 1000),
     )
     resp.headers["X-Total-Errors"] = str(total_errors)
     resp.headers["X-Error-Breakdown"] = json.dumps(error_counts)

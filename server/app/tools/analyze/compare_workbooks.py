@@ -1,15 +1,23 @@
 from __future__ import annotations
 
+import time
 from datetime import datetime, timezone
 from io import BytesIO
 
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, UploadFile
 from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Font, PatternFill
 
+from app.core.security import AuthenticatedPrincipal
+from app.services.jobs_service import JobsService
 from app.tools._common import (
-    check_excel_file, file_response, read_with_limit,
+    check_excel_file, read_with_limit,
     safe_base_filename, unique_sheet_title,
+)
+from app.tools._recording import (
+    get_current_user_optional,
+    jobs_service_dep,
+    record_and_respond,
 )
 from app.tools.analyze._styles import (
     ALT_ROW_FILL, BODY_FONT, BOLD_FONT, CENTER_ALIGNMENT, THIN_BORDER,
@@ -18,6 +26,8 @@ from app.tools.analyze._styles import (
 )
 
 router = APIRouter()
+
+_XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 _CHANGE_STYLES: dict[str, tuple[PatternFill, Font]] = {
     "Added": (GREEN_FILL, WHITE_BOLD_FONT),
@@ -57,9 +67,13 @@ def _read_sheet_data(ws_val, ws_form) -> dict[str, tuple[str, str]]:
     description="Compare two Excel files cell by cell and return an XLSX diff report.",
 )
 async def compare_workbooks(
+    background_tasks: BackgroundTasks,
     file_a: UploadFile = File(..., description="Original Excel file"),
     file_b: UploadFile = File(..., description="Modified Excel file"),
+    principal: AuthenticatedPrincipal | None = Depends(get_current_user_optional),
+    jobs_service: JobsService = Depends(jobs_service_dep),
 ):
+    started = time.perf_counter()
     check_excel_file(file_a)
     check_excel_file(file_b)
     raw_a = await read_with_limit(file_a)
@@ -265,10 +279,19 @@ async def compare_workbooks(
     base_b = safe_base_filename(name_b, "modified")
     output_name = f"comparison-{base_a}-vs-{base_b}.xlsx"
 
-    resp = file_response(
-        buf.getvalue(),
-        output_name,
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    resp = await record_and_respond(
+        principal=principal,
+        background_tasks=background_tasks,
+        jobs_service=jobs_service,
+        tool_slug="compare-workbooks",
+        tool_name="Compare Workbooks",
+        original_filename=file_a.filename,
+        output_bytes=buf.getvalue(),
+        output_filename=output_name,
+        mime_type=_XLSX_MIME,
+        success=True,
+        error_type=None,
+        duration_ms=int((time.perf_counter() - started) * 1000),
     )
     resp.headers["X-Sheets-Added"] = str(len(added_sheets))
     resp.headers["X-Sheets-Removed"] = str(len(removed_sheets))

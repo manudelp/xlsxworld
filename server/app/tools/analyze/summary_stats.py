@@ -1,20 +1,30 @@
 from __future__ import annotations
 
 import statistics
+import time
 from io import BytesIO
 from typing import Any
 
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, UploadFile
 from openpyxl import Workbook
 
+from app.core.security import AuthenticatedPrincipal
 from app.services.excel_reader import parse_excel_bytes
-from app.tools._common import check_excel_file, file_response, read_with_limit, safe_base_filename
+from app.services.jobs_service import JobsService
+from app.tools._common import check_excel_file, read_with_limit, safe_base_filename
+from app.tools._recording import (
+    get_current_user_optional,
+    jobs_service_dep,
+    record_and_respond,
+)
 from app.tools.analyze._styles import (
     ALT_ROW_FILL, BODY_FONT, BOLD_FONT, CENTER_ALIGNMENT, THIN_BORDER,
     WHITE_FILL, apply_header_row, auto_size,
 )
 
 router = APIRouter()
+
+_XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
 def _numeric_values(cells: list[Any]) -> list[float]:
@@ -38,8 +48,12 @@ def _numeric_values(cells: list[Any]) -> list[float]:
     description="Compute summary statistics for numeric columns across all sheets.",
 )
 async def summary_stats(
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(..., description="Excel file"),
+    principal: AuthenticatedPrincipal | None = Depends(get_current_user_optional),
+    jobs_service: JobsService = Depends(jobs_service_dep),
 ):
+    started = time.perf_counter()
     check_excel_file(file)
     raw = await read_with_limit(file)
 
@@ -107,10 +121,20 @@ async def summary_stats(
     out.save(buf)
     base = safe_base_filename(file.filename, "workbook")
 
-    resp = file_response(
-        buf.getvalue(),
-        f"summary-stats-{base}.xlsx",
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    output_name = f"summary-stats-{base}.xlsx"
+    resp = await record_and_respond(
+        principal=principal,
+        background_tasks=background_tasks,
+        jobs_service=jobs_service,
+        tool_slug="summary-stats",
+        tool_name="Summary Stats",
+        original_filename=file.filename,
+        output_bytes=buf.getvalue(),
+        output_filename=output_name,
+        mime_type=_XLSX_MIME,
+        success=True,
+        error_type=None,
+        duration_ms=int((time.perf_counter() - started) * 1000),
     )
     resp.headers["X-Sheets-Analyzed"] = str(sheets_analyzed)
     resp.headers["X-Columns-Found"] = str(total_columns)

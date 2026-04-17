@@ -1,16 +1,27 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, File, HTTPException, UploadFile
+import time
+
+from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, UploadFile
 from openpyxl.utils import get_column_letter
 
+from app.core.security import AuthenticatedPrincipal
 from app.services.excel_editor import (
     load_workbook_for_edit,
     save_workbook_to_bytes,
     supports_inplace_edit,
 )
-from app.tools._common import check_excel_file, file_response, has_visual_elements, read_with_limit
+from app.services.jobs_service import JobsService
+from app.tools._common import check_excel_file, has_visual_elements, read_with_limit
+from app.tools._recording import (
+    get_current_user_optional,
+    jobs_service_dep,
+    record_and_respond,
+)
 
 router = APIRouter()
+
+_XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 PADDING = 2
 MIN_WIDTH = 8
@@ -23,8 +34,12 @@ MAX_WIDTH = 60
     description="Auto-sizes all column widths based on cell content across all sheets.",
 )
 async def auto_size_columns(
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(..., description="Excel file"),
+    principal: AuthenticatedPrincipal | None = Depends(get_current_user_optional),
+    jobs_service: JobsService = Depends(jobs_service_dep),
 ):
+    started = time.perf_counter()
     check_excel_file(file)
     raw = await read_with_limit(file)
 
@@ -56,9 +71,18 @@ async def auto_size_columns(
 
     output_bytes = save_workbook_to_bytes(wb)
 
-    return file_response(
-        output_bytes,
-        "auto-sized.xlsx",
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    return await record_and_respond(
+        principal=principal,
+        background_tasks=background_tasks,
+        jobs_service=jobs_service,
+        tool_slug="auto-size-columns",
+        tool_name="Auto-Size Columns",
+        original_filename=file.filename,
+        output_bytes=output_bytes,
+        output_filename="auto-sized.xlsx",
+        mime_type=_XLSX_MIME,
+        success=True,
+        error_type=None,
+        duration_ms=int((time.perf_counter() - started) * 1000),
         visual_elements_removed=loaded.visual_elements_lost or has_visual_elements(raw),
     )
