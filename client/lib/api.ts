@@ -333,5 +333,16 @@ export const api = {
       );
       return handle<T>(response);
     },
+    async delete<T>(
+      path: string,
+      qs?: Record<string, string | number | boolean | undefined>,
+    ): Promise<T> {
+      const response = await sendRequest(
+        buildUrl(path, qs),
+        { method: "DELETE" },
+        true,
+      );
+      return handle<T>(response);
+    },
   },
 };
