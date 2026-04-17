@@ -13,7 +13,16 @@ from app.db import models as _models  # noqa: F401
 
 config = context.config
 settings = get_settings()
-config.set_main_option("sqlalchemy.url", settings.async_database_url)
+
+# Prefer the pooler URL when configured. Supabase Free-tier direct
+# connections (db.<project>.supabase.co) are IPv6-only and unreachable
+# from networks without IPv6. The pooler host is always IPv4 and is
+# what the running application already uses (see app/db/session.py).
+try:
+    _alembic_url = settings.async_database_pool_url
+except RuntimeError:
+    _alembic_url = settings.async_database_url
+config.set_main_option("sqlalchemy.url", _alembic_url)
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
@@ -47,6 +56,9 @@ async def run_migrations_online() -> None:
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
+        # Match the application engine: Supabase's transaction-style
+        # pooler does not support cached prepared statements.
+        connect_args={"prepared_statement_cache_size": 0},
     )
 
     async with connectable.connect() as connection:
