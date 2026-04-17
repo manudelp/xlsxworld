@@ -53,7 +53,24 @@
     "displayNameUpdated": "Nombre actualizado.",
     "saveChanges": "Guardar cambios",
     "saving": "Guardando...",
-    "loadingAccount": "Cargando cuenta..."
+    "loadingAccount": "Cargando cuenta...",
+    "viewHistory": "Ver historial",
+    "viewHistorySubtitle": "Consulta tus trabajos recientes y vuelve a descargar los resultados durante 7 días.",
+    "history": {
+      "title": "Tu historial",
+      "subtitle": "Trabajos de los últimos 7 días. Los resultados se conservan 7 días y luego caducan.",
+      "refresh": "Actualizar",
+      "searchPlaceholder": "Buscar por herramienta…",
+      "statusFilter": "Estado",
+      "statusAll": "Todos",
+      "statusSuccess": "Éxito",
+      "statusError": "Error",
+      "download": "Descargar",
+      "delete": "Eliminar",
+      "expired": "Caducado",
+      "confirmDelete": "¿Eliminar este trabajo del historial? No se puede deshacer.",
+      "empty": "Aún no hay trabajos — prueba una herramienta y vuelve."
+    }
   },
   "auth": {
     "tabLogin": "Iniciar sesión",

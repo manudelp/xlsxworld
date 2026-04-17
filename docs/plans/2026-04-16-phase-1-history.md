@@ -22,13 +22,13 @@
 | 2. Storage service | ✅ done | `332235c` |
 | 3. Optional-auth dependency | ✅ done | `77e1134` |
 | 4. JobsService | ✅ done | `c5a7d90` |
-| 5. `record_and_respond` helper + `trim-spaces` integration | ✅ done | _pending commit_ |
-| 6. `/me/jobs` API | ✅ done | _pending commit_ |
-| 7. Cleanup CLI | ✅ done | _pending commit_ |
-| 8. `client/lib/jobs.ts` | ⬜ pending | — |
-| 9. `/my-account/history` page | ⬜ pending | — |
-| 10. Header + my-account link | ⬜ pending | — |
-| 11. i18n keys (en/es/fr/pt) | ⬜ pending | — |
+| 5. `record_and_respond` helper + `trim-spaces` integration | ✅ done | `<commit>` |
+| 6. `/me/jobs` API | ✅ done | `<commit>` |
+| 7. Cleanup CLI | ✅ done | `5521141` |
+| 8. `client/lib/jobs.ts` | ✅ done | _pending commit_ |
+| 9. `/my-account/history` page | ✅ done | _pending commit_ |
+| 10. Header + my-account link | ✅ done | _pending commit_ |
+| 11. i18n keys (en/es/fr/pt) | ✅ done | _pending commit_ |
 | 12. Instrument remaining tools | ⬜ follow-up PR | — |
 
 **Operator step:** `uv run alembic upgrade head` — applied to the dev database on 2026-04-17 (revision `20260417_0001`). Note: `alembic/env.py` was updated in the same batch to use `settings.async_database_pool_url` when present, because Supabase Free-tier direct hostnames (`db.<project>.supabase.co`) are IPv6-only and unreachable from IPv4-only networks. The running app already uses the pooler; alembic now follows suit and also passes `prepared_statement_cache_size=0` to match.
@@ -1867,20 +1867,7 @@ git commit -m "feat(api): /me/jobs list, download, delete"
 
 ---
 
-## Task 7: Cleanup script for expired jobs ✅
-
-**Status:** ✅ done.
-
-**Files (landed):**
-- `server/app/cli/__init__.py` — empty package init.
-- `server/app/cli/cleanup_expired_jobs.py` — split into `run_cleanup(session, *, now=None)` (core, unit-testable) and `main()` (opens an `AsyncSessionFactory` session, logs the count, returns the count).
-- `server/tests/test_cleanup_script.py` — 3 tests covering the wrapper: dependency wiring + commit, default `now=datetime.now(timezone.utc)`, and `main()` end-to-end using a fake session-factory context manager and a captured log record.
-- `server/README.md` — adds a "Scheduled tasks" section documenting the cron cadence and what the job does.
-
-**Adaptations from the original plan:**
-- Used `AsyncSessionFactory` (this project's factory name) rather than `async_session_factory` from the plan draft.
-- Split the CLI into `run_cleanup` + `main` so the core logic is trivially unit-testable without any database setup (the underlying `JobsService.cleanup_expired` is already covered by 2 tests in `test_jobs_service.py`, so we don't need to retest the service itself here — we're testing the wrapper).
-- `main()` returns the deleted count for convenience when callers want to invoke it programmatically; the `__main__` block ignores the return value as normal.
+## Task 7: Cleanup script for expired jobs
 
 **Files:**
 - Create: `server/app/cli/__init__.py` (empty)

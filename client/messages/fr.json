@@ -53,7 +53,24 @@
     "displayNameUpdated": "Nom mis à jour.",
     "saveChanges": "Enregistrer les modifications",
     "saving": "Enregistrement...",
-    "loadingAccount": "Chargement du compte..."
+    "loadingAccount": "Chargement du compte...",
+    "viewHistory": "Voir l'historique",
+    "viewHistorySubtitle": "Consultez vos jobs récents et retéléchargez les résultats pendant 7 jours.",
+    "history": {
+      "title": "Votre historique",
+      "subtitle": "Jobs des 7 derniers jours. Les résultats sont conservés 7 jours puis expirent.",
+      "refresh": "Actualiser",
+      "searchPlaceholder": "Rechercher un outil…",
+      "statusFilter": "Statut",
+      "statusAll": "Tous",
+      "statusSuccess": "Succès",
+      "statusError": "Erreur",
+      "download": "Télécharger",
+      "delete": "Supprimer",
+      "expired": "Expiré",
+      "confirmDelete": "Supprimer ce job de votre historique ? Cette action est irréversible.",
+      "empty": "Pas encore de jobs — essayez un outil puis revenez !"
+    }
   },
   "auth": {
     "tabLogin": "Se connecter",

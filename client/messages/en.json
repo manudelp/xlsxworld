@@ -53,7 +53,24 @@
     "displayNameUpdated": "Display name updated.",
     "saveChanges": "Save changes",
     "saving": "Saving...",
-    "loadingAccount": "Loading account..."
+    "loadingAccount": "Loading account...",
+    "viewHistory": "View history",
+    "viewHistorySubtitle": "See your recent jobs and re-download outputs within 7 days.",
+    "history": {
+      "title": "Your history",
+      "subtitle": "Tool jobs from the last 7 days. Outputs are kept for 7 days then expire.",
+      "refresh": "Refresh",
+      "searchPlaceholder": "Search by tool…",
+      "statusFilter": "Status",
+      "statusAll": "All",
+      "statusSuccess": "Success",
+      "statusError": "Error",
+      "download": "Download",
+      "delete": "Delete",
+      "expired": "Expired",
+      "confirmDelete": "Delete this job from your history? This cannot be undone.",
+      "empty": "No jobs yet — try a tool and come back!"
+    }
   },
   "auth": {
     "tabLogin": "Log in",
