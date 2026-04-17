@@ -7,6 +7,8 @@ from urllib.parse import quote
 
 from fastapi import HTTPException, Response, UploadFile
 
+from app.core.limits import Tier, effective_limits
+from app.core.security import AuthenticatedPrincipal
 from app.services.excel_reader import ensure_supported_excel_filename
 
 _VISUAL_PREFIXES = ("xl/drawings/", "xl/charts/", "xl/media/")
@@ -144,3 +146,39 @@ def file_response(
         media_type=media_type,
         headers=headers,
     )
+
+
+async def read_upload_for_principal(
+    file: UploadFile,
+    *,
+    principal: AuthenticatedPrincipal | None,
+) -> bytes:
+    """Tier-aware version of :func:`read_with_limit`.
+
+    Uses the caller's per-tier file-size cap and raises a structured
+    ``413`` with ``error_code = 'ANON_FILE_TOO_LARGE'`` or
+    ``'FREE_FILE_TOO_LARGE'`` so the client can open the upgrade modal
+    (anon) or show the upgrade nudge (free).
+    """
+
+    limits = effective_limits(principal)
+    try:
+        return await read_with_limit(file, max_bytes=limits.max_upload_bytes)
+    except HTTPException as exc:
+        # ``read_with_limit`` raises ``HTTPException(status_code=400,
+        # detail="File too large")`` — remap to 413 with a tier code so
+        # the client can react specifically.
+        if exc.status_code != 400:
+            raise
+        error_code = (
+            "ANON_FILE_TOO_LARGE"
+            if limits.tier is Tier.ANON
+            else "FREE_FILE_TOO_LARGE"
+        )
+        raise HTTPException(
+            status_code=413,
+            detail={
+                "detail": "File too large for your tier.",
+                "error_code": error_code,
+            },
+        ) from exc
