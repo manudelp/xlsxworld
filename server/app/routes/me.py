@@ -11,14 +11,18 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 
+from app.core.limits import effective_limits
+from app.core.quota_guard import quota_service_dep
 from app.core.security import AuthenticatedPrincipal, get_current_user
 from app.db.models import ToolJob
 from app.schemas.jobs import JobDownloadResponse, JobItem, JobsListResponse
+from app.schemas.usage import UsageResponse
 from app.services.jobs_service import (
     JobNotFoundError,
     JobsService,
     get_jobs_service,
 )
+from app.services.quota_service import QuotaService, today_utc
 
 router = APIRouter(prefix="/api/v1/me", tags=["me"])
 
@@ -98,3 +102,26 @@ async def delete_job(
     except JobNotFoundError:
         raise HTTPException(status_code=404, detail="Job not found") from None
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.get("/usage", response_model=UsageResponse)
+async def get_usage(
+    principal: AuthenticatedPrincipal = Depends(get_current_user),
+    quota_service: QuotaService = Depends(quota_service_dep),
+) -> UsageResponse:
+    limits = effective_limits(principal)
+    count = await quota_service.read_today(
+        key=f"user:{principal.user_id}", day=today_utc()
+    )
+    percent = (
+        round((count / limits.daily_jobs) * 100, 1)
+        if limits.daily_jobs
+        else 0.0
+    )
+    return UsageResponse(
+        plan=limits.tier.value,
+        jobs_today=count,
+        jobs_today_limit=limits.daily_jobs,
+        jobs_percent=min(percent, 100.0),
+        max_upload_bytes=limits.max_upload_bytes,
+    )
