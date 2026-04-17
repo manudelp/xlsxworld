@@ -112,10 +112,12 @@ These are not code; they're Supabase project configuration the operator must do 
 1. In the Supabase project dashboard → **Storage** → **Create bucket**:
    - Name: `tool-outputs`
    - Public: **off** (private)
-   - File size limit: 250 MB (matches future Pro tier; phase 1 doesn't enforce this client-side yet)
+   - File size limit: 50 MB (Supabase Free tier cap; comfortably above our 20 MB input cap in `app/tools/_common.py`). If we ever raise the input cap or add a Pro benefit that exceeds ~40 MB outputs, we'll need to upgrade the Supabase plan first.
 2. Add env vars (already present): `SUPABASE_URL`, `SUPABASE_SECRET_KEY` (the `service_role` key — required for signed URL generation and uploads).
 3. Add new env var: `SUPABASE_STORAGE_BUCKET=tool-outputs`.
 4. Add to `client/.env.local` (no new client var needed — downloads go through the API).
+
+**Status:** bucket `tool-outputs` created in Supabase (50 MB cap, private).
 
 ---
 

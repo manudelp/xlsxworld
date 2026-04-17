@@ -56,6 +56,7 @@ These apply across all phases.
 - Output files go in **Supabase Storage** (we already use Supabase for auth).
 - Re-download links are **signed URLs** with explicit expiry matching the tier's retention.
 - A DB row per job in a new `tool_jobs` table holds the metadata. The row outlives the file.
+- **Supabase Free tier caps individual object size at 50 MB.** This is above our current 20 MB input limit, so it's not a Phase 1 concern. Pro's target 250 MB output cap will require upgrading the Supabase plan before Phase 3 launch.
 
 ### Limits
 
