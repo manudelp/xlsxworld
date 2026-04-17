@@ -403,3 +403,11 @@ uv run alembic revision --autogenerate -m "message"  # Generate new revision fro
 uv run alembic downgrade -1                          # Rollback one revision
 uv run alembic history                               # Show migration history
 ```
+
+## Scheduled tasks
+
+| Task | Command | Cadence | Purpose |
+|---|---|---|---|
+| Expire `tool_jobs` storage objects | `python -m app.cli.cleanup_expired_jobs` | Daily | Deletes Supabase Storage objects for jobs whose retention window has elapsed and prunes history rows older than 90 days. Uses `JobsService.cleanup_expired`. |
+
+Intended to be wired to Render's cron, GitHub Actions, or any scheduler that can exec a Python module. Exits 0 when there is nothing to clean; logs the number of Storage objects removed. No output when the job is healthy — parse the `removed N storage objects` line if you want an alerting signal.

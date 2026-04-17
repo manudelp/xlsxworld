@@ -24,7 +24,7 @@
 | 4. JobsService | ✅ done | `c5a7d90` |
 | 5. `record_and_respond` helper + `trim-spaces` integration | ✅ done | _pending commit_ |
 | 6. `/me/jobs` API | ✅ done | _pending commit_ |
-| 7. Cleanup CLI | ⬜ pending | — |
+| 7. Cleanup CLI | ✅ done | _pending commit_ |
 | 8. `client/lib/jobs.ts` | ⬜ pending | — |
 | 9. `/my-account/history` page | ⬜ pending | — |
 | 10. Header + my-account link | ⬜ pending | — |
@@ -1867,7 +1867,20 @@ git commit -m "feat(api): /me/jobs list, download, delete"
 
 ---
 
-## Task 7: Cleanup script for expired jobs
+## Task 7: Cleanup script for expired jobs ✅
+
+**Status:** ✅ done.
+
+**Files (landed):**
+- `server/app/cli/__init__.py` — empty package init.
+- `server/app/cli/cleanup_expired_jobs.py` — split into `run_cleanup(session, *, now=None)` (core, unit-testable) and `main()` (opens an `AsyncSessionFactory` session, logs the count, returns the count).
+- `server/tests/test_cleanup_script.py` — 3 tests covering the wrapper: dependency wiring + commit, default `now=datetime.now(timezone.utc)`, and `main()` end-to-end using a fake session-factory context manager and a captured log record.
+- `server/README.md` — adds a "Scheduled tasks" section documenting the cron cadence and what the job does.
+
+**Adaptations from the original plan:**
+- Used `AsyncSessionFactory` (this project's factory name) rather than `async_session_factory` from the plan draft.
+- Split the CLI into `run_cleanup` + `main` so the core logic is trivially unit-testable without any database setup (the underlying `JobsService.cleanup_expired` is already covered by 2 tests in `test_jobs_service.py`, so we don't need to retest the service itself here — we're testing the wrapper).
+- `main()` returns the deleted count for convenience when callers want to invoke it programmatically; the `__main__` block ignores the return value as normal.
 
 **Files:**
 - Create: `server/app/cli/__init__.py` (empty)
