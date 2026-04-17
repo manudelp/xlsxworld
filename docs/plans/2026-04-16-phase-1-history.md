@@ -22,13 +22,13 @@
 | 2. Storage service | ✅ done | `332235c` |
 | 3. Optional-auth dependency | ✅ done | `77e1134` |
 | 4. JobsService | ✅ done | `c5a7d90` |
-| 5. `record_and_respond` helper + `trim-spaces` integration | ✅ done | `<commit>` |
-| 6. `/me/jobs` API | ✅ done | `<commit>` |
+| 5. `record_and_respond` helper + `trim-spaces` integration | ✅ done | `fe0cff6` |
+| 6. `/me/jobs` API | ✅ done | `f879478` |
 | 7. Cleanup CLI | ✅ done | `5521141` |
-| 8. `client/lib/jobs.ts` | ✅ done | _pending commit_ |
-| 9. `/my-account/history` page | ✅ done | _pending commit_ |
-| 10. Header + my-account link | ✅ done | _pending commit_ |
-| 11. i18n keys (en/es/fr/pt) | ✅ done | _pending commit_ |
+| 8. `client/lib/jobs.ts` | ✅ done | `6edb283` |
+| 9. `/my-account/history` page | ✅ done | `2dfe187` |
+| 10. Header + my-account link | ✅ done | `ebf84a2` |
+| 11. i18n keys (en/es/fr/pt) | ✅ done | `db9dec3` |
 | 12. Instrument remaining tools | ⬜ follow-up PR | — |
 
 **Operator step:** `uv run alembic upgrade head` — applied to the dev database on 2026-04-17 (revision `20260417_0001`). Note: `alembic/env.py` was updated in the same batch to use `settings.async_database_pool_url` when present, because Supabase Free-tier direct hostnames (`db.<project>.supabase.co`) are IPv6-only and unreachable from IPv4-only networks. The running app already uses the pooler; alembic now follows suit and also passes `prepared_statement_cache_size=0` to match.
