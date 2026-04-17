@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter as useNavigationRouter } from "next/navigation";
 import {
   ChevronDown,
+  History,
   LogOut,
   Menu,
   Monitor,
@@ -287,6 +288,16 @@ export default function Header() {
                 <UserRound className="h-4 w-4" />
                 {t("account.myAccount")}
               </Link>
+              <Link
+                href="/my-account/history"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-2 rounded px-3 py-2 text-sm hover:bg-black/5"
+                style={{ color: "var(--foreground)" }}
+                tabIndex={menuOpen ? 0 : -1}
+              >
+                <History className="h-4 w-4" />
+                {t("account.history.title")}
+              </Link>
               {user?.role === "admin" && (
                 <Link
                   href="/admin"
@@ -372,6 +383,16 @@ export default function Header() {
               >
                 <UserRound className="h-4 w-4" />
                 <span className="truncate">{label}</span>
+              </Link>
+              <Link
+                href="/my-account/history"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-2 rounded px-3 py-2 text-sm hover:bg-black/5"
+                style={{ color: "var(--foreground)" }}
+                tabIndex={mobileMenuOpen ? 0 : -1}
+              >
+                <History className="h-4 w-4" />
+                {t("account.history.title")}
               </Link>
               {user?.role === "admin" && (
                 <Link

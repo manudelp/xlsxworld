@@ -2,9 +2,11 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { History } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { useRequireAuth } from "@/components/auth/useRequireAuth";
+import { Link } from "@/i18n/navigation";
 import { updateDisplayName } from "@/lib/auth/client";
 
 export default function MyAccountPage() {
@@ -188,6 +190,40 @@ export default function MyAccountPage() {
             </div>
           </form>
         </section>
+
+        <Link
+          href="/my-account/history"
+          className="flex items-start gap-4 rounded-2xl border p-6 shadow-sm transition hover:opacity-90"
+          style={{
+            borderColor: "var(--border)",
+            backgroundColor: "var(--surface-2)",
+          }}
+        >
+          <span
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md"
+            style={{
+              backgroundColor: "var(--surface)",
+              color: "var(--foreground)",
+            }}
+            aria-hidden="true"
+          >
+            <History className="h-5 w-5" />
+          </span>
+          <span className="min-w-0">
+            <span
+              className="block text-sm font-medium"
+              style={{ color: "var(--foreground)" }}
+            >
+              {t("viewHistory")}
+            </span>
+            <span
+              className="mt-1 block text-xs"
+              style={{ color: "var(--muted)" }}
+            >
+              {t("viewHistorySubtitle")}
+            </span>
+          </span>
+        </Link>
       </div>
     </main>
   );
