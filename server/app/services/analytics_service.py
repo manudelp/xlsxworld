@@ -12,14 +12,13 @@ from uuid import UUID
 
 from fastapi import Depends, Request
 from sqlalchemy.engine import make_url
-from sqlalchemy import case, func, insert, update
+from sqlalchemy import case, func, insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 from app.core.config import get_settings
 from app.core.security import AuthenticatedPrincipal
 from app.db.models.analytics import MetricDataPoint, MetricEvent, UserActivityDaily
-from app.db.models.users import AppUser
 from app.schemas.analytics import EndpointPerformanceEvent, FileUploadEvent, ToolUsageEvent, UserActivityEvent
 
 logger = logging.getLogger(__name__)
@@ -451,12 +450,13 @@ class AnalyticsService:
             },
         )
         await session.execute(upsert_stmt)
-
-        await session.execute(
-            update(AppUser)
-            .where(AppUser.id == user_id)
-            .values(last_seen_at=occurred_at)
-        )
+        # NOTE: we intentionally do NOT update `app_users.last_seen_at` here.
+        # `last_seen_at` is maintained by the auth service on signup/login/
+        # refresh/google paths. Writing it from this fire-and-forget task
+        # acquired a row-level lock on the logged-in user's row for the
+        # duration of an external transaction, which serialized against the
+        # synchronous `_ensure_profile` UPSERT on the same row and caused
+        # Supabase's statement_timeout to fire on /auth/me under concurrency.
 
 
 def get_analytics_service(request: Request) -> AnalyticsService:

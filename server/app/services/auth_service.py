@@ -8,7 +8,7 @@ import httpx
 from fastapi import Depends
 from jose import JWTError, jwt as jose_jwt
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -231,6 +231,33 @@ class AuthService:
         avatar_url: str | None = None,
         touch_last_seen: bool = False,
     ) -> AuthProfileResponse:
+        # Read-first: the vast majority of calls (every /auth/me, every
+        # authenticated request) hit an existing row that does not need to
+        # change. Issuing an INSERT … ON CONFLICT DO UPDATE in that case
+        # takes a row-level write lock and amplifies contention under
+        # concurrency, which is what caused the statement_timeout on
+        # /auth/me in production. Only upsert when something actually has
+        # to be written.
+        existing = (
+            await self.db.execute(select(AppUser).where(AppUser.id == user_id))
+        ).scalar_one_or_none()
+
+        if existing is not None and self._profile_is_up_to_date(
+            existing,
+            email=email,
+            display_name=display_name,
+            avatar_url=avatar_url,
+        ):
+            if touch_last_seen:
+                await self.db.execute(
+                    update(AppUser)
+                    .where(AppUser.id == user_id)
+                    .values(last_seen_at=func.now())
+                )
+                await self.db.commit()
+                await self.db.refresh(existing)
+            return AuthProfileResponse.model_validate(existing)
+
         profile_values: dict[str, Any] = {
             "id": user_id,
             "email": email,
@@ -262,6 +289,31 @@ class AuthService:
         if user is None:
             raise AuthServiceError("Unable to load the authenticated user profile", status_code=500)
         return AuthProfileResponse.model_validate(user)
+
+    @staticmethod
+    def _profile_is_up_to_date(
+        user: AppUser,
+        *,
+        email: str,
+        display_name: str | None,
+        avatar_url: str | None,
+    ) -> bool:
+        """True when the stored row already reflects the provided claims.
+
+        Note: display_name / avatar_url are merged with COALESCE(existing, new)
+        in the upsert path, so we treat a non-null existing value as satisfied
+        regardless of what the new claim says.
+        """
+
+        if user.status != UserStatus.ACTIVE:
+            return False
+        if user.email != email:
+            return False
+        if display_name is not None and user.display_name is None:
+            return False
+        if avatar_url is not None and user.avatar_url is None:
+            return False
+        return True
 
     async def signup(self, body: AuthSignupRequest) -> AuthSessionResponse:
         auth_user = await self.auth_client.create_user(body.email, body.password, body.display_name)
