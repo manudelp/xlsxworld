@@ -22,7 +22,7 @@
 | 2. Storage service | ✅ done | `332235c` |
 | 3. Optional-auth dependency | ✅ done | `77e1134` |
 | 4. JobsService | ✅ done | `c5a7d90` |
-| 5. `record_and_respond` helper + `trim-spaces` integration | ⬜ pending | — |
+| 5. `record_and_respond` helper + `trim-spaces` integration | ✅ done | _pending commit_ |
 | 6. `/me/jobs` API | ⬜ pending | — |
 | 7. Cleanup CLI | ⬜ pending | — |
 | 8. `client/lib/jobs.ts` | ⬜ pending | — |
@@ -31,7 +31,7 @@
 | 11. i18n keys (en/es/fr/pt) | ⬜ pending | — |
 | 12. Instrument remaining tools | ⬜ follow-up PR | — |
 
-**Deferred operator step:** run `uv run alembic upgrade head` in `server/` to apply the `tool_jobs` migration on the dev database before Task 5 lands.
+**Operator step:** `uv run alembic upgrade head` — applied to the dev database on 2026-04-17 (revision `20260417_0001`). Note: `alembic/env.py` was updated in the same batch to use `settings.async_database_pool_url` when present, because Supabase Free-tier direct hostnames (`db.<project>.supabase.co`) are IPv6-only and unreachable from IPv4-only networks. The running app already uses the pooler; alembic now follows suit and also passes `prepared_statement_cache_size=0` to match.
 
 ---
 
@@ -1102,7 +1102,20 @@ Expected: PASS (15 tests — shipped more than originally planned).
 
 ---
 
-## Task 5: `record_and_respond` helper + integrate `trim-spaces`
+## Task 5: `record_and_respond` helper + integrate `trim-spaces` ✅
+
+**Status:** ✅ done.
+
+**Files (landed):**
+- `server/app/tools/_recording.py` — helper + `jobs_service_dep`
+- `server/app/tools/clean/trim_spaces.py` — wired through `record_and_respond`
+- `server/tests/test_recording_helper.py` — 3 tests (anonymous passthrough, authenticated schedules recording, graceful fallback when the service factory yields `None`)
+- `server/tests/test_tool_trim_spaces_recording.py` — 2 end-to-end tests via `AsyncClient`/`ASGITransport` with `dependency_overrides` for `get_current_user_optional` and `jobs_service_dep` (the project has no live-DB test harness, so integration is asserted against a mock `JobsService` rather than selecting from `ToolJob`)
+
+**Adaptations from the original plan:**
+- Added a third helper test (`test_authenticated_but_jobs_service_unavailable_falls_back`) to cover the `jobs_service is None` branch.
+- The integration test uses dependency-override fixtures modelled on `tests/test_auth_endpoints.py` instead of hypothetical `client` / `db_session` / `fake_jwt_for` fixtures that do not exist in this repo.
+- The helper does **not** currently set an `X-Job-Id` response header: the recording runs in a background task so no job id is known at response time. Emitting the header would require pre-generating the id client-side or in the helper; deferred to a follow-up if the frontend actually needs it.
 
 **Files:**
 - Create: `server/app/tools/_recording.py`

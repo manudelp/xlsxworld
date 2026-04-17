@@ -1,12 +1,20 @@
 from __future__ import annotations
 
 import re
+import time
 
-from fastapi import APIRouter, File, Form, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, UploadFile
 
+from app.core.security import AuthenticatedPrincipal
 from app.services.excel_editor import supports_inplace_edit
 from app.services.excel_reader import parse_excel_bytes
-from app.tools._common import check_excel_file, file_response, has_visual_elements, read_with_limit
+from app.services.jobs_service import JobsService
+from app.tools._common import check_excel_file, has_visual_elements, read_with_limit
+from app.tools._recording import (
+    get_current_user_optional,
+    jobs_service_dep,
+    record_and_respond,
+)
 from app.tools.clean._utils import (
     apply_value_mutation_inplace,
     get_cell,
@@ -26,12 +34,16 @@ router = APIRouter()
     description="Trims leading and trailing spaces in selected text columns.",
 )
 async def trim_spaces(
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(..., description="Excel file"),
     sheet: str = Form("", description="Sheet name (required if all_sheets=false)"),
     all_sheets: bool = Form(False, description="Apply to all sheets"),
     columns: str = Form("", description="Comma-separated column names (empty=all columns)"),
     collapse_internal_spaces: bool = Form(False, description="Collapse internal whitespace sequences"),
+    principal: AuthenticatedPrincipal | None = Depends(get_current_user_optional),
+    jobs_service: JobsService = Depends(jobs_service_dep),
 ):
+    started = time.perf_counter()
     check_excel_file(file)
     raw = await read_with_limit(file)
     selected_columns = parse_columns_arg(columns)
@@ -53,10 +65,19 @@ async def trim_spaces(
             selected_columns=selected_columns,
             mutate=_trim,
         )
-        return file_response(
-            output_bytes,
-            "trim-spaces.xlsx",
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        return await record_and_respond(
+            principal=principal,
+            background_tasks=background_tasks,
+            jobs_service=jobs_service,
+            tool_slug="trim-spaces",
+            tool_name="Trim Spaces",
+            original_filename=file.filename,
+            output_bytes=output_bytes,
+            output_filename="trim-spaces.xlsx",
+            mime_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            success=True,
+            error_type=None,
+            duration_ms=int((time.perf_counter() - started) * 1000),
             visual_elements_removed=visual_lost or has_visual_elements(raw),
         )
 
@@ -93,9 +114,18 @@ async def trim_spaces(
 
     output_bytes = workbook_bytes_from_data(workbook_data)
 
-    return file_response(
-        output_bytes,
-        "trim-spaces.xlsx",
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    return await record_and_respond(
+        principal=principal,
+        background_tasks=background_tasks,
+        jobs_service=jobs_service,
+        tool_slug="trim-spaces",
+        tool_name="Trim Spaces",
+        original_filename=file.filename,
+        output_bytes=output_bytes,
+        output_filename="trim-spaces.xlsx",
+        mime_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        success=True,
+        error_type=None,
+        duration_ms=int((time.perf_counter() - started) * 1000),
         visual_elements_removed=has_visual_elements(raw),
     )
