@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { buildAlternates } from "@/lib/seo";
 
 export async function generateMetadata({
@@ -18,7 +18,7 @@ export async function generateMetadata({
   };
 }
 
-const LAST_UPDATED = "April 5, 2025";
+const LAST_UPDATED = new Date(Date.UTC(2026, 3, 17));
 
 export default async function PrivacyPage({
   params,
@@ -32,6 +32,12 @@ export default async function PrivacyPage({
 
 function PrivacyContent() {
   const t = useTranslations("privacy");
+  const format = useFormatter();
+  const formattedDate = format.dateTime(LAST_UPDATED, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 
   return (
     <main className="max-w-3xl mx-auto px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
@@ -39,7 +45,7 @@ function PrivacyContent() {
         {t("title")}
       </h1>
       <p className="mb-10 text-lg leading-relaxed text-muted text-center">
-        {t("lastUpdated", { date: LAST_UPDATED })}
+        {t("lastUpdated", { date: formattedDate })}
       </p>
 
       <div className="space-y-8 text-base leading-relaxed text-muted">
