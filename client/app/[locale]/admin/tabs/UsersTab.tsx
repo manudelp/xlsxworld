@@ -59,7 +59,7 @@ function ChartCard({
 
   return (
     <div
-      className="rounded-lg border p-6"
+      className="rounded-lg border p-4 sm:p-6"
       style={{
         borderColor: "var(--border)",
         backgroundColor: "var(--surface)",
@@ -71,7 +71,8 @@ function ChartCard({
       >
         {title}
       </h3>
-      <ResponsiveContainer width="100%" height={280}>
+      <div className="h-[220px] w-full sm:h-[280px]">
+      <ResponsiveContainer width="100%" height="100%">
         <LineChart data={formatted}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
           <XAxis
@@ -101,6 +102,7 @@ function ChartCard({
           />
         </LineChart>
       </ResponsiveContainer>
+      </div>
     </div>
   );
 }
@@ -186,7 +188,67 @@ function UserTable({
         </span>
       </div>
 
-      <div className="overflow-x-auto">
+      {/* Mobile cards */}
+      <div className="sm:hidden">
+        {users.map((u) => (
+          <div
+            key={`${u.id}-card`}
+            className="px-4 py-3"
+            style={{ borderBottom: "1px solid var(--border)" }}
+          >
+            <div className="mb-2 flex items-start justify-between gap-2">
+              <p
+                className="truncate text-sm font-medium"
+                style={{ color: "var(--foreground)" }}
+                title={u.email}
+              >
+                {u.email}
+              </p>
+              <div className="flex shrink-0 gap-1">
+                <Badge
+                  label={u.role}
+                  style={ROLE_STYLE[u.role] ?? ROLE_STYLE.member}
+                />
+                <Badge
+                  label={u.status}
+                  style={STATUS_STYLE[u.status] ?? STATUS_STYLE.active}
+                />
+              </div>
+            </div>
+            <dl className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
+              {u.display_name && (
+                <>
+                  <dt style={{ color: "var(--muted-2)" }}>{t("displayName")}</dt>
+                  <dd className="truncate text-right" style={{ color: "var(--foreground)" }}>
+                    {u.display_name}
+                  </dd>
+                </>
+              )}
+              <dt style={{ color: "var(--muted-2)" }}>{t("joined")}</dt>
+              <dd className="text-right" style={{ color: "var(--muted-2)" }}>
+                {u.created_at
+                  ? new Date(u.created_at).toLocaleDateString(undefined, {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })
+                  : "—"}
+              </dd>
+              <dt style={{ color: "var(--muted-2)" }}>{t("lastSeen")}</dt>
+              <dd className="text-right" style={{ color: "var(--muted-2)" }}>
+                {timeAgo(u.last_seen_at, t)}
+              </dd>
+              <dt style={{ color: "var(--muted-2)" }}>{t("toolUses")}</dt>
+              <dd className="text-right" style={{ color: "var(--foreground)" }}>
+                {u.total_tool_uses > 0 ? u.total_tool_uses : "—"}
+              </dd>
+            </dl>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop/tablet table */}
+      <div className="hidden overflow-x-auto sm:block">
         <table className="w-full text-sm" style={{ backgroundColor: "var(--surface-2)" }}>
           <thead>
             <tr style={{ backgroundColor: "var(--surface)" }}>
@@ -265,7 +327,7 @@ function UserTable({
 
       {totalPages > 1 && (
         <div
-          className="flex items-center justify-between px-4 py-3"
+          className="flex items-center justify-between gap-2 px-3 py-3 sm:px-4"
           style={{
             borderTop: "1px solid var(--border)",
             backgroundColor: "var(--surface)",
@@ -283,7 +345,10 @@ function UserTable({
           >
             {t("previous")}
           </button>
-          <span className="text-xs" style={{ color: "var(--muted-2)" }}>
+          <span
+            className="flex-1 truncate text-center text-xs"
+            style={{ color: "var(--muted-2)" }}
+          >
             {t("pageOf", { page, total: totalPages })}
           </span>
           <button

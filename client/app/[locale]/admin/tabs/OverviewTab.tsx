@@ -133,7 +133,7 @@ function SparkCard({
     <button
       type="button"
       onClick={onClick}
-      className="w-full cursor-pointer rounded-lg border p-5 text-left transition-all"
+      className="w-full cursor-pointer rounded-lg border p-3 text-left transition-all sm:p-5"
       style={{
         borderColor: active ? color : "var(--border)",
         backgroundColor: "var(--surface)",
@@ -141,18 +141,18 @@ function SparkCard({
       }}
     >
       <p
-        className="mb-1 text-xs font-medium uppercase tracking-wide"
+        className="mb-1 text-[10px] font-medium uppercase tracking-wide sm:text-xs"
         style={{ color: "var(--muted-2)" }}
       >
         {label}
       </p>
       <p
-        className="text-2xl font-bold"
+        className="text-xl font-bold sm:text-2xl"
         style={{ color: valueColor ?? "var(--foreground)" }}
       >
         {value}
       </p>
-      <p className="mt-1 text-xs" style={{ color: "var(--muted-2)" }}>
+      <p className="mt-1 text-[10px] sm:text-xs" style={{ color: "var(--muted-2)" }}>
         {subtext}
       </p>
       {sparkData.length > 1 && (
@@ -277,8 +277,8 @@ export default function OverviewTab({
   const chartLabel = t(activeConfig.labelKey);
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         {kpis.slice(0, 4).map((kpi) => (
           <SparkCard
             key={kpi.key}
@@ -295,7 +295,7 @@ export default function OverviewTab({
         ))}
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         {kpis.slice(4).map((kpi) => (
           <SparkCard
             key={kpi.key}
@@ -313,7 +313,7 @@ export default function OverviewTab({
       </div>
 
       <div
-        className="rounded-lg border p-6"
+        className="rounded-lg border p-4 sm:p-6"
         style={{
           borderColor: "var(--border)",
           backgroundColor: "var(--surface)",
@@ -333,7 +333,8 @@ export default function OverviewTab({
             {t("noToolUsageData")}
           </p>
         ) : (
-          <ResponsiveContainer width="100%" height={280}>
+          <div className="h-[220px] w-full sm:h-[280px]">
+          <ResponsiveContainer width="100%" height="100%">
             <LineChart data={detailChartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
               <XAxis
@@ -375,6 +376,7 @@ export default function OverviewTab({
               />
             </LineChart>
           </ResponsiveContainer>
+          </div>
         )}
       </div>
     </div>

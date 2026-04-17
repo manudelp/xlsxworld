@@ -443,3 +443,8 @@ input[type="time"]:disabled,
 .inspect-scrollbar-themed::-webkit-scrollbar-corner {
   background: var(--surface);
 }
+
+/* Admin tab bar: hide scrollbar while keeping horizontal scroll. */
+.admin-tab-scroll::-webkit-scrollbar {
+  display: none;
+}

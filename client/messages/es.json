@@ -1380,7 +1380,10 @@
       "avgDuration": "Duración promedio",
       "lastUsed": "Último uso",
       "neverUsed": "Nunca usado",
-      "noData": "Sin datos de uso de herramientas aún."
+      "noData": "Sin datos de uso de herramientas aún.",
+      "sortBy": "Ordenar por",
+      "ariaSortAsc": "Orden ascendente",
+      "ariaSortDesc": "Orden descendente"
     },
     "users": {
       "totalUsers": "Usuarios totales",

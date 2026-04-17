@@ -40,8 +40,8 @@ export default function ActivityTab({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
           <h3
             className="text-sm font-medium"
             style={{ color: "var(--foreground)" }}
@@ -56,7 +56,7 @@ export default function ActivityTab({
           type="button"
           onClick={handleRefresh}
           disabled={refreshing}
-          className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm transition-opacity disabled:opacity-50"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs transition-opacity disabled:opacity-50 sm:px-3 sm:text-sm"
           style={{
             borderColor: "var(--border)",
             backgroundColor: "var(--surface)",
@@ -68,7 +68,7 @@ export default function ActivityTab({
           ) : (
             <RefreshCw className="h-3.5 w-3.5" />
           )}
-          {t("refresh")}
+          <span className="hidden sm:inline">{t("refresh")}</span>
         </button>
       </div>
 
@@ -98,9 +98,9 @@ export default function ActivityTab({
                 borderLeft: `4px solid ${item.success ? "#22c55e" : "#ef4444"}`,
               }}
             >
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     {item.success ? (
                       <CheckCircle className="h-4 w-4 shrink-0" style={{ color: "#22c55e" }} />
                     ) : (
@@ -125,8 +125,12 @@ export default function ActivityTab({
                     )}
                   </div>
 
-                  <div className="mt-1 flex flex-wrap items-center gap-3 text-xs">
-                    <span style={{ color: "var(--muted-2)" }}>
+                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+                    <span
+                      className="max-w-full truncate"
+                      style={{ color: "var(--muted-2)" }}
+                      title={item.user_email ?? undefined}
+                    >
                       {item.user_email || t("anonymous")}
                     </span>
                     <span style={{ color: "var(--muted-2)" }}>
@@ -143,7 +147,7 @@ export default function ActivityTab({
                 </div>
 
                 <span
-                  className="shrink-0 text-xs"
+                  className="shrink-0 text-xs sm:text-right"
                   style={{ color: "var(--muted-2)" }}
                 >
                   {timeAgo(item.occurred_at, t)}

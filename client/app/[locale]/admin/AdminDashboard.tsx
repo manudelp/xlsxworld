@@ -90,27 +90,31 @@ export default function AdminDashboard() {
   }, [activeTab, loadTab]);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+    <div className="mx-auto max-w-7xl px-3 py-6 sm:px-6 sm:py-8">
       <h1
-        className="mb-6 text-2xl font-bold"
+        className="mb-4 text-xl font-bold sm:mb-6 sm:text-2xl"
         style={{ color: "var(--foreground)" }}
       >
         {t("title")}
       </h1>
 
       <div
-        className="mb-6 flex gap-1 rounded-lg border p-1"
+        className="admin-tab-scroll mb-6 flex gap-1 overflow-x-auto rounded-lg border p-1"
         style={{
           borderColor: "var(--border)",
           backgroundColor: "var(--surface)",
+          scrollbarWidth: "none",
         }}
+        role="tablist"
       >
         {TAB_KEYS.map((key) => (
           <button
             key={key}
             type="button"
+            role="tab"
+            aria-selected={activeTab === key}
             onClick={() => setActiveTab(key)}
-            className="rounded-md px-4 py-2 text-sm font-medium transition-colors"
+            className="shrink-0 rounded-md px-3 py-2 text-xs font-medium transition-colors sm:px-4 sm:text-sm"
             style={{
               backgroundColor:
                 activeTab === key
