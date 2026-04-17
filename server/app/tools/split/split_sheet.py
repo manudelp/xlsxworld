@@ -1,15 +1,25 @@
 from __future__ import annotations
 
 import re
+import time
 from io import BytesIO
 
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile
 from openpyxl import Workbook
 
+from app.core.security import AuthenticatedPrincipal
 from app.services.excel_reader import parse_excel_bytes
-from app.tools._common import check_excel_file, file_response, has_visual_elements, read_with_limit, safe_sheet_title, unique_sheet_title
+from app.services.jobs_service import JobsService
+from app.tools._common import check_excel_file, has_visual_elements, read_with_limit, safe_sheet_title, unique_sheet_title
+from app.tools._recording import (
+    get_current_user_optional,
+    jobs_service_dep,
+    record_and_respond,
+)
 
 router = APIRouter()
+
+_XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
 def _alpha_token(index: int, lowercase: bool = False) -> str:
@@ -71,6 +81,7 @@ _VALID_STYLES = {
     description="Splits one sheet into multiple sheets by row chunk size and naming strategy.",
 )
 async def split_sheet(
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(..., description="Excel file"),
     sheet: str = Form(..., description="Sheet name"),
     chunk_size: int = Form(1000, description="Max rows per chunk (including header)"),
@@ -78,7 +89,10 @@ async def split_sheet(
     part_separator: str = Form("_", description="Separator between base name and part token"),
     numbering_style: str = Form("numeric", description="Part token style"),
     custom_sequence: str = Form("", description="Custom tokens (one per line) when style is custom"),
+    principal: AuthenticatedPrincipal | None = Depends(get_current_user_optional),
+    jobs_service: JobsService = Depends(jobs_service_dep),
 ):
+    started = time.perf_counter()
     check_excel_file(file)
     raw = await read_with_limit(file)
     if chunk_size < 2:
@@ -137,9 +151,18 @@ async def split_sheet(
     output = BytesIO()
     out_wb.save(output)
 
-    return file_response(
-        output.getvalue(),
-        "split.xlsx",
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    return await record_and_respond(
+        principal=principal,
+        background_tasks=background_tasks,
+        jobs_service=jobs_service,
+        tool_slug="split-sheet",
+        tool_name="Split Sheet",
+        original_filename=file.filename,
+        output_bytes=output.getvalue(),
+        output_filename="split.xlsx",
+        mime_type=_XLSX_MIME,
+        success=True,
+        error_type=None,
+        duration_ms=int((time.perf_counter() - started) * 1000),
         visual_elements_removed=has_visuals,
     )

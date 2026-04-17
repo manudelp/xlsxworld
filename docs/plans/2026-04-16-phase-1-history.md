@@ -37,7 +37,7 @@
 |---|---|---|---|
 | 1. `clean/` | find-replace, normalize-case, remove-duplicates, remove-empty-rows (trim-spaces already done in Task 5) | ✅ done | `a9716dc` |
 | 2. `convert/` | csv-to-xlsx, xlsx-to-csv, xlsx-to-csv-zip, json-to-xlsx, xlsx-to-json, xml-to-xlsx, xlsx-to-xml, sql-to-xlsx, xlsx-to-sql, xlsx-to-pdf | ✅ done | `f33783c` |
-| 3. `merge/` + `split/` | append-workbooks, merge-sheets, split-sheet, split-workbook | ⬜ pending | — |
+| 3. `merge/` + `split/` | append-workbooks, merge-sheets, split-sheet, split-workbook | ✅ done | _pending_ |
 | 4. `analyze/` + `format/` | compare-workbooks, scan-formula-errors, summary-stats, auto-size-columns, freeze-header | ⬜ pending | — |
 | 5. `data/` + `validate/` + `security/` | sort-rows, split-column, transpose-sheet, detect-blanks, validate-emails, password-protect, remove-password | ⬜ pending | — |
 | 6. `inspect/` (special — returns JSON, not files) | `page_sheet` (GET), `preview` (POST) — both return JSON metadata, never call `file_response`, so **no wiring needed** in current shape. Revisit only if/when an `inspect/export-*` endpoint is added that returns a downloadable artifact. | ✅ n/a | — |

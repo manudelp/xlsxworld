@@ -1,13 +1,21 @@
 from __future__ import annotations
 
+import time
 import zipfile
 from io import BytesIO
 
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile
 from openpyxl import Workbook
 
+from app.core.security import AuthenticatedPrincipal
 from app.services.excel_reader import parse_excel_bytes
-from app.tools._common import check_excel_file, file_response, has_visual_elements, read_with_limit
+from app.services.jobs_service import JobsService
+from app.tools._common import check_excel_file, has_visual_elements, read_with_limit
+from app.tools._recording import (
+    get_current_user_optional,
+    jobs_service_dep,
+    record_and_respond,
+)
 
 router = APIRouter()
 
@@ -18,9 +26,13 @@ router = APIRouter()
     description="Exports each workbook sheet as a separate XLSX file inside a ZIP archive.",
 )
 async def split_workbook(
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(..., description="Excel file"),
     sheet_names: str = Form("", description="Comma-separated sheet names to split (empty=all)"),
+    principal: AuthenticatedPrincipal | None = Depends(get_current_user_optional),
+    jobs_service: JobsService = Depends(jobs_service_dep),
 ):
+    started = time.perf_counter()
     check_excel_file(file)
     raw = await read_with_limit(file)
 
@@ -63,9 +75,18 @@ async def split_workbook(
             member_name = f"{sheet_name.replace(' ', '_') or 'sheet'}.xlsx"
             zf.writestr(member_name, child_bytes.getvalue())
 
-    return file_response(
-        zipped.getvalue(),
-        "split_workbook.zip",
-        "application/zip",
+    return await record_and_respond(
+        principal=principal,
+        background_tasks=background_tasks,
+        jobs_service=jobs_service,
+        tool_slug="split-workbook",
+        tool_name="Split Workbook",
+        original_filename=file.filename,
+        output_bytes=zipped.getvalue(),
+        output_filename="split_workbook.zip",
+        mime_type="application/zip",
+        success=True,
+        error_type=None,
+        duration_ms=int((time.perf_counter() - started) * 1000),
         visual_elements_removed=has_visuals,
     )
