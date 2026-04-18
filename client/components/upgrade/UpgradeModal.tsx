@@ -2,6 +2,8 @@
 
 import { useTranslations } from "next-intl";
 
+import { Link } from "@/i18n/navigation";
+
 import { useUpgradeModal } from "./useUpgradeModal";
 
 export default function UpgradeModal() {
@@ -53,7 +55,7 @@ export default function UpgradeModal() {
           >
             {t("dismiss")}
           </button>
-          <a
+          <Link
             href="/signup"
             onClick={close}
             className="rounded-md px-3 py-1.5 text-sm font-semibold"
@@ -63,7 +65,7 @@ export default function UpgradeModal() {
             }}
           >
             {t("signUp")}
-          </a>
+          </Link>
         </div>
       </div>
     </div>

@@ -2,6 +2,15 @@ import { render, screen, waitFor } from "@testing-library/react";
 
 import QuotaPill from "./QuotaPill";
 
+jest.mock("@/i18n/navigation", () => ({
+  Link: ({
+    children,
+    ...props
+  }: React.AnchorHTMLAttributes<HTMLAnchorElement> & {
+    children: React.ReactNode;
+  }) => <a {...props}>{children}</a>,
+}));
+
 jest.mock("@/lib/usage", () => ({
   fetchUsage: jest.fn(),
 }));

@@ -4,6 +4,15 @@ import userEvent from "@testing-library/user-event";
 import UpgradeModal from "./UpgradeModal";
 import { dispatchUpgradeRequest } from "./useUpgradeModal";
 
+jest.mock("@/i18n/navigation", () => ({
+  Link: ({
+    children,
+    ...props
+  }: React.AnchorHTMLAttributes<HTMLAnchorElement> & {
+    children: React.ReactNode;
+  }) => <a {...props}>{children}</a>,
+}));
+
 jest.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
 }));

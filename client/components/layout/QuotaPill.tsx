@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 
+import { Link } from "@/i18n/navigation";
 import { fetchUsage, type Usage } from "@/lib/usage";
 
 const NEAR_LIMIT_THRESHOLD = 80;
@@ -28,7 +29,7 @@ export default function QuotaPill() {
   if (!usage || usage.jobs_percent < NEAR_LIMIT_THRESHOLD) return null;
 
   return (
-    <a
+    <Link
       href="/my-account"
       title={t("tooltip", {
         n: usage.jobs_today,
@@ -45,6 +46,6 @@ export default function QuotaPill() {
         n: usage.jobs_today,
         limit: usage.jobs_today_limit,
       })}
-    </a>
+    </Link>
   );
 }
