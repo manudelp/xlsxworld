@@ -84,12 +84,16 @@
     "tooltip": "You've used {n} of your {limit} daily jobs"
   },
   "upgradeModal": {
-    "title": "Daily limit reached",
-    "body": "You've hit today's free anonymous limit. Sign up free to keep your work and raise the limit.",
-    "sizeTitle": "File too large",
-    "sizeBody": "This file exceeds the anonymous size limit. Sign up free to process larger files.",
-    "signUp": "Sign up free",
-    "dismiss": "Dismiss"
+    "title": "Keep going — save your work first",
+    "body": "Sign in to keep your progress, unlock higher daily limits, and pick up right where you left off.",
+    "sizeTitle": "Larger files, right this way",
+    "sizeBody": "Sign in to process bigger files and keep your work without limits.",
+    "signIn": "Sign in to continue",
+    "signInWithGoogle": "Continue with Google",
+    "signInWithEmail": "Sign in with email",
+    "createAccount": "New here? Create a free account",
+    "dismiss": "Continue without signing in",
+    "close": "Close"
   },
   "auth": {
     "tabLogin": "Log in",

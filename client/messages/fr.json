@@ -84,12 +84,16 @@
     "tooltip": "Vous avez utilisé {n} de vos {limit} jobs quotidiens"
   },
   "upgradeModal": {
-    "title": "Limite quotidienne atteinte",
-    "body": "Vous avez atteint la limite anonyme gratuite du jour. Inscrivez-vous gratuitement pour garder votre travail et augmenter la limite.",
-    "sizeTitle": "Fichier trop volumineux",
-    "sizeBody": "Ce fichier dépasse la limite anonyme. Inscrivez-vous gratuitement pour traiter des fichiers plus volumineux.",
-    "signUp": "Inscription gratuite",
-    "dismiss": "Fermer"
+    "title": "Continuez — sauvegardez votre travail d'abord",
+    "body": "Connectez-vous pour garder votre progression, débloquer des limites plus élevées et reprendre là où vous en étiez.",
+    "sizeTitle": "Des fichiers plus volumineux, par ici",
+    "sizeBody": "Connectez-vous pour traiter des fichiers plus volumineux et garder votre travail sans limites.",
+    "signIn": "Connectez-vous pour continuer",
+    "signInWithGoogle": "Continuer avec Google",
+    "signInWithEmail": "Se connecter par email",
+    "createAccount": "Nouveau ? Créez un compte gratuit",
+    "dismiss": "Continuer sans se connecter",
+    "close": "Fermer"
   },
   "auth": {
     "tabLogin": "Se connecter",

@@ -84,12 +84,16 @@
     "tooltip": "Has usado {n} de tus {limit} trabajos diarios"
   },
   "upgradeModal": {
-    "title": "Límite diario alcanzado",
-    "body": "Alcanzaste el límite anónimo gratuito de hoy. Regístrate gratis para conservar tu trabajo y aumentar el límite.",
-    "sizeTitle": "Archivo demasiado grande",
-    "sizeBody": "Este archivo supera el límite anónimo. Regístrate gratis para procesar archivos más grandes.",
-    "signUp": "Registrarse gratis",
-    "dismiss": "Cerrar"
+    "title": "Sigue adelante — guarda tu trabajo primero",
+    "body": "Inicia sesión para guardar tu progreso, desbloquear límites más altos y retomar donde lo dejaste.",
+    "sizeTitle": "Archivos más grandes, por aquí",
+    "sizeBody": "Inicia sesión para procesar archivos más grandes y guardar tu trabajo sin límites.",
+    "signIn": "Inicia sesión para continuar",
+    "signInWithGoogle": "Continuar con Google",
+    "signInWithEmail": "Iniciar sesión con email",
+    "createAccount": "¿Nuevo aquí? Crea una cuenta gratis",
+    "dismiss": "Continuar sin iniciar sesión",
+    "close": "Cerrar"
   },
   "auth": {
     "tabLogin": "Iniciar sesión",
