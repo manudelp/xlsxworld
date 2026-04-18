@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { History } from "lucide-react";
 import { useTranslations } from "next-intl";
 
+import QuotaCard from "@/components/account/QuotaCard";
 import { useRequireAuth } from "@/components/auth/useRequireAuth";
 import { Link } from "@/i18n/navigation";
 import { updateDisplayName } from "@/lib/auth/client";
@@ -90,6 +91,8 @@ export default function MyAccountPage() {
             {t("keepProfileUpdated")}
           </p>
         </div>
+
+        <QuotaCard />
 
         <section
           className="rounded-2xl border p-6 shadow-sm"
