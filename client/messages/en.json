@@ -56,6 +56,13 @@
     "loadingAccount": "Loading account...",
     "viewHistory": "View history",
     "viewHistorySubtitle": "See your recent jobs and re-download outputs within 7 days.",
+    "usage": {
+      "title": "Today's usage",
+      "planLabel": "{plan} plan",
+      "jobsToday": "jobs today",
+      "progressLabel": "Daily job usage",
+      "sizeCap": "Max file size: {mb} MB"
+    },
     "history": {
       "title": "Your history",
       "subtitle": "Tool jobs from the last 7 days. Outputs are kept for 7 days then expire.",
@@ -71,6 +78,18 @@
       "confirmDelete": "Delete this job from your history? This cannot be undone.",
       "empty": "No jobs yet — try a tool and come back!"
     }
+  },
+  "quotaPill": {
+    "label": "{n}/{limit} today",
+    "tooltip": "You've used {n} of your {limit} daily jobs"
+  },
+  "upgradeModal": {
+    "title": "Daily limit reached",
+    "body": "You've hit today's free anonymous limit. Sign up free to keep your work and raise the limit.",
+    "sizeTitle": "File too large",
+    "sizeBody": "This file exceeds the anonymous size limit. Sign up free to process larger files.",
+    "signUp": "Sign up free",
+    "dismiss": "Dismiss"
   },
   "auth": {
     "tabLogin": "Log in",

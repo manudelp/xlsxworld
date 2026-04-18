@@ -56,6 +56,13 @@
     "loadingAccount": "Cargando cuenta...",
     "viewHistory": "Ver historial",
     "viewHistorySubtitle": "Consulta tus trabajos recientes y vuelve a descargar los resultados durante 7 días.",
+    "usage": {
+      "title": "Uso de hoy",
+      "planLabel": "Plan {plan}",
+      "jobsToday": "trabajos hoy",
+      "progressLabel": "Uso diario de trabajos",
+      "sizeCap": "Tamaño máx. de archivo: {mb} MB"
+    },
     "history": {
       "title": "Tu historial",
       "subtitle": "Trabajos de los últimos 7 días. Los resultados se conservan 7 días y luego caducan.",
@@ -71,6 +78,18 @@
       "confirmDelete": "¿Eliminar este trabajo del historial? No se puede deshacer.",
       "empty": "Aún no hay trabajos — prueba una herramienta y vuelve."
     }
+  },
+  "quotaPill": {
+    "label": "{n}/{limit} hoy",
+    "tooltip": "Has usado {n} de tus {limit} trabajos diarios"
+  },
+  "upgradeModal": {
+    "title": "Límite diario alcanzado",
+    "body": "Alcanzaste el límite anónimo gratuito de hoy. Regístrate gratis para conservar tu trabajo y aumentar el límite.",
+    "sizeTitle": "Archivo demasiado grande",
+    "sizeBody": "Este archivo supera el límite anónimo. Regístrate gratis para procesar archivos más grandes.",
+    "signUp": "Registrarse gratis",
+    "dismiss": "Cerrar"
   },
   "auth": {
     "tabLogin": "Iniciar sesión",
