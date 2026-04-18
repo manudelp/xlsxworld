@@ -78,7 +78,6 @@ export default function DotTrail() {
     if (startGx < ox) startGx += G;
     if (startGy < oy) startGy += G;
 
-    ctx.fillStyle = cl.bg;
     for (let gx = startGx; gx <= maxX; gx += G) {
       for (let gy = startGy; gy <= maxY; gy += G) {
         let a = 0;
@@ -96,16 +95,12 @@ export default function DotTrail() {
           }
         }
         if (a > 0.01) {
-          ctx.globalAlpha = 1;
-          ctx.beginPath();
-          ctx.arc(gx, gy, ERASE, 0, 6.283);
-          ctx.fill();
+          ctx.clearRect(gx - ERASE, gy - ERASE, ERASE * 2, ERASE * 2);
           ctx.globalAlpha = a;
           ctx.fillStyle = cl.p;
           ctx.beginPath();
           ctx.arc(gx, gy, DOT, 0, 6.283);
           ctx.fill();
-          ctx.fillStyle = cl.bg;
         }
       }
     }

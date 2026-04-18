@@ -9,13 +9,21 @@
     "subheading": "The Excel toolkit for accountants, analysts, and anyone who lives in spreadsheets.",
     "socialProof": "Trusted by teams in 30+ countries",
     "trustLine": "Free to use · No signup required · Uploads are never kept",
-    "storyBadge": "Built for real spreadsheet work",
-    "storyHeading": "Got a messy CSV export or a workbook full of broken formulas? You are in the right place.",
-    "storyBody": "XLSX World helps you clean, combine, convert, and inspect spreadsheet files quickly so you can get back to analysis instead of manual cleanup.",
-    "storyPain1": "Messy exports",
-    "storyPain2": "Formula errors",
-    "storyPain3": "Files to merge",
-    "learnCta": "Read practical Excel guides",
+    "guidesHeading": "Fix common Excel problems in minutes",
+    "guidesBullet1": "Fix broken formulas across entire workbooks",
+    "guidesBullet2": "Clean messy CSV and XLSX exports",
+    "guidesBullet3": "Merge multiple files without errors",
+    "guideCard1Title": "Fix #VALUE! errors step-by-step",
+    "guideCard1Desc": "Trace, diagnose, and resolve the most common formula errors in any workbook.",
+    "guideCard1Time": "7 min",
+    "guideCard2Title": "Clean CSV imports correctly",
+    "guideCard2Desc": "Fix separators, encoding, and broken structure before analysis.",
+    "guideCard2Time": "4 min",
+    "guideCard3Title": "Merge 10 Excel files in 30 seconds",
+    "guideCard3Desc": "Combine workbooks without copy-paste or losing headers.",
+    "guideCard3Time": "3 min",
+    "guidesReadMore": "Read guide",
+    "guidesCta": "Browse all guides",
     "startHereHeading": "Start here",
     "startHereSubheading": "The most-used tools — a good place to begin."
   },
@@ -45,6 +53,7 @@
   },
   "footer": {
     "home": "Home",
+    "allTools": "All Tools",
     "learn": "Learn",
     "faq": "FAQ",
     "gameDesk": "GameDesk",
@@ -52,7 +61,12 @@
     "privacy": "Privacy",
     "terms": "Terms",
     "suggestTool": "Suggest a tool",
-    "launchSignupTitle": "Get notified when new tools launch",
+    "navProduct": "Product",
+    "navResources": "Resources",
+    "navCompany": "Company",
+    "valueStatement": "Fix spreadsheets fast. No Excel expertise required.",
+    "trustSignal": "Free tools · No signup required",
+    "launchSignupTitle": "Get new tools",
     "launchSignupBody": "Join our updates list for new Excel tools and workflow guides.",
     "launchSignupPlaceholder": "you@example.com",
     "launchSignupAction": "Notify me",
@@ -1577,5 +1591,302 @@
       "hoursAgo": "{count} hour(s) ago",
       "daysAgo": "{count} day(s) ago"
     }
+  },
+  "taskTools": {
+    "heading": "What do you want to do with your Excel file?",
+    "searchPlaceholder": "Search a task…",
+    "noResults": "No tools match your search.",
+    "categories": {
+      "organizeStructure": {
+        "title": "Organize & Structure",
+        "description": "Reshape and format your data"
+      },
+      "cleanFix": {
+        "title": "Clean & Fix",
+        "description": "Find and fix data issues"
+      },
+      "mergeCombine": {
+        "title": "Merge & Combine",
+        "description": "Join files and datasets"
+      },
+      "splitExtract": {
+        "title": "Split & Extract",
+        "description": "Break files into smaller pieces"
+      },
+      "analyze": {
+        "title": "Analyze & Inspect",
+        "description": "Understand your data before acting on it"
+      },
+      "security": {
+        "title": "Security",
+        "description": "Protect or unlock your files"
+      },
+      "convert": {
+        "title": "Convert",
+        "description": "Change file formats"
+      }
+    },
+    "tools": {
+      "transpose-sheet": {
+        "title": "Transpose a sheet",
+        "outcome": "Flip rows into columns or columns into rows",
+        "step1": "Upload your file",
+        "step2": "Select the sheet to transpose",
+        "step3": "Download the flipped file"
+      },
+      "split-column": {
+        "title": "Split a column",
+        "outcome": "Turn one column into multiple using a delimiter",
+        "step1": "Upload your file",
+        "step2": "Choose delimiter (comma, space, custom)",
+        "step3": "Download processed file"
+      },
+      "sort-rows": {
+        "title": "Sort rows",
+        "outcome": "Reorder data by one or more columns",
+        "step1": "Upload your file",
+        "step2": "Pick columns and sort direction",
+        "step3": "Download sorted file"
+      },
+      "auto-size-columns": {
+        "title": "Auto-fit column widths",
+        "outcome": "Resize every column to match its content",
+        "step1": "Upload your file",
+        "step2": "Columns are auto-sized across all sheets",
+        "step3": "Download the formatted file"
+      },
+      "freeze-header": {
+        "title": "Freeze the header row",
+        "outcome": "Keep headers visible while scrolling",
+        "step1": "Upload your file",
+        "step2": "Set how many rows to freeze",
+        "step3": "Download the updated file"
+      },
+      "format-dates": {
+        "title": "Format dates",
+        "outcome": "Normalize date formats across columns",
+        "step1": "Upload your file",
+        "step2": "Choose the target date format",
+        "step3": "Download the formatted file"
+      },
+      "remove-duplicates": {
+        "title": "Remove duplicate rows",
+        "outcome": "Delete repeated rows based on columns you pick",
+        "step1": "Upload your file",
+        "step2": "Select columns that define a duplicate",
+        "step3": "Download the cleaned file"
+      },
+      "trim-spaces": {
+        "title": "Trim extra spaces",
+        "outcome": "Strip leading, trailing, and repeated whitespace",
+        "step1": "Upload your file",
+        "step2": "Choose sheets and strictness level",
+        "step3": "Download the trimmed file"
+      },
+      "normalize-case": {
+        "title": "Normalize text case",
+        "outcome": "Convert text to UPPER, lower, or Title Case",
+        "step1": "Upload your file",
+        "step2": "Pick target case and columns",
+        "step3": "Download the normalized file"
+      },
+      "find-replace": {
+        "title": "Find and replace text",
+        "outcome": "Bulk-edit values across all sheets with text or regex",
+        "step1": "Upload your file",
+        "step2": "Enter find/replace terms",
+        "step3": "Download the updated file"
+      },
+      "remove-empty-rows": {
+        "title": "Remove empty rows",
+        "outcome": "Delete rows where every cell is blank",
+        "step1": "Upload your file",
+        "step2": "Select sheets to clean",
+        "step3": "Download the cleaned file"
+      },
+      "detect-blanks": {
+        "title": "Detect blank cells",
+        "outcome": "Find every missing value and get a detailed report",
+        "step1": "Upload your file",
+        "step2": "All sheets are scanned automatically",
+        "step3": "Download the blanks report"
+      },
+      "scan-formula-errors": {
+        "title": "Scan for formula errors",
+        "outcome": "Find #REF!, #VALUE!, #DIV/0! and other errors",
+        "step1": "Upload your file",
+        "step2": "Every cell is scanned for errors",
+        "step3": "Download the error report"
+      },
+      "validate-emails": {
+        "title": "Validate email addresses",
+        "outcome": "Check email formats and get a color-coded report",
+        "step1": "Upload your file",
+        "step2": "Select the email column",
+        "step3": "Download the validation report"
+      },
+      "merge-sheets": {
+        "title": "Merge sheets into one",
+        "outcome": "Combine multiple tabs into a single sheet",
+        "step1": "Upload your workbook",
+        "step2": "Select and order the sheets to merge",
+        "step3": "Download the merged file"
+      },
+      "append-workbooks": {
+        "title": "Append multiple workbooks",
+        "outcome": "Stack rows from separate files into one sheet",
+        "step1": "Upload two or more files",
+        "step2": "Arrange file order",
+        "step3": "Download the combined file"
+      },
+      "split-sheet": {
+        "title": "Split a sheet by rows",
+        "outcome": "Break one sheet into smaller chunks",
+        "step1": "Upload your file",
+        "step2": "Set rows per chunk and naming style",
+        "step3": "Download the split workbook"
+      },
+      "split-workbook": {
+        "title": "Split workbook into files",
+        "outcome": "Extract each sheet as its own XLSX in a ZIP",
+        "step1": "Upload your workbook",
+        "step2": "Select sheets to include",
+        "step3": "Download the ZIP archive"
+      },
+      "inspect-sheets": {
+        "title": "Inspect a workbook",
+        "outcome": "Preview sheets, columns, types, and quality stats",
+        "step1": "Upload your file",
+        "step2": "Browse sheets with filters and sorting",
+        "step3": "Spot issues before processing"
+      },
+      "summary-stats": {
+        "title": "Get summary statistics",
+        "outcome": "Count, mean, median, sum for every numeric column",
+        "step1": "Upload your file",
+        "step2": "All numeric columns are analyzed",
+        "step3": "Download the stats report"
+      },
+      "compare-workbooks": {
+        "title": "Compare two workbooks",
+        "outcome": "Cell-by-cell diff between two versions of a file",
+        "step1": "Upload original and modified files",
+        "step2": "Differences are detected automatically",
+        "step3": "Download the comparison report"
+      },
+      "password-protect": {
+        "title": "Password-protect sheets",
+        "outcome": "Lock sheets to prevent accidental edits",
+        "step1": "Upload your file",
+        "step2": "Set a password and protection options",
+        "step3": "Download the protected file"
+      },
+      "remove-password": {
+        "title": "Remove sheet protection",
+        "outcome": "Unlock editing without the original password",
+        "step1": "Upload the protected file",
+        "step2": "Protection is removed from all sheets",
+        "step3": "Download the unlocked file"
+      },
+      "xlsx-to-csv": {
+        "title": "Convert XLSX to CSV",
+        "outcome": "Export one or more sheets as CSV files",
+        "step1": "Upload your Excel file",
+        "step2": "Select sheets to export",
+        "step3": "Download CSV or ZIP of CSVs"
+      },
+      "csv-to-xlsx": {
+        "title": "Convert CSV to XLSX",
+        "outcome": "Turn a CSV into a proper Excel workbook",
+        "step1": "Upload your CSV file",
+        "step2": "Set delimiter and sheet name",
+        "step3": "Download the XLSX workbook"
+      },
+      "xlsx-to-json": {
+        "title": "Convert XLSX to JSON",
+        "outcome": "Export sheet data as structured JSON",
+        "step1": "Upload your Excel file",
+        "step2": "Select sheets to export",
+        "step3": "Download the JSON file"
+      },
+      "json-to-xlsx": {
+        "title": "Convert JSON to XLSX",
+        "outcome": "Create an Excel workbook from JSON data",
+        "step1": "Upload your JSON file",
+        "step2": "Structure is auto-detected",
+        "step3": "Download the XLSX workbook"
+      },
+      "xlsx-to-pdf": {
+        "title": "Convert XLSX to PDF",
+        "outcome": "Export sheets as printable PDF documents",
+        "step1": "Upload your Excel file",
+        "step2": "Choose sheets and page orientation",
+        "step3": "Download the PDF"
+      },
+      "pdf-to-xlsx": {
+        "title": "Convert PDF to XLSX",
+        "outcome": "Extract tables from PDF into Excel",
+        "step1": "Upload your PDF file",
+        "step2": "Tables are detected automatically",
+        "step3": "Download the XLSX workbook"
+      },
+      "xlsx-to-sql": {
+        "title": "Convert XLSX to SQL",
+        "outcome": "Generate CREATE and INSERT statements",
+        "step1": "Upload your Excel file",
+        "step2": "Select sheets and set table prefix",
+        "step3": "Download the SQL file"
+      },
+      "sql-to-xlsx": {
+        "title": "Convert SQL to XLSX",
+        "outcome": "Parse INSERT statements into a spreadsheet",
+        "step1": "Upload your SQL file",
+        "step2": "Tables are extracted automatically",
+        "step3": "Download the XLSX workbook"
+      },
+      "xlsx-to-xml": {
+        "title": "Convert XLSX to XML",
+        "outcome": "Transform sheet rows into XML elements",
+        "step1": "Upload your Excel file",
+        "step2": "Set root and row tag names",
+        "step3": "Download the XML file"
+      },
+      "xml-to-xlsx": {
+        "title": "Convert XML to XLSX",
+        "outcome": "Map XML nodes to rows and columns",
+        "step1": "Upload your XML file",
+        "step2": "Structure is auto-detected",
+        "step3": "Download the XLSX workbook"
+      }
+    }
+  },
+  "learn": {
+    "heading": "Fix Excel problems",
+    "subheading": "Step-by-step guides paired with the right tool for each fix.",
+    "searchPlaceholder": "Search guides...",
+    "cat_all": "All",
+    "cat_formulas": "Formula errors",
+    "cat_csv": "CSV / Imports",
+    "cat_merging": "File merging",
+    "fp_formulas": "Fix formula errors",
+    "fp_formulas_sub": "Trace and resolve #REF!, #VALUE!, #N/A",
+    "fp_csv": "Clean messy CSVs",
+    "fp_csv_sub": "Fix separators, encoding, and structure",
+    "fp_merging": "Merge files safely",
+    "fp_merging_sub": "Combine workbooks without losing data",
+    "g1Title": "Fix broken Excel formulas",
+    "g1Outcome": "Trace, diagnose, and resolve #REF!, #VALUE!, and #N/A errors across entire workbooks.",
+    "g1Time": "7 min",
+    "g1Tool": "Use tool: Scan Formula Errors",
+    "g2Title": "Fix broken CSV imports",
+    "g2Outcome": "Clean separators, encoding, and structure issues before they corrupt your analysis.",
+    "g2Time": "4 min",
+    "g2Tool": "Use tool: CSV to XLSX",
+    "g3Title": "Merge Excel files without errors",
+    "g3Outcome": "Combine multiple workbooks into one without losing headers or duplicating rows.",
+    "g3Time": "3 min",
+    "g3Tool": "Use tool: Append Workbooks",
+    "open": "Open",
+    "noResults": "No guides match your search."
   }
 }

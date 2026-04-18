@@ -44,33 +44,37 @@ export default async function RelatedTools({ slug, locale }: RelatedToolsProps) 
       <h2 className="text-xl font-semibold mb-4">{t("relatedHeading")}</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {entries.map((entry) => (
-          <Link
+          <div
             key={entry.slug}
-            href={entry.href as "/"}
-            className="tool-card tool-card-interactive rounded-[16px] p-4 block"
+            className="tool-card tool-card-interactive rounded-[16px] relative overflow-hidden z-[1]"
             style={{
               backgroundColor: "var(--surface)",
               border: "1px solid var(--border)",
               color: "var(--foreground)",
             }}
           >
-            <div className="text-3xl mb-2" aria-hidden>
-              {entry.icon}
-            </div>
-            <h3 className="text-base font-semibold mb-1">{entry.heading}</h3>
-            <p
-              className="text-sm"
-              style={{
-                display: "-webkit-box",
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: "vertical",
-                overflow: "hidden",
-                color: "var(--muted)",
-              }}
+            <Link
+              href={entry.href as "/"}
+              className="tool-card-link block h-full p-4"
             >
-              {entry.description}
-            </p>
-          </Link>
+              <div className="text-3xl mb-2" aria-hidden>
+                {entry.icon}
+              </div>
+              <h3 className="text-base font-semibold mb-1">{entry.heading}</h3>
+              <p
+                className="text-sm"
+                style={{
+                  display: "-webkit-box",
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                  color: "var(--muted)",
+                }}
+              >
+                {entry.description}
+              </p>
+            </Link>
+          </div>
         ))}
       </div>
     </section>

@@ -49,16 +49,12 @@ export default function FooterLaunchSignup() {
   }
 
   return (
-    <section className="rounded-lg border border-white/15 bg-white/5 p-3 sm:p-4">
+    <div>
       <h3 className="text-sm font-semibold text-white">
         {t("launchSignupTitle")}
       </h3>
-      <p className="mt-1 text-xs text-white/75">{t("launchSignupBody")}</p>
 
-      <form
-        onSubmit={handleSubmit}
-        className="mt-3 flex flex-col sm:flex-row gap-2"
-      >
+      <form onSubmit={handleSubmit} className="mt-2.5 flex gap-2">
         <input
           type="email"
           inputMode="email"
@@ -69,12 +65,12 @@ export default function FooterLaunchSignup() {
           disabled={status === "submitting"}
           placeholder={t("launchSignupPlaceholder")}
           aria-label={t("launchSignupPlaceholder")}
-          className="w-full rounded-md border border-white/20 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 outline-none focus:border-white focus:ring-2 focus:ring-white/35 disabled:opacity-70"
+          className="w-full rounded-md border border-white/20 bg-white px-3 py-1.5 text-sm text-gray-900 placeholder:text-gray-500 outline-none focus:border-white focus:ring-2 focus:ring-white/35 disabled:opacity-70"
         />
         <button
           type="submit"
           disabled={status === "submitting"}
-          className="inline-flex shrink-0 items-center justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-[#292931] transition-colors hover:bg-white/90 disabled:opacity-70"
+          className="shrink-0 rounded-md bg-white px-3 py-1.5 text-sm font-semibold text-[#1e1e24] transition-colors hover:bg-white/90 disabled:opacity-70"
         >
           {status === "submitting"
             ? t("launchSignupSubmitting")
@@ -84,12 +80,12 @@ export default function FooterLaunchSignup() {
 
       {(status === "success" || status === "error") && (
         <p
-          className={`mt-2 text-xs ${status === "success" ? "text-emerald-300" : "text-rose-300"}`}
+          className={`mt-1.5 text-xs ${status === "success" ? "text-emerald-300" : "text-rose-300"}`}
           role="status"
         >
           {feedback}
         </p>
       )}
-    </section>
+    </div>
   );
 }

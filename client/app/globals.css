@@ -270,6 +270,28 @@ body {
   transform: translateY(-1px) scale(0.995);
 }
 
+/* Task-driven tool cards (All Tools page) */
+.task-tool-card {
+  transition:
+    transform 260ms cubic-bezier(0.2, 0.75, 0.2, 1),
+    box-shadow 260ms ease,
+    border-color 220ms ease,
+    background-color 220ms ease;
+}
+
+.task-tool-card:not([class*="opacity-50"]):hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--border) 55%, var(--primary) 45%);
+  background-color: color-mix(in srgb, var(--surface) 88%, var(--primary) 12%);
+  box-shadow:
+    0 12px 24px color-mix(in srgb, var(--primary) 14%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--primary) 25%, transparent);
+}
+
+.task-tool-card:not([class*="opacity-50"]):active {
+  transform: translateY(-1px) scale(0.995);
+}
+
 @keyframes tool-spin {
   to { transform: rotate(360deg); }
 }
