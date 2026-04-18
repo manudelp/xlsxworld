@@ -10,7 +10,7 @@ from app.services.auth_service import AuthServiceError
 from app.middleware.analytics import AnalyticsMiddleware
 from app.services.analytics_service import AnalyticsService
 from app.routes import platform_routers
-from app.tools import tool_routers
+from app.tools import tool_pagination_routers, tool_routers
 from app.core.openapi_custom import attach_custom_openapi
 from app.core.rate_limit import limiter, _rate_limit_exceeded_handler
 from app.core.quota_guard import enforce_quota
@@ -58,6 +58,13 @@ def create_app() -> FastAPI:
 
     for router in tool_routers:
         app.include_router(router, dependencies=[Depends(enforce_quota)])
+
+    # Pagination / batch-loading routes for tools — no quota increment.
+    # These serve data from an already-counted job (e.g. paging rows in
+    # Inspect Sheets). Counting them would exhaust the user's daily quota
+    # on a single large file.
+    for router in tool_pagination_routers:
+        app.include_router(router)
 
     attach_custom_openapi(app)
     return app

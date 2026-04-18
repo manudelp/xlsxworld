@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import date, datetime, timezone
 from typing import Final
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -78,6 +78,19 @@ class QuotaService:
         result = await self._db.execute(stmt)
         value = result.scalar_one_or_none()
         return int(value) if value is not None else 0
+
+    async def reset(self, *, key: str, day: date) -> None:
+        """Reset the counter for ``(key, day)`` to zero."""
+        stmt = (
+            update(ToolRequestCounter)
+            .where(
+                ToolRequestCounter.key == key,
+                ToolRequestCounter.day_utc == day,
+            )
+            .values(count=0)
+        )
+        await self._db.execute(stmt)
+        await self._db.commit()
 
 
 __all__ = [

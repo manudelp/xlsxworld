@@ -7,9 +7,11 @@ from sqlalchemy import case, cast, func, outerjoin, select, text, Float, Integer
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import AuthenticatedPrincipal, get_current_user
+from app.core.quota_guard import quota_service_dep
 from app.db.models.analytics import MetricEvent, UserActivityDaily
 from app.db.models.users import AppUser, UserRole
 from app.db.session import get_db_session
+from app.services.quota_service import QuotaService, today_utc
 
 router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
 
@@ -508,3 +510,27 @@ async def performance(
         }
         for r in rows
     ]
+
+
+@router.post(
+    "/quota/reset",
+    summary="Reset daily quota for a user or IP",
+    description=(
+        "Sets today's job counter to zero for the given key. "
+        "Key format: ``user:<uuid>`` or ``ip:<address>``."
+    ),
+)
+async def reset_quota(
+    admin: AuthenticatedPrincipal = Depends(require_admin),
+    quota_service: QuotaService = Depends(quota_service_dep),
+    key: str | None = Query(
+        default=None,
+        description='Quota key, e.g. "user:<uuid>" or "ip:<addr>". '
+        "Omit to reset your own quota.",
+    ),
+) -> dict:
+    target = key or f"user:{admin.user_id}"
+    day = today_utc()
+    prev = await quota_service.read_today(key=target, day=day)
+    await quota_service.reset(key=target, day=day)
+    return {"key": target, "day": str(day), "previous_count": prev, "new_count": 0}

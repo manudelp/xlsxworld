@@ -153,3 +153,16 @@ export function fetchAdminActivity(filters: ActivityFilters = {}) {
 export function fetchAdminPerformance() {
   return api.auth.get<AdminPerformanceStat[]>("/api/v1/admin/performance");
 }
+
+export interface QuotaResetResult {
+  key: string;
+  day: string;
+  previous_count: number;
+  new_count: number;
+}
+
+export function resetQuota(key?: string) {
+  const qs: Record<string, string> = {};
+  if (key) qs.key = key;
+  return api.auth.postJson<QuotaResetResult>("/api/v1/admin/quota/reset", {}, qs);
+}

@@ -63,7 +63,7 @@ class AnalyticsMiddleware(BaseHTTPMiddleware):
                     )
                 )
 
-                if is_tool_request:
+                if is_tool_request and not self._is_pagination_request(path, request.method):
                     tool_slug = path.split("/api/v1/tools/", 1)[1].strip("/") or None
                     tool_name = route_name or tool_slug or path
                     tool_category = tool_slug.split("/", 1)[0] if tool_slug and "/" in tool_slug else tool_slug
@@ -107,6 +107,17 @@ class AnalyticsMiddleware(BaseHTTPMiddleware):
             return True
 
         return route_name == "me" and method.upper() == "GET"
+
+    @staticmethod
+    def _is_pagination_request(path: str, method: str) -> bool:
+        """Return True for tool sub-routes that serve paginated data.
+
+        These are part of an already-counted job and must NOT be recorded
+        as separate tool_usage events.
+        """
+        if method.upper() != "GET":
+            return False
+        return path.rstrip("/") == "/api/v1/tools/inspect/sheet"
 
     async def _resolve_principal(self, request: Request) -> AuthenticatedPrincipal | None:
         authorization = request.headers.get("authorization")

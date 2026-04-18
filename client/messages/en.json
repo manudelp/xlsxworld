@@ -7,7 +7,6 @@
     "welcomeBanner": "Welcome. Your account is ready.",
     "heading": "Stop wrestling with Excel.",
     "subheading": "The Excel toolkit for accountants, analysts, and anyone who lives in spreadsheets.",
-    "socialProof": "Trusted by teams in 30+ countries",
     "trustLine": "Free to use · No signup required · Uploads are never kept",
     "guidesHeading": "Fix common Excel problems in minutes",
     "guidesBullet1": "Fix broken formulas across entire workbooks",
@@ -23,9 +22,7 @@
     "guideCard3Desc": "Combine workbooks without copy-paste or losing headers.",
     "guideCard3Time": "3 min",
     "guidesReadMore": "Read guide",
-    "guidesCta": "Browse all guides",
-    "startHereHeading": "Start here",
-    "startHereSubheading": "The most-used tools — a good place to begin."
+    "guidesCta": "Browse all guides"
   },
   "header": {
     "login": "Login",
@@ -37,6 +34,7 @@
   "tools": {
     "noTools": "No tools in this category.",
     "all": "All",
+    "popular": "Popular",
     "new": "New",
     "comingSoon": "Coming soon",
     "suggestTool": "Suggest a Tool",
@@ -1554,7 +1552,12 @@
       "justNow": "Just now",
       "minutesAgo": "{count}m ago",
       "hoursAgo": "{count}h ago",
-      "daysAgo": "{count}d ago"
+      "daysAgo": "{count}d ago",
+      "actions": "Actions",
+      "resetQuota": "Reset Quota",
+      "resettingQuota": "Resetting…",
+      "quotaResetSuccess": "Quota reset for {email} (was {count})",
+      "quotaResetFailed": "Failed to reset quota"
     },
     "performance": {
       "method": "Method",

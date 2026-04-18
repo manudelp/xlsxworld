@@ -7,7 +7,6 @@
     "welcomeBanner": "Bienvenido. Tu cuenta está lista.",
     "heading": "Deja de pelear con Excel.",
     "subheading": "El kit de Excel para contadores, analistas y cualquiera que viva en hojas de cálculo.",
-    "socialProof": "Usado por equipos en más de 30 países",
     "trustLine": "Gratis · Sin registro · Nunca guardamos tus archivos subidos",
     "guidesHeading": "Resuelve problemas comunes de Excel en minutos",
     "guidesBullet1": "Corrige fórmulas rotas en libros completos",
@@ -23,9 +22,7 @@
     "guideCard3Desc": "Une libros sin copiar y pegar ni perder encabezados.",
     "guideCard3Time": "3 min",
     "guidesReadMore": "Leer guía",
-    "guidesCta": "Ver todas las guías",
-    "startHereHeading": "Empieza por aquí",
-    "startHereSubheading": "Las herramientas más usadas — un buen punto de partida."
+    "guidesCta": "Ver todas las guías"
   },
   "header": {
     "login": "Iniciar sesión",
@@ -37,6 +34,7 @@
   "tools": {
     "noTools": "No hay herramientas en esta categoría.",
     "all": "Todas",
+    "popular": "Populares",
     "new": "Nuevo",
     "comingSoon": "Próximamente",
     "suggestTool": "Sugerir Herramienta",
@@ -1554,7 +1552,12 @@
       "justNow": "Ahora mismo",
       "minutesAgo": "hace {count}m",
       "hoursAgo": "hace {count}h",
-      "daysAgo": "hace {count}d"
+      "daysAgo": "hace {count}d",
+      "actions": "Acciones",
+      "resetQuota": "Restablecer cuota",
+      "resettingQuota": "Restableciendo…",
+      "quotaResetSuccess": "Cuota restablecida para {email} (era {count})",
+      "quotaResetFailed": "Error al restablecer la cuota"
     },
     "performance": {
       "method": "Método",
@@ -1597,48 +1600,267 @@
     "searchPlaceholder": "Buscar una tarea…",
     "noResults": "Ninguna herramienta coincide con tu búsqueda.",
     "categories": {
-      "organizeStructure": { "title": "Organizar y estructurar", "description": "Reorganiza y formatea tus datos" },
-      "cleanFix": { "title": "Limpiar y corregir", "description": "Encuentra y corrige problemas en los datos" },
-      "mergeCombine": { "title": "Combinar y unir", "description": "Une archivos y conjuntos de datos" },
-      "splitExtract": { "title": "Dividir y extraer", "description": "Divide archivos en partes más pequeñas" },
-      "analyze": { "title": "Analizar e inspeccionar", "description": "Entiende tus datos antes de actuar" },
-      "security": { "title": "Seguridad", "description": "Protege o desbloquea tus archivos" },
-      "convert": { "title": "Convertir", "description": "Cambia el formato de archivo" }
+      "organizeStructure": {
+        "title": "Organizar y estructurar",
+        "description": "Reorganiza y formatea tus datos"
+      },
+      "cleanFix": {
+        "title": "Limpiar y corregir",
+        "description": "Encuentra y corrige problemas en los datos"
+      },
+      "mergeCombine": {
+        "title": "Combinar y unir",
+        "description": "Une archivos y conjuntos de datos"
+      },
+      "splitExtract": {
+        "title": "Dividir y extraer",
+        "description": "Divide archivos en partes más pequeñas"
+      },
+      "analyze": {
+        "title": "Analizar e inspeccionar",
+        "description": "Entiende tus datos antes de actuar"
+      },
+      "security": {
+        "title": "Seguridad",
+        "description": "Protege o desbloquea tus archivos"
+      },
+      "convert": {
+        "title": "Convertir",
+        "description": "Cambia el formato de archivo"
+      }
     },
     "tools": {
-      "transpose-sheet": { "title": "Transponer una hoja", "outcome": "Convierte filas en columnas o columnas en filas", "step1": "Sube tu archivo", "step2": "Selecciona la hoja a transponer", "step3": "Descarga el archivo invertido" },
-      "split-column": { "title": "Dividir una columna", "outcome": "Convierte una columna en varias usando un delimitador", "step1": "Sube tu archivo", "step2": "Elige delimitador (coma, espacio, personalizado)", "step3": "Descarga el archivo procesado" },
-      "sort-rows": { "title": "Ordenar filas", "outcome": "Reordena datos por una o más columnas", "step1": "Sube tu archivo", "step2": "Elige columnas y dirección de orden", "step3": "Descarga el archivo ordenado" },
-      "auto-size-columns": { "title": "Ajustar ancho de columnas", "outcome": "Redimensiona cada columna según su contenido", "step1": "Sube tu archivo", "step2": "Las columnas se ajustan en todas las hojas", "step3": "Descarga el archivo formateado" },
-      "freeze-header": { "title": "Congelar la fila de encabezado", "outcome": "Mantén los encabezados visibles al desplazarte", "step1": "Sube tu archivo", "step2": "Define cuántas filas congelar", "step3": "Descarga el archivo actualizado" },
-      "format-dates": { "title": "Formatear fechas", "outcome": "Normaliza formatos de fecha en columnas", "step1": "Sube tu archivo", "step2": "Elige el formato de fecha objetivo", "step3": "Descarga el archivo formateado" },
-      "remove-duplicates": { "title": "Eliminar filas duplicadas", "outcome": "Borra filas repetidas según las columnas que elijas", "step1": "Sube tu archivo", "step2": "Selecciona columnas que definen un duplicado", "step3": "Descarga el archivo limpio" },
-      "trim-spaces": { "title": "Recortar espacios extra", "outcome": "Elimina espacios iniciales, finales y repetidos", "step1": "Sube tu archivo", "step2": "Elige hojas y nivel de limpieza", "step3": "Descarga el archivo recortado" },
-      "normalize-case": { "title": "Normalizar mayúsculas", "outcome": "Convierte texto a MAYÚSCULAS, minúsculas o Tipo Título", "step1": "Sube tu archivo", "step2": "Elige el tipo de caja y columnas", "step3": "Descarga el archivo normalizado" },
-      "find-replace": { "title": "Buscar y reemplazar texto", "outcome": "Edita valores en masa con texto o regex", "step1": "Sube tu archivo", "step2": "Ingresa los términos de búsqueda/reemplazo", "step3": "Descarga el archivo actualizado" },
-      "remove-empty-rows": { "title": "Eliminar filas vacías", "outcome": "Borra filas donde todas las celdas están en blanco", "step1": "Sube tu archivo", "step2": "Selecciona hojas a limpiar", "step3": "Descarga el archivo limpio" },
-      "detect-blanks": { "title": "Detectar celdas vacías", "outcome": "Encuentra cada valor faltante y obtén un informe detallado", "step1": "Sube tu archivo", "step2": "Todas las hojas se escanean automáticamente", "step3": "Descarga el informe de vacíos" },
-      "scan-formula-errors": { "title": "Escanear errores de fórmula", "outcome": "Encuentra #REF!, #VALUE!, #DIV/0! y otros errores", "step1": "Sube tu archivo", "step2": "Cada celda se escanea en busca de errores", "step3": "Descarga el informe de errores" },
-      "validate-emails": { "title": "Validar direcciones de correo", "outcome": "Verifica formatos de email y obtén un informe con colores", "step1": "Sube tu archivo", "step2": "Selecciona la columna de email", "step3": "Descarga el informe de validación" },
-      "merge-sheets": { "title": "Combinar hojas en una", "outcome": "Une varias pestañas en una sola hoja", "step1": "Sube tu libro", "step2": "Selecciona y ordena las hojas a combinar", "step3": "Descarga el archivo combinado" },
-      "append-workbooks": { "title": "Anexar varios libros", "outcome": "Apila filas de archivos separados en una hoja", "step1": "Sube dos o más archivos", "step2": "Organiza el orden de archivos", "step3": "Descarga el archivo combinado" },
-      "split-sheet": { "title": "Dividir una hoja por filas", "outcome": "Divide una hoja en fragmentos más pequeños", "step1": "Sube tu archivo", "step2": "Define filas por fragmento y estilo de nombre", "step3": "Descarga el libro dividido" },
-      "split-workbook": { "title": "Dividir libro en archivos", "outcome": "Extrae cada hoja como su propio XLSX en un ZIP", "step1": "Sube tu libro", "step2": "Selecciona hojas a incluir", "step3": "Descarga el archivo ZIP" },
-      "inspect-sheets": { "title": "Inspeccionar un libro", "outcome": "Previsualiza hojas, columnas, tipos y estadísticas de calidad", "step1": "Sube tu archivo", "step2": "Navega hojas con filtros y ordenamiento", "step3": "Detecta problemas antes de procesar" },
-      "summary-stats": { "title": "Obtener estadísticas resumen", "outcome": "Conteo, media, mediana, suma para cada columna numérica", "step1": "Sube tu archivo", "step2": "Todas las columnas numéricas se analizan", "step3": "Descarga el informe de estadísticas" },
-      "compare-workbooks": { "title": "Comparar dos libros", "outcome": "Diferencias celda por celda entre dos versiones de un archivo", "step1": "Sube archivos original y modificado", "step2": "Las diferencias se detectan automáticamente", "step3": "Descarga el informe de comparación" },
-      "password-protect": { "title": "Proteger hojas con contraseña", "outcome": "Bloquea hojas para evitar ediciones accidentales", "step1": "Sube tu archivo", "step2": "Define contraseña y opciones de protección", "step3": "Descarga el archivo protegido" },
-      "remove-password": { "title": "Eliminar protección de hojas", "outcome": "Desbloquea la edición sin la contraseña original", "step1": "Sube el archivo protegido", "step2": "La protección se elimina de todas las hojas", "step3": "Descarga el archivo desbloqueado" },
-      "xlsx-to-csv": { "title": "Convertir XLSX a CSV", "outcome": "Exporta una o más hojas como archivos CSV", "step1": "Sube tu archivo Excel", "step2": "Selecciona hojas a exportar", "step3": "Descarga CSV o ZIP de CSVs" },
-      "csv-to-xlsx": { "title": "Convertir CSV a XLSX", "outcome": "Convierte un CSV en un libro Excel", "step1": "Sube tu archivo CSV", "step2": "Define delimitador y nombre de hoja", "step3": "Descarga el libro XLSX" },
-      "xlsx-to-json": { "title": "Convertir XLSX a JSON", "outcome": "Exporta datos de hojas como JSON estructurado", "step1": "Sube tu archivo Excel", "step2": "Selecciona hojas a exportar", "step3": "Descarga el archivo JSON" },
-      "json-to-xlsx": { "title": "Convertir JSON a XLSX", "outcome": "Crea un libro Excel desde datos JSON", "step1": "Sube tu archivo JSON", "step2": "La estructura se detecta automáticamente", "step3": "Descarga el libro XLSX" },
-      "xlsx-to-pdf": { "title": "Convertir XLSX a PDF", "outcome": "Exporta hojas como documentos PDF imprimibles", "step1": "Sube tu archivo Excel", "step2": "Elige hojas y orientación de página", "step3": "Descarga el PDF" },
-      "pdf-to-xlsx": { "title": "Convertir PDF a XLSX", "outcome": "Extrae tablas de PDF a Excel", "step1": "Sube tu archivo PDF", "step2": "Las tablas se detectan automáticamente", "step3": "Descarga el libro XLSX" },
-      "xlsx-to-sql": { "title": "Convertir XLSX a SQL", "outcome": "Genera sentencias CREATE e INSERT", "step1": "Sube tu archivo Excel", "step2": "Selecciona hojas y prefijo de tabla", "step3": "Descarga el archivo SQL" },
-      "sql-to-xlsx": { "title": "Convertir SQL a XLSX", "outcome": "Analiza sentencias INSERT en una hoja de cálculo", "step1": "Sube tu archivo SQL", "step2": "Las tablas se extraen automáticamente", "step3": "Descarga el libro XLSX" },
-      "xlsx-to-xml": { "title": "Convertir XLSX a XML", "outcome": "Transforma filas de hojas en elementos XML", "step1": "Sube tu archivo Excel", "step2": "Define nombres de etiquetas raíz y fila", "step3": "Descarga el archivo XML" },
-      "xml-to-xlsx": { "title": "Convertir XML a XLSX", "outcome": "Mapea nodos XML a filas y columnas", "step1": "Sube tu archivo XML", "step2": "La estructura se detecta automáticamente", "step3": "Descarga el libro XLSX" }
+      "transpose-sheet": {
+        "title": "Transponer una hoja",
+        "outcome": "Convierte filas en columnas o columnas en filas",
+        "step1": "Sube tu archivo",
+        "step2": "Selecciona la hoja a transponer",
+        "step3": "Descarga el archivo invertido"
+      },
+      "split-column": {
+        "title": "Dividir una columna",
+        "outcome": "Convierte una columna en varias usando un delimitador",
+        "step1": "Sube tu archivo",
+        "step2": "Elige delimitador (coma, espacio, personalizado)",
+        "step3": "Descarga el archivo procesado"
+      },
+      "sort-rows": {
+        "title": "Ordenar filas",
+        "outcome": "Reordena datos por una o más columnas",
+        "step1": "Sube tu archivo",
+        "step2": "Elige columnas y dirección de orden",
+        "step3": "Descarga el archivo ordenado"
+      },
+      "auto-size-columns": {
+        "title": "Ajustar ancho de columnas",
+        "outcome": "Redimensiona cada columna según su contenido",
+        "step1": "Sube tu archivo",
+        "step2": "Las columnas se ajustan en todas las hojas",
+        "step3": "Descarga el archivo formateado"
+      },
+      "freeze-header": {
+        "title": "Congelar la fila de encabezado",
+        "outcome": "Mantén los encabezados visibles al desplazarte",
+        "step1": "Sube tu archivo",
+        "step2": "Define cuántas filas congelar",
+        "step3": "Descarga el archivo actualizado"
+      },
+      "format-dates": {
+        "title": "Formatear fechas",
+        "outcome": "Normaliza formatos de fecha en columnas",
+        "step1": "Sube tu archivo",
+        "step2": "Elige el formato de fecha objetivo",
+        "step3": "Descarga el archivo formateado"
+      },
+      "remove-duplicates": {
+        "title": "Eliminar filas duplicadas",
+        "outcome": "Borra filas repetidas según las columnas que elijas",
+        "step1": "Sube tu archivo",
+        "step2": "Selecciona columnas que definen un duplicado",
+        "step3": "Descarga el archivo limpio"
+      },
+      "trim-spaces": {
+        "title": "Recortar espacios extra",
+        "outcome": "Elimina espacios iniciales, finales y repetidos",
+        "step1": "Sube tu archivo",
+        "step2": "Elige hojas y nivel de limpieza",
+        "step3": "Descarga el archivo recortado"
+      },
+      "normalize-case": {
+        "title": "Normalizar mayúsculas",
+        "outcome": "Convierte texto a MAYÚSCULAS, minúsculas o Tipo Título",
+        "step1": "Sube tu archivo",
+        "step2": "Elige el tipo de caja y columnas",
+        "step3": "Descarga el archivo normalizado"
+      },
+      "find-replace": {
+        "title": "Buscar y reemplazar texto",
+        "outcome": "Edita valores en masa con texto o regex",
+        "step1": "Sube tu archivo",
+        "step2": "Ingresa los términos de búsqueda/reemplazo",
+        "step3": "Descarga el archivo actualizado"
+      },
+      "remove-empty-rows": {
+        "title": "Eliminar filas vacías",
+        "outcome": "Borra filas donde todas las celdas están en blanco",
+        "step1": "Sube tu archivo",
+        "step2": "Selecciona hojas a limpiar",
+        "step3": "Descarga el archivo limpio"
+      },
+      "detect-blanks": {
+        "title": "Detectar celdas vacías",
+        "outcome": "Encuentra cada valor faltante y obtén un informe detallado",
+        "step1": "Sube tu archivo",
+        "step2": "Todas las hojas se escanean automáticamente",
+        "step3": "Descarga el informe de vacíos"
+      },
+      "scan-formula-errors": {
+        "title": "Escanear errores de fórmula",
+        "outcome": "Encuentra #REF!, #VALUE!, #DIV/0! y otros errores",
+        "step1": "Sube tu archivo",
+        "step2": "Cada celda se escanea en busca de errores",
+        "step3": "Descarga el informe de errores"
+      },
+      "validate-emails": {
+        "title": "Validar direcciones de correo",
+        "outcome": "Verifica formatos de email y obtén un informe con colores",
+        "step1": "Sube tu archivo",
+        "step2": "Selecciona la columna de email",
+        "step3": "Descarga el informe de validación"
+      },
+      "merge-sheets": {
+        "title": "Combinar hojas en una",
+        "outcome": "Une varias pestañas en una sola hoja",
+        "step1": "Sube tu libro",
+        "step2": "Selecciona y ordena las hojas a combinar",
+        "step3": "Descarga el archivo combinado"
+      },
+      "append-workbooks": {
+        "title": "Anexar varios libros",
+        "outcome": "Apila filas de archivos separados en una hoja",
+        "step1": "Sube dos o más archivos",
+        "step2": "Organiza el orden de archivos",
+        "step3": "Descarga el archivo combinado"
+      },
+      "split-sheet": {
+        "title": "Dividir una hoja por filas",
+        "outcome": "Divide una hoja en fragmentos más pequeños",
+        "step1": "Sube tu archivo",
+        "step2": "Define filas por fragmento y estilo de nombre",
+        "step3": "Descarga el libro dividido"
+      },
+      "split-workbook": {
+        "title": "Dividir libro en archivos",
+        "outcome": "Extrae cada hoja como su propio XLSX en un ZIP",
+        "step1": "Sube tu libro",
+        "step2": "Selecciona hojas a incluir",
+        "step3": "Descarga el archivo ZIP"
+      },
+      "inspect-sheets": {
+        "title": "Inspeccionar un libro",
+        "outcome": "Previsualiza hojas, columnas, tipos y estadísticas de calidad",
+        "step1": "Sube tu archivo",
+        "step2": "Navega hojas con filtros y ordenamiento",
+        "step3": "Detecta problemas antes de procesar"
+      },
+      "summary-stats": {
+        "title": "Obtener estadísticas resumen",
+        "outcome": "Conteo, media, mediana, suma para cada columna numérica",
+        "step1": "Sube tu archivo",
+        "step2": "Todas las columnas numéricas se analizan",
+        "step3": "Descarga el informe de estadísticas"
+      },
+      "compare-workbooks": {
+        "title": "Comparar dos libros",
+        "outcome": "Diferencias celda por celda entre dos versiones de un archivo",
+        "step1": "Sube archivos original y modificado",
+        "step2": "Las diferencias se detectan automáticamente",
+        "step3": "Descarga el informe de comparación"
+      },
+      "password-protect": {
+        "title": "Proteger hojas con contraseña",
+        "outcome": "Bloquea hojas para evitar ediciones accidentales",
+        "step1": "Sube tu archivo",
+        "step2": "Define contraseña y opciones de protección",
+        "step3": "Descarga el archivo protegido"
+      },
+      "remove-password": {
+        "title": "Eliminar protección de hojas",
+        "outcome": "Desbloquea la edición sin la contraseña original",
+        "step1": "Sube el archivo protegido",
+        "step2": "La protección se elimina de todas las hojas",
+        "step3": "Descarga el archivo desbloqueado"
+      },
+      "xlsx-to-csv": {
+        "title": "Convertir XLSX a CSV",
+        "outcome": "Exporta una o más hojas como archivos CSV",
+        "step1": "Sube tu archivo Excel",
+        "step2": "Selecciona hojas a exportar",
+        "step3": "Descarga CSV o ZIP de CSVs"
+      },
+      "csv-to-xlsx": {
+        "title": "Convertir CSV a XLSX",
+        "outcome": "Convierte un CSV en un libro Excel",
+        "step1": "Sube tu archivo CSV",
+        "step2": "Define delimitador y nombre de hoja",
+        "step3": "Descarga el libro XLSX"
+      },
+      "xlsx-to-json": {
+        "title": "Convertir XLSX a JSON",
+        "outcome": "Exporta datos de hojas como JSON estructurado",
+        "step1": "Sube tu archivo Excel",
+        "step2": "Selecciona hojas a exportar",
+        "step3": "Descarga el archivo JSON"
+      },
+      "json-to-xlsx": {
+        "title": "Convertir JSON a XLSX",
+        "outcome": "Crea un libro Excel desde datos JSON",
+        "step1": "Sube tu archivo JSON",
+        "step2": "La estructura se detecta automáticamente",
+        "step3": "Descarga el libro XLSX"
+      },
+      "xlsx-to-pdf": {
+        "title": "Convertir XLSX a PDF",
+        "outcome": "Exporta hojas como documentos PDF imprimibles",
+        "step1": "Sube tu archivo Excel",
+        "step2": "Elige hojas y orientación de página",
+        "step3": "Descarga el PDF"
+      },
+      "pdf-to-xlsx": {
+        "title": "Convertir PDF a XLSX",
+        "outcome": "Extrae tablas de PDF a Excel",
+        "step1": "Sube tu archivo PDF",
+        "step2": "Las tablas se detectan automáticamente",
+        "step3": "Descarga el libro XLSX"
+      },
+      "xlsx-to-sql": {
+        "title": "Convertir XLSX a SQL",
+        "outcome": "Genera sentencias CREATE e INSERT",
+        "step1": "Sube tu archivo Excel",
+        "step2": "Selecciona hojas y prefijo de tabla",
+        "step3": "Descarga el archivo SQL"
+      },
+      "sql-to-xlsx": {
+        "title": "Convertir SQL a XLSX",
+        "outcome": "Analiza sentencias INSERT en una hoja de cálculo",
+        "step1": "Sube tu archivo SQL",
+        "step2": "Las tablas se extraen automáticamente",
+        "step3": "Descarga el libro XLSX"
+      },
+      "xlsx-to-xml": {
+        "title": "Convertir XLSX a XML",
+        "outcome": "Transforma filas de hojas en elementos XML",
+        "step1": "Sube tu archivo Excel",
+        "step2": "Define nombres de etiquetas raíz y fila",
+        "step3": "Descarga el archivo XML"
+      },
+      "xml-to-xlsx": {
+        "title": "Convertir XML a XLSX",
+        "outcome": "Mapea nodos XML a filas y columnas",
+        "step1": "Sube tu archivo XML",
+        "step2": "La estructura se detecta automáticamente",
+        "step3": "Descarga el libro XLSX"
+      }
     }
   },
   "learn": {

@@ -247,14 +247,24 @@ export const toolItems: ToolItem[] = [
   },
 ];
 
-// Featured tools shown in the "Start here" row on the homepage.
+// Popular tools shown when the "Popular" filter is active on the homepage.
 // Order matters — these are the recommended entry points for new users.
 export const FEATURED_TOOL_SLUGS = [
-  "csv-to-xlsx",
-  "xlsx-to-csv",
-  "remove-duplicates",
   "inspect-sheets",
+  "xlsx-to-csv",
+  "csv-to-xlsx",
+  "remove-duplicates",
+  "merge-sheets",
+  "append-workbooks",
+  "split-workbook",
+  "xlsx-to-json",
+  "xlsx-to-pdf",
+  "trim-spaces",
+  "find-replace",
   "scan-formula-errors",
+  "sort-rows",
+  "detect-blanks",
+  "freeze-header",
 ];
 
 // Hidden list for future consideration (not shown in the grid)

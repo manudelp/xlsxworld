@@ -5,6 +5,7 @@ import { getMessages, setRequestLocale } from "next-intl/server";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { routing } from "@/i18n/routing";
+import { Toaster } from "sonner";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { AuthProvider } from "@/components/auth/AuthProvider";
@@ -124,6 +125,17 @@ export default async function LocaleLayout({
               <main className="pt-[60px] min-h-screen">{children}</main>
               <Footer />
               <UpgradeModal />
+              <Toaster
+                position="bottom-right"
+                theme="system"
+                toastOptions={{
+                  style: {
+                    background: "var(--surface-2)",
+                    color: "var(--foreground)",
+                    border: "1px solid var(--border)",
+                  },
+                }}
+              />
             </AuthProvider>
           </ThemeProvider>
         </NextIntlClientProvider>

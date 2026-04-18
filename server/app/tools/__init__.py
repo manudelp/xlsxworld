@@ -1,3 +1,4 @@
+from app.tools.inspect import pagination_router as inspect_pagination_router
 from app.tools.inspect import router as inspect_router
 from app.tools.convert import router as convert_router
 from app.tools.merge import router as merge_router
@@ -13,4 +14,10 @@ tool_routers = [
     inspect_router, convert_router, merge_router, split_router,
     clean_router, analyze_router, format_router, data_router,
     validate_router, security_router,
+]
+
+# Routers that serve internal pagination / batch-loading for tools.
+# These must NOT be quota-enforced: they are part of an already-counted job.
+tool_pagination_routers = [
+    inspect_pagination_router,
 ]

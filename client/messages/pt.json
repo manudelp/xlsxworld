@@ -7,7 +7,6 @@
     "welcomeBanner": "Bem-vindo. Sua conta está pronta.",
     "heading": "Pare de lutar com o Excel.",
     "subheading": "O kit de Excel para contadores, analistas e qualquer pessoa que vive em planilhas.",
-    "socialProof": "Usado por equipes em mais de 30 países",
     "trustLine": "Grátis · Sem cadastro · Seus envios nunca são guardados",
     "guidesHeading": "Resolva problemas comuns do Excel em minutos",
     "guidesBullet1": "Corrija fórmulas quebradas em planilhas inteiras",
@@ -23,9 +22,7 @@
     "guideCard3Desc": "Una planilhas sem copiar e colar ou perder cabeçalhos.",
     "guideCard3Time": "3 min",
     "guidesReadMore": "Ler guia",
-    "guidesCta": "Ver todos os guias",
-    "startHereHeading": "Comece por aqui",
-    "startHereSubheading": "As ferramentas mais usadas — um bom ponto de partida."
+    "guidesCta": "Ver todos os guias"
   },
   "header": {
     "login": "Entrar",
@@ -37,6 +34,7 @@
   "tools": {
     "noTools": "Nenhuma ferramenta nesta categoria.",
     "all": "Todas",
+    "popular": "Populares",
     "new": "Novo",
     "comingSoon": "Em breve",
     "suggestTool": "Sugerir Ferramenta",
@@ -1554,7 +1552,12 @@
       "justNow": "Agora mesmo",
       "minutesAgo": "há {count}m",
       "hoursAgo": "há {count}h",
-      "daysAgo": "há {count}d"
+      "daysAgo": "há {count}d",
+      "actions": "Ações",
+      "resetQuota": "Redefinir cota",
+      "resettingQuota": "Redefinindo…",
+      "quotaResetSuccess": "Cota redefinida para {email} (era {count})",
+      "quotaResetFailed": "Falha ao redefinir a cota"
     },
     "performance": {
       "method": "Método",
@@ -1597,48 +1600,267 @@
     "searchPlaceholder": "Buscar uma tarefa…",
     "noResults": "Nenhuma ferramenta corresponde à sua busca.",
     "categories": {
-      "organizeStructure": { "title": "Organizar e estruturar", "description": "Reorganize e formate seus dados" },
-      "cleanFix": { "title": "Limpar e corrigir", "description": "Encontre e corrija problemas nos dados" },
-      "mergeCombine": { "title": "Combinar e unir", "description": "Junte arquivos e conjuntos de dados" },
-      "splitExtract": { "title": "Dividir e extrair", "description": "Divida arquivos em partes menores" },
-      "analyze": { "title": "Analisar e inspecionar", "description": "Entenda seus dados antes de agir" },
-      "security": { "title": "Segurança", "description": "Proteja ou desbloqueie seus arquivos" },
-      "convert": { "title": "Converter", "description": "Mude o formato do arquivo" }
+      "organizeStructure": {
+        "title": "Organizar e estruturar",
+        "description": "Reorganize e formate seus dados"
+      },
+      "cleanFix": {
+        "title": "Limpar e corrigir",
+        "description": "Encontre e corrija problemas nos dados"
+      },
+      "mergeCombine": {
+        "title": "Combinar e unir",
+        "description": "Junte arquivos e conjuntos de dados"
+      },
+      "splitExtract": {
+        "title": "Dividir e extrair",
+        "description": "Divida arquivos em partes menores"
+      },
+      "analyze": {
+        "title": "Analisar e inspecionar",
+        "description": "Entenda seus dados antes de agir"
+      },
+      "security": {
+        "title": "Segurança",
+        "description": "Proteja ou desbloqueie seus arquivos"
+      },
+      "convert": {
+        "title": "Converter",
+        "description": "Mude o formato do arquivo"
+      }
     },
     "tools": {
-      "transpose-sheet": { "title": "Transpor uma planilha", "outcome": "Inverta linhas em colunas ou colunas em linhas", "step1": "Envie seu arquivo", "step2": "Selecione a planilha a transpor", "step3": "Baixe o arquivo invertido" },
-      "split-column": { "title": "Dividir uma coluna", "outcome": "Transforme uma coluna em várias usando um delimitador", "step1": "Envie seu arquivo", "step2": "Escolha delimitador (vírgula, espaço, personalizado)", "step3": "Baixe o arquivo processado" },
-      "sort-rows": { "title": "Ordenar linhas", "outcome": "Reordene dados por uma ou mais colunas", "step1": "Envie seu arquivo", "step2": "Escolha colunas e direção de ordenação", "step3": "Baixe o arquivo ordenado" },
-      "auto-size-columns": { "title": "Ajustar largura das colunas", "outcome": "Redimensione cada coluna conforme seu conteúdo", "step1": "Envie seu arquivo", "step2": "As colunas são ajustadas em todas as planilhas", "step3": "Baixe o arquivo formatado" },
-      "freeze-header": { "title": "Congelar a linha de cabeçalho", "outcome": "Mantenha os cabeçalhos visíveis ao rolar", "step1": "Envie seu arquivo", "step2": "Defina quantas linhas congelar", "step3": "Baixe o arquivo atualizado" },
-      "format-dates": { "title": "Formatar datas", "outcome": "Normalize formatos de data nas colunas", "step1": "Envie seu arquivo", "step2": "Escolha o formato de data alvo", "step3": "Baixe o arquivo formatado" },
-      "remove-duplicates": { "title": "Remover linhas duplicadas", "outcome": "Exclua linhas repetidas com base nas colunas escolhidas", "step1": "Envie seu arquivo", "step2": "Selecione colunas que definem uma duplicata", "step3": "Baixe o arquivo limpo" },
-      "trim-spaces": { "title": "Aparar espaços extras", "outcome": "Remova espaços iniciais, finais e repetidos", "step1": "Envie seu arquivo", "step2": "Escolha planilhas e nível de limpeza", "step3": "Baixe o arquivo aparado" },
-      "normalize-case": { "title": "Normalizar caixa do texto", "outcome": "Converta texto para MAIÚSCULAS, minúsculas ou Tipo Título", "step1": "Envie seu arquivo", "step2": "Escolha a caixa alvo e colunas", "step3": "Baixe o arquivo normalizado" },
-      "find-replace": { "title": "Localizar e substituir texto", "outcome": "Edite valores em massa com texto ou regex", "step1": "Envie seu arquivo", "step2": "Insira os termos de busca/substituição", "step3": "Baixe o arquivo atualizado" },
-      "remove-empty-rows": { "title": "Remover linhas vazias", "outcome": "Exclua linhas onde todas as células estão em branco", "step1": "Envie seu arquivo", "step2": "Selecione planilhas a limpar", "step3": "Baixe o arquivo limpo" },
-      "detect-blanks": { "title": "Detectar células vazias", "outcome": "Encontre cada valor faltante e obtenha um relatório detalhado", "step1": "Envie seu arquivo", "step2": "Todas as planilhas são escaneadas automaticamente", "step3": "Baixe o relatório de vazios" },
-      "scan-formula-errors": { "title": "Escanear erros de fórmula", "outcome": "Encontre #REF!, #VALUE!, #DIV/0! e outros erros", "step1": "Envie seu arquivo", "step2": "Cada célula é escaneada em busca de erros", "step3": "Baixe o relatório de erros" },
-      "validate-emails": { "title": "Validar endereços de e-mail", "outcome": "Verifique formatos de e-mail e obtenha um relatório colorido", "step1": "Envie seu arquivo", "step2": "Selecione a coluna de e-mail", "step3": "Baixe o relatório de validação" },
-      "merge-sheets": { "title": "Combinar planilhas em uma", "outcome": "Una várias abas em uma única planilha", "step1": "Envie sua pasta de trabalho", "step2": "Selecione e ordene as planilhas a combinar", "step3": "Baixe o arquivo combinado" },
-      "append-workbooks": { "title": "Anexar várias pastas de trabalho", "outcome": "Empilhe linhas de arquivos separados em uma planilha", "step1": "Envie dois ou mais arquivos", "step2": "Organize a ordem dos arquivos", "step3": "Baixe o arquivo combinado" },
-      "split-sheet": { "title": "Dividir uma planilha por linhas", "outcome": "Divida uma planilha em fragmentos menores", "step1": "Envie seu arquivo", "step2": "Defina linhas por fragmento e estilo de nome", "step3": "Baixe a pasta de trabalho dividida" },
-      "split-workbook": { "title": "Dividir pasta de trabalho em arquivos", "outcome": "Extraia cada planilha como XLSX em um ZIP", "step1": "Envie sua pasta de trabalho", "step2": "Selecione planilhas a incluir", "step3": "Baixe o arquivo ZIP" },
-      "inspect-sheets": { "title": "Inspecionar uma pasta de trabalho", "outcome": "Visualize planilhas, colunas, tipos e estatísticas", "step1": "Envie seu arquivo", "step2": "Navegue planilhas com filtros e ordenação", "step3": "Detecte problemas antes de processar" },
-      "summary-stats": { "title": "Obter estatísticas resumidas", "outcome": "Contagem, média, mediana, soma por coluna numérica", "step1": "Envie seu arquivo", "step2": "Todas as colunas numéricas são analisadas", "step3": "Baixe o relatório de estatísticas" },
-      "compare-workbooks": { "title": "Comparar duas pastas de trabalho", "outcome": "Diferenças célula por célula entre duas versões", "step1": "Envie arquivos original e modificado", "step2": "As diferenças são detectadas automaticamente", "step3": "Baixe o relatório de comparação" },
-      "password-protect": { "title": "Proteger planilhas com senha", "outcome": "Bloqueie planilhas contra edições acidentais", "step1": "Envie seu arquivo", "step2": "Defina senha e opções de proteção", "step3": "Baixe o arquivo protegido" },
-      "remove-password": { "title": "Remover proteção de planilhas", "outcome": "Desbloqueie a edição sem a senha original", "step1": "Envie o arquivo protegido", "step2": "A proteção é removida de todas as planilhas", "step3": "Baixe o arquivo desbloqueado" },
-      "xlsx-to-csv": { "title": "Converter XLSX para CSV", "outcome": "Exporte uma ou mais planilhas como CSV", "step1": "Envie seu arquivo Excel", "step2": "Selecione planilhas a exportar", "step3": "Baixe CSV ou ZIP de CSVs" },
-      "csv-to-xlsx": { "title": "Converter CSV para XLSX", "outcome": "Transforme um CSV em uma pasta de trabalho Excel", "step1": "Envie seu arquivo CSV", "step2": "Defina delimitador e nome da planilha", "step3": "Baixe a pasta de trabalho XLSX" },
-      "xlsx-to-json": { "title": "Converter XLSX para JSON", "outcome": "Exporte dados de planilhas como JSON estruturado", "step1": "Envie seu arquivo Excel", "step2": "Selecione planilhas a exportar", "step3": "Baixe o arquivo JSON" },
-      "json-to-xlsx": { "title": "Converter JSON para XLSX", "outcome": "Crie uma pasta de trabalho Excel a partir de dados JSON", "step1": "Envie seu arquivo JSON", "step2": "A estrutura é detectada automaticamente", "step3": "Baixe a pasta de trabalho XLSX" },
-      "xlsx-to-pdf": { "title": "Converter XLSX para PDF", "outcome": "Exporte planilhas como PDFs imprimíveis", "step1": "Envie seu arquivo Excel", "step2": "Escolha planilhas e orientação da página", "step3": "Baixe o PDF" },
-      "pdf-to-xlsx": { "title": "Converter PDF para XLSX", "outcome": "Extraia tabelas de PDF para Excel", "step1": "Envie seu arquivo PDF", "step2": "As tabelas são detectadas automaticamente", "step3": "Baixe a pasta de trabalho XLSX" },
-      "xlsx-to-sql": { "title": "Converter XLSX para SQL", "outcome": "Gere instruções CREATE e INSERT", "step1": "Envie seu arquivo Excel", "step2": "Selecione planilhas e prefixo de tabela", "step3": "Baixe o arquivo SQL" },
-      "sql-to-xlsx": { "title": "Converter SQL para XLSX", "outcome": "Analise instruções INSERT em uma planilha", "step1": "Envie seu arquivo SQL", "step2": "As tabelas são extraídas automaticamente", "step3": "Baixe a pasta de trabalho XLSX" },
-      "xlsx-to-xml": { "title": "Converter XLSX para XML", "outcome": "Transforme linhas de planilhas em elementos XML", "step1": "Envie seu arquivo Excel", "step2": "Defina nomes de tags raiz e linha", "step3": "Baixe o arquivo XML" },
-      "xml-to-xlsx": { "title": "Converter XML para XLSX", "outcome": "Mapeie nós XML para linhas e colunas", "step1": "Envie seu arquivo XML", "step2": "A estrutura é detectada automaticamente", "step3": "Baixe a pasta de trabalho XLSX" }
+      "transpose-sheet": {
+        "title": "Transpor uma planilha",
+        "outcome": "Inverta linhas em colunas ou colunas em linhas",
+        "step1": "Envie seu arquivo",
+        "step2": "Selecione a planilha a transpor",
+        "step3": "Baixe o arquivo invertido"
+      },
+      "split-column": {
+        "title": "Dividir uma coluna",
+        "outcome": "Transforme uma coluna em várias usando um delimitador",
+        "step1": "Envie seu arquivo",
+        "step2": "Escolha delimitador (vírgula, espaço, personalizado)",
+        "step3": "Baixe o arquivo processado"
+      },
+      "sort-rows": {
+        "title": "Ordenar linhas",
+        "outcome": "Reordene dados por uma ou mais colunas",
+        "step1": "Envie seu arquivo",
+        "step2": "Escolha colunas e direção de ordenação",
+        "step3": "Baixe o arquivo ordenado"
+      },
+      "auto-size-columns": {
+        "title": "Ajustar largura das colunas",
+        "outcome": "Redimensione cada coluna conforme seu conteúdo",
+        "step1": "Envie seu arquivo",
+        "step2": "As colunas são ajustadas em todas as planilhas",
+        "step3": "Baixe o arquivo formatado"
+      },
+      "freeze-header": {
+        "title": "Congelar a linha de cabeçalho",
+        "outcome": "Mantenha os cabeçalhos visíveis ao rolar",
+        "step1": "Envie seu arquivo",
+        "step2": "Defina quantas linhas congelar",
+        "step3": "Baixe o arquivo atualizado"
+      },
+      "format-dates": {
+        "title": "Formatar datas",
+        "outcome": "Normalize formatos de data nas colunas",
+        "step1": "Envie seu arquivo",
+        "step2": "Escolha o formato de data alvo",
+        "step3": "Baixe o arquivo formatado"
+      },
+      "remove-duplicates": {
+        "title": "Remover linhas duplicadas",
+        "outcome": "Exclua linhas repetidas com base nas colunas escolhidas",
+        "step1": "Envie seu arquivo",
+        "step2": "Selecione colunas que definem uma duplicata",
+        "step3": "Baixe o arquivo limpo"
+      },
+      "trim-spaces": {
+        "title": "Aparar espaços extras",
+        "outcome": "Remova espaços iniciais, finais e repetidos",
+        "step1": "Envie seu arquivo",
+        "step2": "Escolha planilhas e nível de limpeza",
+        "step3": "Baixe o arquivo aparado"
+      },
+      "normalize-case": {
+        "title": "Normalizar caixa do texto",
+        "outcome": "Converta texto para MAIÚSCULAS, minúsculas ou Tipo Título",
+        "step1": "Envie seu arquivo",
+        "step2": "Escolha a caixa alvo e colunas",
+        "step3": "Baixe o arquivo normalizado"
+      },
+      "find-replace": {
+        "title": "Localizar e substituir texto",
+        "outcome": "Edite valores em massa com texto ou regex",
+        "step1": "Envie seu arquivo",
+        "step2": "Insira os termos de busca/substituição",
+        "step3": "Baixe o arquivo atualizado"
+      },
+      "remove-empty-rows": {
+        "title": "Remover linhas vazias",
+        "outcome": "Exclua linhas onde todas as células estão em branco",
+        "step1": "Envie seu arquivo",
+        "step2": "Selecione planilhas a limpar",
+        "step3": "Baixe o arquivo limpo"
+      },
+      "detect-blanks": {
+        "title": "Detectar células vazias",
+        "outcome": "Encontre cada valor faltante e obtenha um relatório detalhado",
+        "step1": "Envie seu arquivo",
+        "step2": "Todas as planilhas são escaneadas automaticamente",
+        "step3": "Baixe o relatório de vazios"
+      },
+      "scan-formula-errors": {
+        "title": "Escanear erros de fórmula",
+        "outcome": "Encontre #REF!, #VALUE!, #DIV/0! e outros erros",
+        "step1": "Envie seu arquivo",
+        "step2": "Cada célula é escaneada em busca de erros",
+        "step3": "Baixe o relatório de erros"
+      },
+      "validate-emails": {
+        "title": "Validar endereços de e-mail",
+        "outcome": "Verifique formatos de e-mail e obtenha um relatório colorido",
+        "step1": "Envie seu arquivo",
+        "step2": "Selecione a coluna de e-mail",
+        "step3": "Baixe o relatório de validação"
+      },
+      "merge-sheets": {
+        "title": "Combinar planilhas em uma",
+        "outcome": "Una várias abas em uma única planilha",
+        "step1": "Envie sua pasta de trabalho",
+        "step2": "Selecione e ordene as planilhas a combinar",
+        "step3": "Baixe o arquivo combinado"
+      },
+      "append-workbooks": {
+        "title": "Anexar várias pastas de trabalho",
+        "outcome": "Empilhe linhas de arquivos separados em uma planilha",
+        "step1": "Envie dois ou mais arquivos",
+        "step2": "Organize a ordem dos arquivos",
+        "step3": "Baixe o arquivo combinado"
+      },
+      "split-sheet": {
+        "title": "Dividir uma planilha por linhas",
+        "outcome": "Divida uma planilha em fragmentos menores",
+        "step1": "Envie seu arquivo",
+        "step2": "Defina linhas por fragmento e estilo de nome",
+        "step3": "Baixe a pasta de trabalho dividida"
+      },
+      "split-workbook": {
+        "title": "Dividir pasta de trabalho em arquivos",
+        "outcome": "Extraia cada planilha como XLSX em um ZIP",
+        "step1": "Envie sua pasta de trabalho",
+        "step2": "Selecione planilhas a incluir",
+        "step3": "Baixe o arquivo ZIP"
+      },
+      "inspect-sheets": {
+        "title": "Inspecionar uma pasta de trabalho",
+        "outcome": "Visualize planilhas, colunas, tipos e estatísticas",
+        "step1": "Envie seu arquivo",
+        "step2": "Navegue planilhas com filtros e ordenação",
+        "step3": "Detecte problemas antes de processar"
+      },
+      "summary-stats": {
+        "title": "Obter estatísticas resumidas",
+        "outcome": "Contagem, média, mediana, soma por coluna numérica",
+        "step1": "Envie seu arquivo",
+        "step2": "Todas as colunas numéricas são analisadas",
+        "step3": "Baixe o relatório de estatísticas"
+      },
+      "compare-workbooks": {
+        "title": "Comparar duas pastas de trabalho",
+        "outcome": "Diferenças célula por célula entre duas versões",
+        "step1": "Envie arquivos original e modificado",
+        "step2": "As diferenças são detectadas automaticamente",
+        "step3": "Baixe o relatório de comparação"
+      },
+      "password-protect": {
+        "title": "Proteger planilhas com senha",
+        "outcome": "Bloqueie planilhas contra edições acidentais",
+        "step1": "Envie seu arquivo",
+        "step2": "Defina senha e opções de proteção",
+        "step3": "Baixe o arquivo protegido"
+      },
+      "remove-password": {
+        "title": "Remover proteção de planilhas",
+        "outcome": "Desbloqueie a edição sem a senha original",
+        "step1": "Envie o arquivo protegido",
+        "step2": "A proteção é removida de todas as planilhas",
+        "step3": "Baixe o arquivo desbloqueado"
+      },
+      "xlsx-to-csv": {
+        "title": "Converter XLSX para CSV",
+        "outcome": "Exporte uma ou mais planilhas como CSV",
+        "step1": "Envie seu arquivo Excel",
+        "step2": "Selecione planilhas a exportar",
+        "step3": "Baixe CSV ou ZIP de CSVs"
+      },
+      "csv-to-xlsx": {
+        "title": "Converter CSV para XLSX",
+        "outcome": "Transforme um CSV em uma pasta de trabalho Excel",
+        "step1": "Envie seu arquivo CSV",
+        "step2": "Defina delimitador e nome da planilha",
+        "step3": "Baixe a pasta de trabalho XLSX"
+      },
+      "xlsx-to-json": {
+        "title": "Converter XLSX para JSON",
+        "outcome": "Exporte dados de planilhas como JSON estruturado",
+        "step1": "Envie seu arquivo Excel",
+        "step2": "Selecione planilhas a exportar",
+        "step3": "Baixe o arquivo JSON"
+      },
+      "json-to-xlsx": {
+        "title": "Converter JSON para XLSX",
+        "outcome": "Crie uma pasta de trabalho Excel a partir de dados JSON",
+        "step1": "Envie seu arquivo JSON",
+        "step2": "A estrutura é detectada automaticamente",
+        "step3": "Baixe a pasta de trabalho XLSX"
+      },
+      "xlsx-to-pdf": {
+        "title": "Converter XLSX para PDF",
+        "outcome": "Exporte planilhas como PDFs imprimíveis",
+        "step1": "Envie seu arquivo Excel",
+        "step2": "Escolha planilhas e orientação da página",
+        "step3": "Baixe o PDF"
+      },
+      "pdf-to-xlsx": {
+        "title": "Converter PDF para XLSX",
+        "outcome": "Extraia tabelas de PDF para Excel",
+        "step1": "Envie seu arquivo PDF",
+        "step2": "As tabelas são detectadas automaticamente",
+        "step3": "Baixe a pasta de trabalho XLSX"
+      },
+      "xlsx-to-sql": {
+        "title": "Converter XLSX para SQL",
+        "outcome": "Gere instruções CREATE e INSERT",
+        "step1": "Envie seu arquivo Excel",
+        "step2": "Selecione planilhas e prefixo de tabela",
+        "step3": "Baixe o arquivo SQL"
+      },
+      "sql-to-xlsx": {
+        "title": "Converter SQL para XLSX",
+        "outcome": "Analise instruções INSERT em uma planilha",
+        "step1": "Envie seu arquivo SQL",
+        "step2": "As tabelas são extraídas automaticamente",
+        "step3": "Baixe a pasta de trabalho XLSX"
+      },
+      "xlsx-to-xml": {
+        "title": "Converter XLSX para XML",
+        "outcome": "Transforme linhas de planilhas em elementos XML",
+        "step1": "Envie seu arquivo Excel",
+        "step2": "Defina nomes de tags raiz e linha",
+        "step3": "Baixe o arquivo XML"
+      },
+      "xml-to-xlsx": {
+        "title": "Converter XML para XLSX",
+        "outcome": "Mapeie nós XML para linhas e colunas",
+        "step1": "Envie seu arquivo XML",
+        "step2": "A estrutura é detectada automaticamente",
+        "step3": "Baixe a pasta de trabalho XLSX"
+      }
     }
   },
   "learn": {

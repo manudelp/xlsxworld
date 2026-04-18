@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
+import { toast } from "sonner";
 import {
   LineChart,
   Line,
@@ -13,7 +14,7 @@ import {
 } from "recharts";
 
 import type { AdminUsers, AdminUsersList, AdminUserRow } from "@/lib/admin";
-import { fetchAdminUsersList } from "@/lib/admin";
+import { fetchAdminUsersList, resetQuota } from "@/lib/admin";
 
 function ChartCard({
   title,
@@ -150,6 +151,45 @@ function Badge({
   );
 }
 
+function ResetQuotaButton({
+  user,
+  t,
+}: {
+  user: AdminUserRow;
+  t: (key: string, values?: Record<string, string | number>) => string;
+}) {
+  const [busy, setBusy] = useState(false);
+
+  const handleReset = async () => {
+    setBusy(true);
+    try {
+      const result = await resetQuota(`user:${user.id}`);
+      toast.success(t("quotaResetSuccess", { email: user.email, count: result.previous_count }));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      toast.error(message || t("quotaResetFailed"));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      disabled={busy}
+      onClick={handleReset}
+      className="cursor-pointer rounded-md border px-2 py-1 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-50"
+      style={{
+        borderColor: "var(--tag-border)",
+        backgroundColor: "var(--tag-bg)",
+        color: "var(--tag-text)",
+      }}
+    >
+      {busy ? t("resettingQuota") : t("resetQuota")}
+    </button>
+  );
+}
+
 function UserTable({
   users,
   page,
@@ -243,6 +283,9 @@ function UserTable({
                 {u.total_tool_uses > 0 ? u.total_tool_uses : "—"}
               </dd>
             </dl>
+            <div className="mt-2">
+              <ResetQuotaButton user={u} t={t} />
+            </div>
           </div>
         ))}
       </div>
@@ -260,6 +303,7 @@ function UserTable({
                 t("joined"),
                 t("lastSeen"),
                 t("toolUses"),
+                t("actions"),
               ].map((h) => (
                 <th
                   key={h}
@@ -312,6 +356,9 @@ function UserTable({
                   style={{ color: "var(--foreground)" }}
                 >
                   {u.total_tool_uses > 0 ? u.total_tool_uses : "—"}
+                </td>
+                <td className="px-4 py-3">
+                  <ResetQuotaButton user={u} t={t} />
                 </td>
               </tr>
             ))}

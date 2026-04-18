@@ -47,13 +47,7 @@ function HomeContent({ showWelcomeBanner }: { showWelcomeBanner: boolean }) {
           {t("subheading")}
         </p>
         <p
-          className="text-[13px] sm:text-[14px] mt-3 mx-auto font-medium"
-          style={{ color: "var(--primary)" }}
-        >
-          {t("socialProof")}
-        </p>
-        <p
-          className="text-[13px] sm:text-[14px] mt-2 mx-auto"
+          className="text-[13px] sm:text-[14px] mt-3 mx-auto"
           style={{ color: "var(--muted)" }}
         >
           {t("trustLine")}
