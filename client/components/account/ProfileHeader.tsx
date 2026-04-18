@@ -9,7 +9,7 @@ import { updateDisplayName } from "@/lib/auth/client";
 
 interface ProfileHeaderProps {
   user: AuthProfile;
-  onRefresh: () => Promise<void> | void;
+  onRefresh: () => Promise<unknown> | void;
   onLogout: () => Promise<void> | void;
 }
 

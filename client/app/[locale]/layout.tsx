@@ -88,6 +88,7 @@ export default async function LocaleLayout({
 
   setRequestLocale(locale);
   const messages = await getMessages();
+  const now = new Date();
 
   const websiteJsonLd = {
     "@context": "https://schema.org",
@@ -115,14 +116,12 @@ export default async function LocaleLayout({
         />
       </head>
       <body>
-        <NextIntlClientProvider messages={messages}>
+        <NextIntlClientProvider messages={messages} now={now}>
           <ThemeProvider>
             <AuthProvider>
               <Header />
               <DotTrail />
-              <main className="pt-[60px] min-h-screen">
-                {children}
-              </main>
+              <main className="pt-[60px] min-h-screen">{children}</main>
               <Footer />
               <UpgradeModal />
             </AuthProvider>

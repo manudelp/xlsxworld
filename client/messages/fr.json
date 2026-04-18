@@ -50,7 +50,7 @@
   "account": {
     "label": "Compte",
     "myAccount": "Mon compte",
-    "profile": "Profil",
+    "profile": "Account",
     "logout": "Se déconnecter",
     "keepProfileUpdated": "Gardez les données de votre profil à jour.",
     "email": "Adresse e-mail",
