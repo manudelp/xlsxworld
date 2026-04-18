@@ -18,7 +18,7 @@ export async function generateMetadata({
   };
 }
 
-const LAST_UPDATED = new Date(Date.UTC(2026, 3, 22));
+const LAST_UPDATED = new Date(Date.UTC(2026, 3, 17));
 
 export default async function TermsPage({
   params,
