@@ -19,6 +19,7 @@ import {
 import { useLocale, useTranslations } from "next-intl";
 
 import { useAuth } from "@/components/auth/AuthProvider";
+import QuotaPill from "@/components/layout/QuotaPill";
 import { Theme, useTheme } from "@/components/theme/ThemeProvider";
 import {
   Link,
@@ -240,6 +241,8 @@ export default function Header() {
             <span className="animate-pulse">{t("header.login")}</span>
           </span>
         ) : isAuthenticated ? (
+          <>
+          <QuotaPill />
           <div className="relative" ref={menuRef}>
             <button
               type="button"
@@ -323,6 +326,7 @@ export default function Header() {
               </button>
             </div>
           </div>
+          </>
         ) : (
           <Link
             href="/login"
