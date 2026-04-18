@@ -9,6 +9,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import UpgradeModal from "@/components/upgrade/UpgradeModal";
 import DotTrail from "@/components/common/DotTrail";
 import { BASE_URL, buildAlternates } from "@/lib/seo";
 
@@ -123,6 +124,7 @@ export default async function LocaleLayout({
                 {children}
               </main>
               <Footer />
+              <UpgradeModal />
             </AuthProvider>
           </ThemeProvider>
         </NextIntlClientProvider>

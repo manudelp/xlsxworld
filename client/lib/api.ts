@@ -3,6 +3,21 @@ export interface ApiError {
   errorCode?: string;
 }
 
+const ANON_LIMIT_ERROR_CODES = new Set([
+  "ANON_DAILY_QUOTA",
+  "ANON_FILE_TOO_LARGE",
+]);
+
+function maybeDispatchUpgrade(errorCode: string | undefined, message: string): void {
+  if (typeof window === "undefined") return;
+  if (!errorCode || !ANON_LIMIT_ERROR_CODES.has(errorCode)) return;
+  window.dispatchEvent(
+    new CustomEvent("xlsxworld:upgrade-requested", {
+      detail: { reason: errorCode, message },
+    }),
+  );
+}
+
 export class ApiRequestError extends Error {
   readonly status: number;
   readonly errorCode?: string;
@@ -135,6 +150,7 @@ async function clearSessionAndRedirect(): Promise<void> {
 async function handle<T>(res: Response): Promise<T> {
   if (!res.ok) {
     const { detail, errorCode } = await extractError(res);
+    maybeDispatchUpgrade(errorCode, detail);
     throw new ApiRequestError(detail, res.status, errorCode);
   }
 
@@ -203,6 +219,7 @@ export async function postFormForFile(
   });
   if (!res.ok) {
     const { detail, errorCode } = await extractError(res);
+    maybeDispatchUpgrade(errorCode, detail);
     throw new ApiRequestError(detail, res.status, errorCode);
   }
   const buffer = await res.arrayBuffer();
