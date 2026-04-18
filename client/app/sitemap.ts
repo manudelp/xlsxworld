@@ -14,6 +14,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const staticPages = [
     { path: "", priority: 1, changeFrequency: "weekly" as const },
+    { path: "/learn", priority: 0.8, changeFrequency: "weekly" as const },
+    {
+      path: "/learn/how-to-find-and-fix-broken-excel-formulas",
+      priority: 0.8,
+      changeFrequency: "monthly" as const,
+    },
     { path: "/faq", priority: 0.5, changeFrequency: "monthly" as const },
     { path: "/contact", priority: 0.5, changeFrequency: "monthly" as const },
     { path: "/privacy", priority: 0.3, changeFrequency: "yearly" as const },

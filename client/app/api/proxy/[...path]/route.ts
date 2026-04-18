@@ -10,6 +10,7 @@ const BACKEND =
 const ALLOWED_PREFIXES = [
   "api/v1/tools/",
   "api/v1/contact",
+  "api/v1/launch-updates",
   "api/v1/analytics",
   "api/v1/admin/",
   "api/v1/usage",
