@@ -12,6 +12,7 @@ const ALLOWED_PREFIXES = [
   "api/v1/contact",
   "api/v1/analytics",
   "api/v1/admin/",
+  "api/v1/usage",
   "api/v1/me/",
   "auth/",
   "health",

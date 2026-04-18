@@ -1,8 +1,9 @@
 /**
- * Typed client for the `/api/v1/me/usage` endpoint (Phase 2 limits).
+ * Typed client for `GET /api/v1/usage` (read-only limits + today's count).
  *
- * The request goes through `api.auth.*` so the refresh-on-401 flow kicks
- * in automatically if a stale access token is used.
+ * Works for anonymous visitors (IP-keyed quota) and signed-in users
+ * (account-keyed). Uses `api.get` so unauthenticated sessions do not
+ * trigger auth refresh / redirect.
  */
 
 import { api } from "@/lib/api";
@@ -16,5 +17,5 @@ export interface Usage {
 }
 
 export function fetchUsage(): Promise<Usage> {
-  return api.auth.get<Usage>("/api/v1/me/usage");
+  return api.get<Usage>("/api/v1/usage");
 }

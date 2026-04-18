@@ -18,7 +18,7 @@ export async function generateMetadata({
   };
 }
 
-const LAST_UPDATED = new Date(Date.UTC(2026, 3, 17));
+const LAST_UPDATED = new Date(Date.UTC(2026, 3, 22));
 
 export default async function TermsPage({
   params,
@@ -85,6 +85,7 @@ function TermsContent() {
             <li>{t("acceptableUse3")}</li>
             <li>{t("acceptableUse4")}</li>
             <li>{t("acceptableUse5")}</li>
+            <li>{t("acceptableUse6")}</li>
           </ul>
         </section>
 

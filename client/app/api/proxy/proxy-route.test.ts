@@ -177,6 +177,30 @@ describe("proxy route", () => {
     fetchMock.mockRestore();
   });
 
+  it("allows GET /api/v1/usage through the proxy allowlist", async () => {
+    const fetchMock = jest.spyOn(global, "fetch").mockResolvedValue(
+      new Response(JSON.stringify({ plan: "anon", jobs_today: 0 }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+
+    const request = new NextRequest(
+      "http://localhost:3000/api/proxy/api/v1/usage",
+      { method: "GET" },
+    );
+
+    const response = await GET(request, {
+      params: Promise.resolve({ path: ["api", "v1", "usage"] }),
+    });
+
+    expect(response.status).toBe(200);
+    expect(fetchMock).toHaveBeenCalled();
+    const dest = fetchMock.mock.calls[0][0] as string;
+    expect(dest).toContain("/api/v1/usage");
+    fetchMock.mockRestore();
+  });
+
   it("drops stale content-encoding for JSON responses", async () => {
     const fetchMock = jest.spyOn(global, "fetch").mockResolvedValue(
       new Response(JSON.stringify({ ok: true }), {

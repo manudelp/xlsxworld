@@ -2,23 +2,21 @@ import { fetchUsage } from "./usage";
 
 jest.mock("@/lib/api", () => ({
   api: {
-    auth: {
-      get: jest.fn(),
-    },
+    get: jest.fn(),
   },
 }));
 
 const { api } = jest.requireMock("@/lib/api") as {
-  api: { auth: { get: jest.Mock } };
+  api: { get: jest.Mock };
 };
 
 describe("usage lib", () => {
   beforeEach(() => {
-    api.auth.get.mockReset();
+    api.get.mockReset();
   });
 
-  it("fetchUsage hits /api/v1/me/usage and returns the payload", async () => {
-    api.auth.get.mockResolvedValue({
+  it("fetchUsage hits /api/v1/usage and returns the payload", async () => {
+    api.get.mockResolvedValue({
       plan: "free",
       jobs_today: 17,
       jobs_today_limit: 200,
@@ -28,7 +26,7 @@ describe("usage lib", () => {
 
     const usage = await fetchUsage();
 
-    expect(api.auth.get).toHaveBeenCalledWith("/api/v1/me/usage");
+    expect(api.get).toHaveBeenCalledWith("/api/v1/usage");
     expect(usage.plan).toBe("free");
     expect(usage.jobs_today).toBe(17);
     expect(usage.max_upload_bytes).toBe(26214400);

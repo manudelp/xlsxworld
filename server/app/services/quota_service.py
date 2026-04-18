@@ -59,6 +59,10 @@ class QuotaService:
         result = await self._db.execute(stmt)
         count = int(result.scalar_one())
         await self._db.flush()
+        # Request-scoped sessions from ``get_db_session()`` do not auto-commit.
+        # Many tool handlers never commit; without this the row rolls back on
+        # session teardown and ``/me/usage`` stays at 0 despite successful tools.
+        await self._db.commit()
 
         if count > limit:
             raise QuotaExceededError(

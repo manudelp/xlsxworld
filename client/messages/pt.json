@@ -246,7 +246,7 @@
     "q6": "Quais formatos de arquivo são suportados?",
     "a6": "A maioria das ferramentas suporta arquivos .xlsx, .xls, .xlsb e .xlsm. Algumas também aceitam .csv, .json, .xml, .sql e .pdf. Cada página de ferramenta mostra exatamente quais formatos aceita.",
     "q7": "Qual é o tamanho máximo de arquivo?",
-    "a7": "20 MB por arquivo. Para arquivos maiores, considere dividir a pasta de trabalho primeiro usando nossa ferramenta Dividir Pasta de Trabalho e depois processar cada parte separadamente.",
+    "a7": "Sem conta, cada envio pode ter até 10 MB. Com uma conta gratuita, até 25 MB por arquivo. Para arquivos maiores, divida a pasta de trabalho primeiro com nossa ferramenta Dividir Pasta de Trabalho e processe cada parte separadamente.",
     "q8": "Por que meu arquivo está demorando para processar?",
     "a8": "O tempo de processamento depende do tamanho e complexidade do arquivo. A maioria dos arquivos é concluída em menos de 5 segundos. Arquivos muito grandes (10 MB+) ou com milhares de fórmulas podem levar até 30 segundos. Se demorar mais de um minuto, algo pode ter dado errado — tente novamente.",
     "q9": "Meu download não começou. O que faço?",
@@ -288,7 +288,7 @@
     "reportIssue": "Reportar este problema"
   },
   "common": {
-    "maxFileSize": "Máximo 20 MB por arquivo",
+    "maxFileSizePerFile": "Máximo {sizeMb} MB por arquivo",
     "uploading": "Enviando e preparando a pasta de trabalho...",
     "readingStructure": "Lendo estrutura da pasta de trabalho...",
     "uploadingParsing": "Enviando e analisando a pasta de trabalho...",
@@ -553,6 +553,7 @@
     "splitFailed": "Falha na divisão",
     "appendFailed": "Falha no anexo",
     "conversionFailed": "Falha na conversão",
+    "conversionComplete": "Arquivo convertido com sucesso",
     "couldNotRemoveDuplicates": "Não foi possível remover duplicatas",
     "couldNotTrimSpaces": "Não foi possível aparar espaços",
     "couldNotNormalizeCase": "Não foi possível normalizar maiúsculas",
@@ -658,7 +659,7 @@
     "infoCollect4": "Dados de segurança e prevenção de abuso, como endereço IP e sinais de limitação de taxa.",
     "infoCollect5": "Se você entrar com o Google, recebemos seu nome, endereço de e-mail e foto de perfil da sua conta Google. Não recebemos nem armazenamos sua senha do Google.",
     "fileProcessingTitle": "Processamento de arquivos",
-    "fileProcessingText": "Os arquivos que você envia são processados temporariamente em nossos servidores apenas para realizar a operação solicitada (converter, combinar, dividir, inspecionar, etc.). Os arquivos de origem que você envia nunca são retidos — são excluídos assim que o processamento termina. Para usuários autenticados, o arquivo de saída é salvo em um bucket privado do Supabase Storage por até 7 dias para que você possa baixá-lo novamente do seu histórico, após o que é automaticamente excluído de forma definitiva; você pode excluir qualquer saída antes com um clique pela página de Histórico. Usuários anônimos recebem um download direto único e nada é armazenado. Não lemos, inspecionamos, vendemos nem compartilhamos o conteúdo dos seus arquivos.",
+    "fileProcessingText": "Os arquivos que você envia são processados temporariamente em nossos servidores apenas para realizar a operação solicitada (converter, combinar, dividir, inspecionar, etc.). Os arquivos de origem que você envia nunca são retidos — são excluídos assim que o processamento termina. Para usuários autenticados, o arquivo de saída é salvo em um bucket privado do Supabase Storage por até 7 dias para que você possa baixá-lo novamente do seu histórico, após o que é automaticamente excluído de forma definitiva; você pode excluir qualquer saída antes com um clique pela página de Histórico. Usuários anônimos recebem um download direto único e nada é armazenado. Não lemos, inspecionamos, vendemos nem compartilhamos o conteúdo dos seus arquivos. Os limites atuais por arquivo são 10 MB em uso anónimo e 25 MB para contas gratuitas com sessão iniciada.",
     "howWeUseTitle": "Como usamos as informações",
     "howWeUse1": "Para fornecer e proteger as funcionalidades principais do produto.",
     "howWeUse2": "Para autenticar sessões e manter o acesso à conta.",
@@ -687,18 +688,19 @@
     "acceptanceTitle": "Aceitação",
     "acceptanceText": "Ao usar o XLSX World, você aceita estes termos. Se não concordar, por favor não use o serviço.",
     "serviceTitle": "Descrição do serviço",
-    "serviceText": "O XLSX World oferece ferramentas online gratuitas para converter, combinar, dividir e inspecionar arquivos de planilha (.xlsx e .csv), juntamente com funcionalidades opcionais baseadas em conta. Você pode criar uma conta com e-mail e senha ou entrando com o Google. Podemos modificar, suspender ou descontinuar qualquer parte do serviço a qualquer momento.",
+    "serviceText": "O XLSX World oferece ferramentas online gratuitas para converter, combinar, dividir, inspecionar, limpar, validar e processar de outras formas planilhas e ficheiros relacionados. Cada ferramenta indica os formatos suportados; em geral incluem livros Excel (.xlsx, .xls, .xlsb e semelhantes), CSV e, conforme a ferramenta, JSON, XML, SQL ou PDF. Contas opcionais acrescentam funcionalidades como histórico de tarefas e nova descarga de resultados; pode registar-se com e-mail e palavra-passe ou com o Google. No futuro poderão existir planos pagos com outros limites ou funcionalidades; nesse caso atualizaremos estes termos antes de entrarem em vigor. Podemos modificar, suspender ou descontinuar qualquer parte do serviço a qualquer momento.",
     "accountsTitle": "Contas e segurança",
     "accounts1": "Você é responsável pela atividade realizada na sua conta.",
     "accounts2": "Você deve manter suas credenciais confidenciais e usar boas práticas de segurança.",
     "accounts3": "Podemos suspender o acesso para proteger usuários, sistemas ou a integridade dos dados.",
     "accounts4": "Se você entrar com o Google, sua conta pode ser automaticamente vinculada a uma conta existente com o mesmo e-mail verificado.",
     "acceptableUseTitle": "Uso aceitável",
-    "acceptableUse1": "Tamanho máximo de upload de arquivo: 20 MB por arquivo.",
+    "acceptableUse1": "Tamanho máximo de upload por arquivo: 10 MB sem sessão iniciada, e 25 MB com uma conta gratuita.",
     "acceptableUse2": "O serviço só pode ser usado para fins legais.",
     "acceptableUse3": "Você não deve enviar conteúdo que não está autorizado a processar.",
     "acceptableUse4": "Você não deve abusar, sobrecarregar, fazer engenharia reversa ou interromper a plataforma.",
     "acceptableUse5": "O uso automatizado ou abusivo pode resultar em limitação de taxa ou restrições de acesso.",
+    "acceptableUse6": "Sem conta, pode executar até 20 tarefas de ferramenta por dia UTC; com uma conta gratuita, até 200 por dia UTC. Estes limites podem ser alterados e podem aplicar-se medidas adicionais de prevenção de abuso.",
     "yourFilesTitle": "Seus arquivos",
     "yourFilesText": "Você mantém total propriedade de qualquer arquivo que enviar. Não reivindicamos nenhum direito sobre seu conteúdo. Os arquivos de origem que você envia nunca são retidos — são excluídos imediatamente após a conclusão da sua tarefa. Para usuários autenticados, o resultado é armazenado em um bucket privado por até 7 dias para que possa ser baixado novamente do seu histórico, após o que é automaticamente excluído. Você pode excluir qualquer saída armazenada do seu histórico a qualquer momento.",
     "ipTitle": "Propriedade intelectual",
@@ -731,7 +733,7 @@
       "seoWhyUse": "Audite rapidamente uma planilha desconhecida antes de processá-la. Veja linhas vazias, contagens de duplicatas e tipos de colunas de relance — sem precisar abrir o Excel ou instalar nada.",
       "seoFaqTitle": "Perguntas frequentes",
       "seoFaq1Q": "Quais formatos de arquivo posso inspecionar?",
-      "seoFaq1A": "Você pode inspecionar arquivos .xlsx, .xls e .xlsb de até 20 MB.",
+      "seoFaq1A": "Pode inspecionar ficheiros .xlsx, .xls e .xlsb dentro do limite por arquivo do seu plano (10 MB sem conta, 25 MB com sessão iniciada).",
       "seoFaq2Q": "Inspecionar modifica meu arquivo?",
       "seoFaq2A": "Não. A inspeção é somente leitura — seu arquivo original nunca é alterado.",
       "seoFaq3Q": "Posso inspecionar arquivos protegidos por senha?",
@@ -751,7 +753,7 @@
       "seoFaq1Q": "Todas as planilhas precisam ter as mesmas colunas?",
       "seoFaq1A": "Idealmente sim. A ferramenta usa o cabeçalho da primeira planilha selecionada como linha de cabeçalho compartilhada.",
       "seoFaq2Q": "Há um limite de planilhas que posso combinar?",
-      "seoFaq2A": "Sem limite fixo — você pode combinar todas as planilhas da pasta de trabalho desde que o arquivo tenha menos de 20 MB.",
+      "seoFaq2A": "Sem limite rígido no número de folhas — pode combiná-las todas desde que o ficheiro respeite o limite por arquivo (10 MB sem conta, 25 MB com sessão iniciada).",
       "seoFaq3Q": "As fórmulas são preservadas?",
       "seoFaq3A": "Os valores dos dados são preservados. Fórmulas, estilos e formatação avançada não são transferidos."
     },
@@ -769,7 +771,7 @@
       "seoFaq1Q": "As pastas de trabalho precisam ter colunas idênticas?",
       "seoFaq1A": "Devem compartilhar a mesma estrutura de colunas para melhores resultados. Colunas diferentes podem causar problemas de alinhamento.",
       "seoFaq2Q": "Quantos arquivos posso anexar de uma vez?",
-      "seoFaq2A": "Não há limite fixo na quantidade de arquivos, mas o tamanho total combinado deve ficar abaixo de 20 MB.",
+      "seoFaq2A": "Não há limite fixo na quantidade de ficheiros, mas cada tarefa deve respeitar o limite por arquivo (10 MB sem conta, 25 MB com sessão iniciada), incluindo o tamanho total combinado.",
       "seoFaq3Q": "Posso controlar qual planilha é usada de cada pasta de trabalho?",
       "seoFaq3A": "A ferramenta anexa todas as planilhas de origem. Use a ferramenta de combinar primeiro se precisar escolher planilhas específicas."
     },
@@ -843,7 +845,7 @@
       "seoFaq2Q": "Os tipos de dados são preservados?",
       "seoFaq2A": "Sim. Números, datas e texto são detectados e armazenados com os tipos Excel apropriados.",
       "seoFaq3Q": "Há um limite de linhas?",
-      "seoFaq3A": "A ferramenta lida com arquivos de até 20 MB, o que normalmente cobre centenas de milhares de linhas."
+      "seoFaq3A": "A ferramenta aceita ficheiros dentro do limite por arquivo (10 MB sem conta, 25 MB com sessão iniciada), o que normalmente cobre centenas de milhares de linhas."
     },
     "xlsx-to-pdf": {
       "title": "XLSX → PDF",
@@ -1016,7 +1018,7 @@
       "seoFaq2Q": "Posso manter a última ocorrência em vez da primeira?",
       "seoFaq2A": "Sim. Você pode escolher manter a primeira ou a última ocorrência de cada grupo de duplicatas.",
       "seoFaq3Q": "Funciona com arquivos grandes?",
-      "seoFaq3A": "Sim. A ferramenta lida com arquivos de até 20 MB, o que cobre a maioria das planilhas típicas."
+      "seoFaq3A": "Sim. Os ficheiros devem respeitar o limite por arquivo (10 MB sem conta, 25 MB com sessão iniciada), suficiente para a maioria das planilhas típicas."
     },
     "trim-spaces": {
       "title": "Aparar espaços",
@@ -1244,7 +1246,7 @@
       "seoFaq2Q": "O que acontece com células mescladas?",
       "seoFaq2A": "Elas são separadas durante a transposição. Os valores são preservados.",
       "seoFaq3Q": "Há limite de tamanho?",
-      "seoFaq3A": "A ferramenta aceita arquivos de até 20 MB, o que cobre a maioria das planilhas comuns."
+      "seoFaq3A": "Aplicam-se os mesmos limites por arquivo (10 MB sem conta, 25 MB com sessão iniciada), suficientes para a maioria das planilhas comuns."
     },
     "split-column": {
       "title": "Dividir coluna",

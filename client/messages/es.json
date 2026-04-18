@@ -246,7 +246,7 @@
     "q6": "¿Qué formatos de archivo son compatibles?",
     "a6": "La mayoría de las herramientas soportan archivos .xlsx, .xls, .xlsb y .xlsm. Algunas también aceptan .csv, .json, .xml, .sql y .pdf. Cada página de herramienta muestra exactamente qué formatos acepta.",
     "q7": "¿Cuál es el tamaño máximo de archivo?",
-    "a7": "20 MB por archivo. Para archivos más grandes, considera dividir el libro primero usando nuestra herramienta Dividir Libro y luego procesar cada parte por separado.",
+    "a7": "Sin cuenta, cada carga puede ser de hasta 10 MB. Con una cuenta gratuita, hasta 25 MB por archivo. Para archivos más grandes, divide el libro primero con nuestra herramienta Dividir Libro y procesa cada parte por separado.",
     "q8": "¿Por qué mi archivo tarda en procesarse?",
     "a8": "El tiempo de procesamiento depende del tamaño y complejidad del archivo. La mayoría se completan en menos de 5 segundos. Archivos muy grandes (10 MB+) o con miles de fórmulas pueden tardar hasta 30 segundos. Si tarda más de un minuto, algo pudo haber salido mal — inténtalo de nuevo.",
     "q9": "Mi descarga no comenzó. ¿Qué hago?",
@@ -288,7 +288,7 @@
     "reportIssue": "Reportar este problema"
   },
   "common": {
-    "maxFileSize": "Máximo 20 MB por archivo",
+    "maxFileSizePerFile": "Máximo {sizeMb} MB por archivo",
     "uploading": "Subiendo y preparando el libro...",
     "readingStructure": "Leyendo estructura del libro...",
     "uploadingParsing": "Subiendo y analizando el libro...",
@@ -553,6 +553,7 @@
     "splitFailed": "Error al dividir",
     "appendFailed": "Error al anexar",
     "conversionFailed": "Error en la conversión",
+    "conversionComplete": "Archivo convertido correctamente",
     "couldNotRemoveDuplicates": "No se pudieron eliminar duplicados",
     "couldNotTrimSpaces": "No se pudieron recortar espacios",
     "couldNotNormalizeCase": "No se pudo normalizar mayúsculas",
@@ -658,7 +659,7 @@
     "infoCollect4": "Datos de seguridad y prevención de abuso, como dirección IP y señales de límite de velocidad.",
     "infoCollect5": "Si inicias sesión con Google, recibimos tu nombre, correo electrónico y foto de perfil de tu cuenta de Google. No recibimos ni almacenamos tu contraseña de Google.",
     "fileProcessingTitle": "Procesamiento de archivos",
-    "fileProcessingText": "Los archivos que subes se procesan temporalmente en nuestros servidores únicamente para realizar la operación solicitada (convertir, combinar, dividir, inspeccionar, etc.). Los archivos de origen nunca se conservan — se eliminan en cuanto termina el procesamiento. Para usuarios autenticados, el archivo de salida se guarda en un bucket privado de Supabase Storage hasta 7 días para que puedas volver a descargarlo desde tu historial, tras lo cual se elimina automáticamente; puedes eliminar cualquier salida antes con un clic desde la página de Historial. Los usuarios anónimos obtienen una descarga directa única y no se guarda nada. No leemos, inspeccionamos, vendemos ni compartimos el contenido de tus archivos.",
+    "fileProcessingText": "Los archivos que subes se procesan temporalmente en nuestros servidores únicamente para realizar la operación solicitada (convertir, combinar, dividir, inspeccionar, etc.). Los archivos de origen nunca se conservan — se eliminan en cuanto termina el procesamiento. Para usuarios autenticados, el archivo de salida se guarda en un bucket privado de Supabase Storage hasta 7 días para que puedas volver a descargarlo desde tu historial, tras lo cual se elimina automáticamente; puedes eliminar cualquier salida antes con un clic desde la página de Historial. Los usuarios anónimos obtienen una descarga directa única y no se guarda nada. No leemos, inspeccionamos, vendemos ni compartimos el contenido de tus archivos. Los límites actuales por archivo son 10 MB en uso anónimo y 25 MB con una cuenta gratuita registrada.",
     "howWeUseTitle": "Cómo usamos la información",
     "howWeUse1": "Para proporcionar y asegurar la funcionalidad principal del producto.",
     "howWeUse2": "Para autenticar sesiones y mantener el acceso a la cuenta.",
@@ -687,18 +688,19 @@
     "acceptanceTitle": "Aceptación",
     "acceptanceText": "Al usar XLSX World, aceptas estos términos. Si no estás de acuerdo, por favor no uses el servicio.",
     "serviceTitle": "Descripción del servicio",
-    "serviceText": "XLSX World proporciona herramientas en línea gratuitas para convertir, combinar, dividir e inspeccionar archivos de hojas de cálculo (.xlsx y .csv), junto con funciones opcionales basadas en cuenta. Puedes crear una cuenta con correo y contraseña o iniciando sesión con Google. Podemos modificar, suspender o descontinuar cualquier parte del servicio en cualquier momento.",
+    "serviceText": "XLSX World ofrece herramientas en línea gratuitas para convertir, combinar, dividir, inspeccionar, limpiar, validar y procesar de otro modo hojas de cálculo y archivos relacionados. Cada herramienta indica los formatos admitidos; suelen incluir libros de Excel (.xlsx, .xls, .xlsb y similares), CSV y, según la herramienta, JSON, XML, SQL o PDF. Las cuentas opcionales añaden funciones como el historial de trabajos y la vuelta a descargar resultados; puedes registrarte con correo y contraseña o con Google. En el futuro podrían ofrecerse planes de pago con otros límites o funciones; en ese caso actualizaremos estos términos antes de que entren en vigor. Podemos modificar, suspender o descontinuar cualquier parte del servicio en cualquier momento.",
     "accountsTitle": "Cuentas y seguridad",
     "accounts1": "Eres responsable de la actividad realizada bajo tu cuenta.",
     "accounts2": "Debes mantener las credenciales confidenciales y usar prácticas de seguridad sólidas.",
     "accounts3": "Podemos suspender el acceso para proteger a los usuarios, sistemas o la integridad de los datos.",
     "accounts4": "Si inicias sesión con Google, tu cuenta puede vincularse automáticamente a una cuenta existente con el mismo correo electrónico verificado.",
     "acceptableUseTitle": "Uso aceptable",
-    "acceptableUse1": "Tamaño máximo de carga de archivo: 20 MB por archivo.",
+    "acceptableUse1": "Tamaño máximo de carga por archivo: 10 MB si no has iniciado sesión, y 25 MB con una cuenta gratuita.",
     "acceptableUse2": "El servicio solo puede usarse para fines legales.",
     "acceptableUse3": "No debes subir contenido que no estés autorizado a procesar.",
     "acceptableUse4": "No debes abusar, sobrecargar, realizar ingeniería inversa o interrumpir la plataforma.",
     "acceptableUse5": "El uso automatizado o abusivo puede resultar en limitación de velocidad o restricciones de acceso.",
+    "acceptableUse6": "Sin cuenta puedes ejecutar hasta 20 trabajos de herramienta por día UTC; con una cuenta gratuita, hasta 200 por día UTC. Estos límites pueden cambiar y pueden aplicarse medidas adicionales contra el abuso.",
     "yourFilesTitle": "Tus archivos",
     "yourFilesText": "Conservas la propiedad total de cualquier archivo que subas. No reclamamos ningún derecho sobre tu contenido. Los archivos de origen que subes nunca se conservan — se eliminan inmediatamente después de completar tu tarea. Para usuarios autenticados, el resultado se almacena en un bucket privado hasta 7 días para que puedas volver a descargarlo desde tu historial, tras lo cual se elimina automáticamente. Puedes eliminar cualquier salida almacenada desde tu historial en cualquier momento.",
     "ipTitle": "Propiedad intelectual",
@@ -731,7 +733,7 @@
       "seoWhyUse": "Audita rápidamente una hoja de cálculo desconocida antes de procesarla. Ve filas vacías, conteos de duplicados y tipos de columnas de un vistazo — sin necesidad de abrir Excel ni instalar nada.",
       "seoFaqTitle": "Preguntas frecuentes",
       "seoFaq1Q": "¿Qué formatos de archivo puedo inspeccionar?",
-      "seoFaq1A": "Puedes inspeccionar archivos .xlsx, .xls y .xlsb de hasta 20 MB.",
+      "seoFaq1A": "Puedes inspeccionar archivos .xlsx, .xls y .xlsb dentro del límite por archivo de tu plan (10 MB sin cuenta, 25 MB con sesión iniciada).",
       "seoFaq2Q": "¿Inspeccionar modifica mi archivo?",
       "seoFaq2A": "No. La inspección es de solo lectura — tu archivo original nunca se modifica.",
       "seoFaq3Q": "¿Puedo inspeccionar archivos protegidos con contraseña?",
@@ -751,7 +753,7 @@
       "seoFaq1Q": "¿Todas las hojas necesitan las mismas columnas?",
       "seoFaq1A": "Idealmente sí. La herramienta usa el encabezado de la primera hoja seleccionada como fila de encabezado compartida.",
       "seoFaq2Q": "¿Hay un límite de hojas que puedo combinar?",
-      "seoFaq2A": "No hay límite fijo — puedes combinar todas las hojas del libro siempre que el archivo sea menor de 20 MB.",
+      "seoFaq2A": "No hay límite estricto en la cantidad de hojas: puedes combinarlas todas siempre que el libro respete el límite por archivo (10 MB sin cuenta, 25 MB con sesión iniciada).",
       "seoFaq3Q": "¿Se preservan las fórmulas?",
       "seoFaq3A": "Los valores de datos se preservan. Las fórmulas, estilos y formato avanzado no se transfieren."
     },
@@ -769,7 +771,7 @@
       "seoFaq1Q": "¿Los libros necesitan columnas idénticas?",
       "seoFaq1A": "Deben compartir la misma estructura de columnas para mejores resultados. Columnas diferentes pueden causar problemas de alineación.",
       "seoFaq2Q": "¿Cuántos archivos puedo anexar a la vez?",
-      "seoFaq2A": "No hay límite fijo en la cantidad de archivos, pero el tamaño total combinado debe ser menor de 20 MB.",
+      "seoFaq2A": "No hay límite fijo en la cantidad de archivos, pero cada trabajo debe respetar el límite por archivo (10 MB sin cuenta, 25 MB con sesión iniciada), incluido el tamaño total combinado.",
       "seoFaq3Q": "¿Puedo controlar qué hoja se usa de cada libro?",
       "seoFaq3A": "La herramienta anexa todas las hojas de origen. Usa la herramienta de combinar primero si necesitas elegir hojas específicas."
     },
@@ -843,7 +845,7 @@
       "seoFaq2Q": "¿Se preservan los tipos de datos?",
       "seoFaq2A": "Sí. Los números, fechas y texto se detectan y almacenan con los tipos de Excel apropiados.",
       "seoFaq3Q": "¿Hay un límite de filas?",
-      "seoFaq3A": "La herramienta maneja archivos de hasta 20 MB, lo que normalmente cubre cientos de miles de filas."
+      "seoFaq3A": "La herramienta admite archivos dentro del límite por archivo (10 MB sin cuenta, 25 MB con sesión iniciada), lo que normalmente cubre cientos de miles de filas."
     },
     "xlsx-to-pdf": {
       "title": "XLSX → PDF",
@@ -1016,7 +1018,7 @@
       "seoFaq2Q": "¿Puedo mantener la última ocurrencia en lugar de la primera?",
       "seoFaq2A": "Sí. Puedes elegir mantener la primera o la última ocurrencia de cada grupo de duplicados.",
       "seoFaq3Q": "¿Funciona con archivos grandes?",
-      "seoFaq3A": "Sí. La herramienta maneja archivos de hasta 20 MB, lo que cubre la mayoría de hojas de cálculo típicas."
+      "seoFaq3A": "Sí. Los archivos deben respetar el límite por archivo (10 MB sin cuenta, 25 MB con sesión iniciada), suficiente para la mayoría de hojas de cálculo habituales."
     },
     "trim-spaces": {
       "title": "Recortar espacios",
@@ -1244,7 +1246,7 @@
       "seoFaq2Q": "¿Qué pasa con las celdas combinadas?",
       "seoFaq2A": "Durante la transposición se separan las celdas combinadas. Los valores se conservan.",
       "seoFaq3Q": "¿Hay un límite de tamaño?",
-      "seoFaq3A": "La herramienta admite archivos de hasta 20 MB, suficiente para la mayoría de hojas de cálculo habituales."
+      "seoFaq3A": "Se aplican los mismos límites por archivo (10 MB sin cuenta, 25 MB con sesión iniciada), suficientes para la mayoría de hojas de cálculo habituales."
     },
     "split-column": {
       "title": "Dividir columna",

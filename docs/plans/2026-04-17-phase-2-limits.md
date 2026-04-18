@@ -1032,7 +1032,7 @@ git commit -m "feat(limits): enforce_quota dependency + global tool-router wirin
 - Modify: `server/app/tools/_common.py`
 - Create: `server/tests/test_read_upload_for_principal.py`
 
-`read_with_limit(file)` today reads a hard-coded 20 MB cap. We don't remove it — callers outside of tool routes (tests, future scripts) may still want the simple form. We add a thin wrapper that picks the cap off `effective_limits(principal)` and raises a structured 413 when the upload is too big.
+`read_with_limit(file)` historically used a fixed byte cap; production now resolves the cap from `effective_limits(principal)` (10 MB anonymous / 25 MB free — see `server/app/core/limits.py`). We add a thin wrapper that picks the cap off the principal and raises a structured 413 when the upload is too big.
 
 - [ ] **Step 1: Write the failing helper test**
 

@@ -246,7 +246,7 @@
     "q6": "What file formats are supported?",
     "a6": "Most tools support .xlsx, .xls, .xlsb, and .xlsm files. Some tools also accept .csv, .json, .xml, .sql, and .pdf. Each tool page shows exactly which formats it accepts.",
     "q7": "What is the maximum file size?",
-    "a7": "20 MB per file. For larger files, consider splitting the workbook first using our Split Workbook tool, then processing each part separately.",
+    "a7": "Without an account, each upload can be up to 10 MB. With a free account, each upload can be up to 25 MB. For larger files, split the workbook first using our Split Workbook tool, then process each part separately.",
     "q8": "Why is my file taking long to process?",
     "a8": "Processing time depends on file size and complexity. Most files complete in under 5 seconds. Very large files (10 MB+) or files with thousands of formulas may take up to 30 seconds. If it takes longer than a minute something may have gone wrong — try again.",
     "q9": "My download didn't start. What do I do?",
@@ -288,7 +288,7 @@
     "reportIssue": "Report This Issue"
   },
   "common": {
-    "maxFileSize": "Max 20 MB per file",
+    "maxFileSizePerFile": "Max {sizeMb} MB per file",
     "uploading": "Uploading and preparing workbook...",
     "readingStructure": "Reading workbook structure...",
     "uploadingParsing": "Uploading and parsing workbook...",
@@ -574,6 +574,7 @@
     "splitFailed": "Split failed",
     "appendFailed": "Append failed",
     "conversionFailed": "Conversion failed",
+    "conversionComplete": "File converted successfully",
     "couldNotRemoveDuplicates": "Could not remove duplicates",
     "couldNotTrimSpaces": "Could not trim spaces",
     "couldNotNormalizeCase": "Could not normalize case",
@@ -658,7 +659,7 @@
     "infoCollect4": "Security and abuse-prevention data, such as IP address and rate-limit signals.",
     "infoCollect5": "If you sign in with Google, we receive your name, email address, and profile picture from your Google account. We do not receive or store your Google password.",
     "fileProcessingTitle": "File Processing",
-    "fileProcessingText": "Files you upload are processed temporarily on our servers solely to perform the requested operation (convert, merge, split, inspect, etc.). Your uploaded source files are never retained — they are deleted as soon as processing finishes. For authenticated users, the resulting output file is saved in a private Supabase Storage bucket for up to 7 days so you can re-download it from your history, after which it is automatically hard-deleted; you can delete any output earlier with one click from the History page. Anonymous users get a one-time direct download with nothing stored. We do not read, inspect, sell, or share the contents of your files.",
+    "fileProcessingText": "Files you upload are processed temporarily on our servers solely to perform the requested operation (convert, merge, split, inspect, etc.). Your uploaded source files are never retained — they are deleted as soon as processing finishes. For authenticated users, the resulting output file is saved in a private Supabase Storage bucket for up to 7 days so you can re-download it from your history, after which it is automatically hard-deleted; you can delete any output earlier with one click from the History page. Anonymous users get a one-time direct download with nothing stored. We do not read, inspect, sell, or share the contents of your files. Per-file upload limits are currently 10 MB for anonymous use and 25 MB for signed-in free accounts.",
     "howWeUseTitle": "How We Use Information",
     "howWeUse1": "To provide and secure core product functionality.",
     "howWeUse2": "To authenticate sessions and maintain account access.",
@@ -687,18 +688,19 @@
     "acceptanceTitle": "Acceptance",
     "acceptanceText": "By using XLSX World, you agree to these terms. If you do not agree, please do not use the service.",
     "serviceTitle": "Service Description",
-    "serviceText": "XLSX World provides free online tools to convert, merge, split, and inspect spreadsheet files (.xlsx and .csv), along with optional account-based features. You may create an account using email and password or by signing in with Google. We may modify, suspend, or discontinue any part of the service at any time.",
+    "serviceText": "XLSX World provides free online tools to convert, merge, split, inspect, clean, validate, and otherwise process spreadsheets and related files. Each tool lists the formats it supports; these commonly include Excel workbooks (.xlsx, .xls, .xlsb, and similar), CSV, and depending on the tool, JSON, XML, SQL, or PDF. Optional accounts add features such as job history and re-download of outputs; you may register with email and password or by signing in with Google. Paid tiers with different limits or features may be offered in the future; if so, we will update these terms before they take effect. We may modify, suspend, or discontinue any part of the service at any time.",
     "accountsTitle": "Accounts and Security",
     "accounts1": "You are responsible for activity performed under your account.",
     "accounts2": "You must keep credentials confidential and use strong security practices.",
     "accounts3": "We may suspend access to protect users, systems, or data integrity.",
     "accounts4": "If you sign in with Google, your account may be automatically linked to an existing account with the same verified email address.",
     "acceptableUseTitle": "Acceptable Use",
-    "acceptableUse1": "Maximum file upload size: 20 MB per file.",
+    "acceptableUse1": "Maximum file upload size: 10 MB per upload when you are not signed in, and 25 MB per upload when signed in to a free account.",
     "acceptableUse2": "The service may only be used for lawful purposes.",
     "acceptableUse3": "You must not upload content you are not authorized to process.",
     "acceptableUse4": "You must not abuse, overload, reverse engineer, or disrupt the platform.",
     "acceptableUse5": "Automated or abusive usage may result in rate limiting or access restrictions.",
+    "acceptableUse6": "Without an account you may run up to 20 tool jobs per UTC day; with a free account, up to 200 jobs per UTC day. These limits may change, and additional abuse-prevention measures may apply.",
     "yourFilesTitle": "Your Files",
     "yourFilesText": "You retain full ownership of any files you upload. We do not claim any rights over your content. Your uploaded source files are never retained — they are deleted immediately after your task completes. For authenticated users, the resulting output is stored in a private bucket for up to 7 days so it can be re-downloaded from your history, after which it is automatically deleted. You can delete any stored output from your history at any time.",
     "ipTitle": "Intellectual Property",
@@ -731,7 +733,7 @@
       "seoWhyUse": "Quickly audit an unfamiliar spreadsheet before processing it. See blank rows, duplicate counts, and column types at a glance — no need to open Excel or install anything.",
       "seoFaqTitle": "FAQ",
       "seoFaq1Q": "What file formats can I inspect?",
-      "seoFaq1A": "You can inspect .xlsx, .xls, and .xlsb files up to 20 MB.",
+      "seoFaq1A": "You can inspect .xlsx, .xls, and .xlsb files within your plan's per-file upload limit (10 MB without an account, 25 MB when signed in).",
       "seoFaq2Q": "Does inspecting modify my file?",
       "seoFaq2A": "No. Inspection is read-only — your original file is never changed.",
       "seoFaq3Q": "Can I inspect password-protected files?",
@@ -751,7 +753,7 @@
       "seoFaq1Q": "Do all sheets need the same columns?",
       "seoFaq1A": "Ideally yes. The tool uses the first selected sheet's header as the shared header row.",
       "seoFaq2Q": "Is there a limit on how many sheets I can merge?",
-      "seoFaq2A": "No hard limit — you can merge all sheets in the workbook as long as the file is under 20 MB.",
+      "seoFaq2A": "No hard limit on sheet count — you can merge all sheets as long as the workbook stays within the per-file upload limit (10 MB without an account, 25 MB when signed in).",
       "seoFaq3Q": "Will formulas be preserved?",
       "seoFaq3A": "Data values are preserved. Formulas, styles, and advanced formatting are not carried over."
     },
@@ -769,7 +771,7 @@
       "seoFaq1Q": "Do the workbooks need identical columns?",
       "seoFaq1A": "They should share the same column structure for best results. Mismatched columns may cause alignment issues.",
       "seoFaq2Q": "How many files can I append at once?",
-      "seoFaq2A": "There is no fixed limit on file count, but total combined size should stay under 20 MB.",
+      "seoFaq2A": "There is no fixed limit on file count, but each job must stay within the per-file upload limit (10 MB without an account, 25 MB when signed in), including total combined size.",
       "seoFaq3Q": "Can I control which sheet is used from each workbook?",
       "seoFaq3A": "The tool appends all source sheets. Use the merge tool first if you need to pick specific sheets."
     },
@@ -843,7 +845,7 @@
       "seoFaq2Q": "Will my data types be preserved?",
       "seoFaq2A": "Yes. Numbers, dates, and text are detected and stored with appropriate Excel types.",
       "seoFaq3Q": "Is there a row limit?",
-      "seoFaq3A": "The tool handles files up to 20 MB, which typically covers hundreds of thousands of rows."
+      "seoFaq3A": "The tool accepts files within the per-file upload limit (10 MB without an account, 25 MB when signed in), which typically covers hundreds of thousands of rows."
     },
     "xlsx-to-pdf": {
       "title": "XLSX → PDF",
@@ -1016,7 +1018,7 @@
       "seoFaq2Q": "Can I keep the last occurrence instead of the first?",
       "seoFaq2A": "Yes. You can choose to keep either the first or last occurrence of each duplicate group.",
       "seoFaq3Q": "Does it work on large files?",
-      "seoFaq3A": "Yes. The tool handles files up to 20 MB, which covers most typical spreadsheets."
+      "seoFaq3A": "Yes. Files must stay within the per-file upload limit (10 MB without an account, 25 MB when signed in), which covers most typical spreadsheets."
     },
     "trim-spaces": {
       "title": "Trim Spaces",
@@ -1244,7 +1246,7 @@
       "seoFaq2Q": "What happens to merged cells?",
       "seoFaq2A": "Merged cells are unmerged during transposition. Data values are preserved.",
       "seoFaq3Q": "Is there a size limit?",
-      "seoFaq3A": "The tool handles files up to 20 MB, which covers most typical spreadsheets."
+      "seoFaq3A": "The same per-file upload limits apply (10 MB without an account, 25 MB when signed in), which covers most typical spreadsheets."
     },
     "split-column": {
       "title": "Split Column",

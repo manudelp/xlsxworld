@@ -246,7 +246,7 @@
     "q6": "Quels formats de fichiers sont pris en charge ?",
     "a6": "La plupart des outils prennent en charge les fichiers .xlsx, .xls, .xlsb et .xlsm. Certains outils acceptent également .csv, .json, .xml, .sql et .pdf. Chaque page d’outil indique exactement quels formats sont acceptés.",
     "q7": "Quelle est la taille maximale de fichier ?",
-    "a7": "20 Mo par fichier. Pour les fichiers plus volumineux, envisagez de diviser le classeur d’abord avec notre outil Diviser le classeur, puis de traiter chaque partie séparément.",
+    "a7": "Sans compte, chaque envoi peut aller jusqu'à 10 Mo. Avec un compte gratuit, jusqu'à 25 Mo par fichier. Pour les fichiers plus volumineux, divisez d'abord le classeur avec notre outil Diviser le classeur, puis traitez chaque partie séparément.",
     "q8": "Pourquoi mon fichier met-il du temps à être traité ?",
     "a8": "Le temps de traitement dépend de la taille et de la complexité du fichier. La plupart des fichiers sont traités en moins de 5 secondes. Les fichiers très volumineux (10 Mo+) ou contenant des milliers de formules peuvent prendre jusqu’à 30 secondes. Si cela prend plus d’une minute, quelque chose a pu mal se passer — réessayez.",
     "q9": "Mon téléchargement n’a pas démarré. Que faire ?",
@@ -288,7 +288,7 @@
     "reportIssue": "Signaler ce problème"
   },
   "common": {
-    "maxFileSize": "Maximum 20 Mo par fichier",
+    "maxFileSizePerFile": "Maximum {sizeMb} Mo par fichier",
     "uploading": "Téléchargement et préparation du classeur...",
     "readingStructure": "Lecture de la structure du classeur...",
     "uploadingParsing": "Téléchargement et analyse du classeur...",
@@ -553,6 +553,7 @@
     "splitFailed": "Échec de la division",
     "appendFailed": "Échec de l'ajout",
     "conversionFailed": "Échec de la conversion",
+    "conversionComplete": "Fichier converti avec succès",
     "couldNotRemoveDuplicates": "Impossible de supprimer les doublons",
     "couldNotTrimSpaces": "Impossible de nettoyer les espaces",
     "couldNotNormalizeCase": "Impossible de normaliser la casse",
@@ -658,7 +659,7 @@
     "infoCollect4": "Données de sécurité et de prévention des abus, telles que l'adresse IP et les signaux de limitation de débit.",
     "infoCollect5": "Si vous vous connectez avec Google, nous recevons votre nom, adresse e-mail et photo de profil de votre compte Google. Nous ne recevons ni ne stockons votre mot de passe Google.",
     "fileProcessingTitle": "Traitement des fichiers",
-    "fileProcessingText": "Les fichiers que vous envoyez sont traités temporairement sur nos serveurs uniquement pour effectuer l'opération demandée (convertir, fusionner, diviser, inspecter, etc.). Les fichiers source que vous envoyez ne sont jamais conservés — ils sont supprimés dès la fin du traitement. Pour les utilisateurs authentifiés, le fichier de sortie est enregistré dans un bucket privé Supabase Storage jusqu'à 7 jours pour que vous puissiez le retélécharger depuis votre historique, après quoi il est automatiquement supprimé définitivement ; vous pouvez supprimer toute sortie plus tôt en un clic depuis la page Historique. Les utilisateurs anonymes obtiennent un téléchargement direct unique et rien n'est stocké. Nous ne lisons pas, n'inspectons pas, ne vendons pas et ne partageons pas le contenu de vos fichiers.",
+    "fileProcessingText": "Les fichiers que vous envoyez sont traités temporairement sur nos serveurs uniquement pour effectuer l'opération demandée (convertir, fusionner, diviser, inspecter, etc.). Les fichiers source que vous envoyez ne sont jamais conservés — ils sont supprimés dès la fin du traitement. Pour les utilisateurs authentifiés, le fichier de sortie est enregistré dans un bucket privé Supabase Storage jusqu'à 7 jours pour que vous puissiez le retélécharger depuis votre historique, après quoi il est automatiquement supprimé définitivement ; vous pouvez supprimer toute sortie plus tôt en un clic depuis la page Historique. Les utilisateurs anonymes obtiennent un téléchargement direct unique et rien n'est stocké. Nous ne lisons pas, n'inspectons pas, ne vendons pas et ne partageons pas le contenu de vos fichiers. Les plafonds actuels par fichier sont de 10 Mo en navigation anonyme et de 25 Mo pour les comptes gratuits connectés.",
     "howWeUseTitle": "Comment nous utilisons les informations",
     "howWeUse1": "Pour fournir et sécuriser les fonctionnalités principales du produit.",
     "howWeUse2": "Pour authentifier les sessions et maintenir l'accès au compte.",
@@ -687,18 +688,19 @@
     "acceptanceTitle": "Acceptation",
     "acceptanceText": "En utilisant XLSX World, vous acceptez ces conditions. Si vous n'êtes pas d'accord, veuillez ne pas utiliser le service.",
     "serviceTitle": "Description du service",
-    "serviceText": "XLSX World fournit des outils en ligne gratuits pour convertir, fusionner, diviser et inspecter des fichiers de feuilles de calcul (.xlsx et .csv), ainsi que des fonctionnalités optionnelles basées sur un compte. Vous pouvez créer un compte avec e-mail et mot de passe ou en vous connectant avec Google. Nous pouvons modifier, suspendre ou interrompre toute partie du service à tout moment.",
+    "serviceText": "XLSX World fournit des outils en ligne gratuits pour convertir, fusionner, diviser, inspecter, nettoyer, valider et traiter autrement des classeurs et fichiers connexes. Chaque outil indique les formats pris en charge ; il s'agit le plus souvent de classeurs Excel (.xlsx, .xls, .xlsb et équivalents), de CSV et, selon l'outil, de JSON, XML, SQL ou PDF. Un compte facultatif ajoute des fonctions telles que l'historique des tâches et le retéléchargement des résultats ; vous pouvez vous inscrire par e-mail et mot de passe ou via Google. Des offres payantes avec d'autres limites ou fonctionnalités pourront être proposées ; le cas échéant, nous mettrons ces conditions à jour avant leur entrée en vigueur. Nous pouvons modifier, suspendre ou interrompre toute partie du service à tout moment.",
     "accountsTitle": "Comptes et sécurité",
     "accounts1": "Vous êtes responsable de toute activité effectuée sous votre compte.",
     "accounts2": "Vous devez garder vos identifiants confidentiels et utiliser des pratiques de sécurité solides.",
     "accounts3": "Nous pouvons suspendre l'accès pour protéger les utilisateurs, les systèmes ou l'intégrité des données.",
     "accounts4": "Si vous vous connectez avec Google, votre compte peut être automatiquement lié à un compte existant avec la même adresse e-mail vérifiée.",
     "acceptableUseTitle": "Utilisation acceptable",
-    "acceptableUse1": "Taille maximale de téléchargement de fichier : 20 Mo par fichier.",
+    "acceptableUse1": "Taille maximale d'envoi par fichier : 10 Mo si vous n'êtes pas connecté, et 25 Mo avec un compte gratuit.",
     "acceptableUse2": "Le service ne peut être utilisé qu'à des fins légales.",
     "acceptableUse3": "Vous ne devez pas télécharger de contenu que vous n'êtes pas autorisé à traiter.",
     "acceptableUse4": "Vous ne devez pas abuser, surcharger, procéder à de l'ingénierie inverse ou perturber la plateforme.",
     "acceptableUse5": "Une utilisation automatisée ou abusive peut entraîner une limitation de débit ou des restrictions d'accès.",
+    "acceptableUse6": "Sans compte, vous pouvez lancer jusqu'à 20 exécutions d'outil par jour UTC ; avec un compte gratuit, jusqu'à 200 par jour UTC. Ces limites peuvent évoluer et des mesures supplémentaires de prévention des abus peuvent s'appliquer.",
     "yourFilesTitle": "Vos fichiers",
     "yourFilesText": "Vous conservez l'entière propriété de tout fichier que vous envoyez. Nous ne revendiquons aucun droit sur votre contenu. Les fichiers source que vous envoyez ne sont jamais conservés — ils sont supprimés immédiatement après l'accomplissement de votre tâche. Pour les utilisateurs authentifiés, le résultat est stocké dans un bucket privé jusqu'à 7 jours pour pouvoir être retéléchargé depuis votre historique, après quoi il est automatiquement supprimé. Vous pouvez supprimer toute sortie stockée depuis votre historique à tout moment.",
     "ipTitle": "Propriété intellectuelle",
@@ -731,7 +733,7 @@
       "seoWhyUse": "Auditez rapidement un tableur inconnu avant de le traiter. Visualisez les lignes vides, les doublons et les types de colonnes en un coup d'œil — sans ouvrir Excel ni rien installer.",
       "seoFaqTitle": "Questions fréquentes",
       "seoFaq1Q": "Quels formats de fichiers puis-je inspecter ?",
-      "seoFaq1A": "Vous pouvez inspecter les fichiers .xlsx, .xls et .xlsb jusqu'à 20 Mo.",
+      "seoFaq1A": "Vous pouvez inspecter les fichiers .xlsx, .xls et .xlsb dans la limite par fichier de votre offre (10 Mo sans compte, 25 Mo une fois connecté).",
       "seoFaq2Q": "L'inspection modifie-t-elle mon fichier ?",
       "seoFaq2A": "Non. L'inspection est en lecture seule — votre fichier original n'est jamais modifié.",
       "seoFaq3Q": "Puis-je inspecter des fichiers protégés par mot de passe ?",
@@ -751,7 +753,7 @@
       "seoFaq1Q": "Toutes les feuilles doivent-elles avoir les mêmes colonnes ?",
       "seoFaq1A": "Idéalement oui. L'outil utilise l'en-tête de la première feuille sélectionnée comme ligne d'en-tête partagée.",
       "seoFaq2Q": "Y a-t-il une limite au nombre de feuilles que je peux fusionner ?",
-      "seoFaq2A": "Pas de limite fixe — vous pouvez fusionner toutes les feuilles du classeur tant que le fichier fait moins de 20 Mo.",
+      "seoFaq2A": "Pas de limite stricte sur le nombre de feuilles — vous pouvez tout fusionner tant que le classeur respecte la limite par fichier (10 Mo sans compte, 25 Mo connecté).",
       "seoFaq3Q": "Les formules sont-elles préservées ?",
       "seoFaq3A": "Les valeurs des données sont préservées. Les formules, styles et formatage avancé ne sont pas transférés."
     },
@@ -769,7 +771,7 @@
       "seoFaq1Q": "Les classeurs doivent-ils avoir des colonnes identiques ?",
       "seoFaq1A": "Ils doivent partager la même structure de colonnes pour de meilleurs résultats. Des colonnes différentes peuvent causer des problèmes d'alignement.",
       "seoFaq2Q": "Combien de fichiers puis-je ajouter à la fois ?",
-      "seoFaq2A": "Il n'y a pas de limite fixe sur le nombre de fichiers, mais la taille totale combinée doit rester sous 20 Mo.",
+      "seoFaq2A": "Il n'y a pas de limite fixe sur le nombre de fichiers, mais chaque traitement doit respecter la limite par fichier (10 Mo sans compte, 25 Mo connecté), y compris la taille totale combinée.",
       "seoFaq3Q": "Puis-je contrôler quelle feuille est utilisée de chaque classeur ?",
       "seoFaq3A": "L'outil ajoute toutes les feuilles sources. Utilisez d'abord l'outil de fusion si vous devez choisir des feuilles spécifiques."
     },
@@ -843,7 +845,7 @@
       "seoFaq2Q": "Les types de données sont-ils préservés ?",
       "seoFaq2A": "Oui. Les nombres, dates et textes sont détectés et stockés avec les types Excel appropriés.",
       "seoFaq3Q": "Y a-t-il une limite de lignes ?",
-      "seoFaq3A": "L'outil gère des fichiers jusqu'à 20 Mo, ce qui couvre généralement des centaines de milliers de lignes."
+      "seoFaq3A": "L'outil accepte des fichiers dans la limite par fichier (10 Mo sans compte, 25 Mo connecté), ce qui couvre généralement des centaines de milliers de lignes."
     },
     "xlsx-to-pdf": {
       "title": "XLSX → PDF",
@@ -1016,7 +1018,7 @@
       "seoFaq2Q": "Puis-je garder la dernière occurrence au lieu de la première ?",
       "seoFaq2A": "Oui. Vous pouvez choisir de garder la première ou la dernière occurrence de chaque groupe de doublons.",
       "seoFaq3Q": "Cela fonctionne-t-il avec de gros fichiers ?",
-      "seoFaq3A": "Oui. L'outil gère des fichiers jusqu'à 20 Mo, ce qui couvre la plupart des tableurs typiques."
+      "seoFaq3A": "Oui. Les fichiers doivent respecter la limite par fichier (10 Mo sans compte, 25 Mo connecté), ce qui couvre la plupart des tableurs typiques."
     },
     "trim-spaces": {
       "title": "Supprimer les espaces",
@@ -1244,7 +1246,7 @@
       "seoFaq2Q": "Que deviennent les cellules fusionnées ?",
       "seoFaq2A": "Elles sont séparées pendant la transposition. Les valeurs sont conservées.",
       "seoFaq3Q": "Y a-t-il une limite de taille ?",
-      "seoFaq3A": "L'outil accepte des fichiers jusqu'à 20 Mo, ce qui couvre la plupart des classeurs courants."
+      "seoFaq3A": "Les mêmes limites par fichier s'appliquent (10 Mo sans compte, 25 Mo connecté), ce qui couvre la plupart des classeurs courants."
     },
     "split-column": {
       "title": "Diviser la colonne",

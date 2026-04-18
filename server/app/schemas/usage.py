@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 
 class UsageResponse(BaseModel):
-    plan: str  # 'anon' | 'free' | 'pro'  (anon will never hit this endpoint in practice)
+    plan: str  # 'anon' | 'free' | 'pro'
     jobs_today: int
     jobs_today_limit: int
     jobs_percent: float  # 0..100, for progress bars

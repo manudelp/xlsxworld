@@ -28,6 +28,7 @@ def _db_returning(values: list[int]) -> MagicMock:
 
     db.execute = AsyncMock(side_effect=execute)
     db.flush = AsyncMock()
+    db.commit = AsyncMock()
     return db
 
 
@@ -41,6 +42,7 @@ async def test_increment_and_check_allows_under_the_limit() -> None:
     )
     assert count == 5
     db.execute.assert_awaited_once()
+    db.commit.assert_awaited_once()
 
 
 @pytest.mark.asyncio
@@ -54,6 +56,7 @@ async def test_increment_and_check_raises_at_the_limit() -> None:
         )
     assert excinfo.value.count == 201
     assert excinfo.value.limit == 200
+    db.commit.assert_awaited_once()
 
 
 @pytest.mark.asyncio

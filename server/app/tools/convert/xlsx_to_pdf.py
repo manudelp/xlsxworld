@@ -11,6 +11,7 @@ from reportlab.lib.pagesizes import A3, A4, landscape, letter
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
 from reportlab.platypus import PageBreak, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+from reportlab.platypus.flowables import KeepInFrame
 
 from app.core.security import AuthenticatedPrincipal
 from app.services.excel_reader import ensure_supported_excel_filename, parse_excel_bytes
@@ -31,6 +32,8 @@ router = APIRouter()
 _MIN_COL_WIDTH = 30
 _MAX_COL_WIDTH = 180   # used by ellipsis mode only
 _CELL_PADDING = 4
+# Split tables with repeatRows use a slightly shorter frame than doc.height; keep cells under that.
+_WRAP_CELL_HEIGHT_RESERVE = 32
 _CHAR_W_FACTOR = 0.62  # conservative per-char width for Helvetica (accounts for wide glyphs)
 
 _HEADER_BG_COLORED = colors.HexColor("#2E7D32")
@@ -169,6 +172,12 @@ def _build_pdf(
         topMargin=14 * mm,
         bottomMargin=14 * mm,
     )
+    # Match the PDF frame exactly (avoids oversized tables vs usable width).
+    avail_width = float(doc.width)
+    max_wrap_cell_height = max(
+        48.0,
+        float(doc.height) - 2 * _CELL_PADDING - _WRAP_CELL_HEIGHT_RESERVE,
+    )
     styles = getSampleStyleSheet()
     body_fs, header_fs = _FONT_SIZES.get(font_size, (8, 9))
 
@@ -216,7 +225,6 @@ def _build_pdf(
         story.append(Spacer(1, 2 * mm))
 
         num_cols = max(len(r) for r in rows)
-        avail_width = page_size[0] - 24 * mm
 
         # ── fit mode: column pagination ──────────────────────────────────────
         if column_mode == "fit":
@@ -257,16 +265,26 @@ def _build_pdf(
 
         # ── wrap mode ────────────────────────────────────────────────────────
         if column_mode == "wrap":
+            col_width = max(float(_MIN_COL_WIDTH), avail_width / num_cols)
+            col_widths = [col_width] * num_cols
+            inner_w = max(1.0, col_width - 2 * _CELL_PADDING)
             table_data = []
             for ri, row in enumerate(rows):
                 style = header_cell_style if ri == 0 else cell_style
-                cells = [
-                    Paragraph(_safe_text(row[ci] if ci < len(row) else None), style)
-                    for ci in range(num_cols)
-                ]
+                cells = []
+                for ci in range(num_cols):
+                    raw = row[ci] if ci < len(row) else None
+                    para = Paragraph(_safe_text(raw), style)
+                    cells.append(
+                        KeepInFrame(
+                            inner_w,
+                            max_wrap_cell_height,
+                            [para],
+                            mode="truncate",
+                            mergeSpace=0,
+                        )
+                    )
                 table_data.append(cells)
-            col_width = max(float(_MIN_COL_WIDTH), avail_width / num_cols)
-            col_widths = [col_width] * num_cols
 
         # ── ellipsis mode (default) ──────────────────────────────────────────
         else:

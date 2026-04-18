@@ -1,6 +1,13 @@
 "use client";
 
 import { useState, type CSSProperties } from "react";
+import { useTranslations } from "next-intl";
+
+import { useAuth } from "@/components/auth/AuthProvider";
+import {
+  CLIENT_MAX_UPLOAD_MB_ANON,
+  CLIENT_MAX_UPLOAD_MB_AUTHENTICATED,
+} from "@/lib/uploadLimits";
 
 type FileUploadDropzoneProps = {
   accept: string;
@@ -38,9 +45,18 @@ export default function FileUploadDropzone({
   maxSizeLabel,
   unsupportedFileError,
 }: FileUploadDropzoneProps) {
+  const t = useTranslations("common");
+  const { isAuthenticated, isLoading } = useAuth();
   const [dragOver, setDragOver] = useState(false);
   const [hover, setHover] = useState(false);
   const [rejectionError, setRejectionError] = useState<string | null>(null);
+
+  const sizeMb = isLoading
+    ? CLIENT_MAX_UPLOAD_MB_ANON
+    : isAuthenticated
+      ? CLIENT_MAX_UPLOAD_MB_AUTHENTICATED
+      : CLIENT_MAX_UPLOAD_MB_ANON;
+  const defaultMaxSizeLabel = t("maxFileSizePerFile", { sizeMb });
 
   const extensions = extractExtensions(accept);
 
@@ -127,7 +143,7 @@ export default function FileUploadDropzone({
           {message}
         </span>
         <span className="text-xs mt-1" style={{ color: "var(--muted-2)" }}>
-          {maxSizeLabel ?? "Max 20 MB per file"}
+          {maxSizeLabel ?? defaultMaxSizeLabel}
         </span>
         {rejectionError && (
           <span className="text-xs mt-1 font-medium" style={{ color: "var(--danger)" }}>
