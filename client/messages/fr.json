@@ -7,13 +7,17 @@
     "welcomeBanner": "Bienvenue. Votre compte est prêt.",
     "heading": "Arrêtez de vous battre avec Excel.",
     "subheading": "Convertissez, nettoyez, divisez, fusionnez et analysez vos feuilles de calcul en quelques secondes — sans logiciel, sans inscription.",
-    "trustLine": "Gratuit · Aucune inscription requise · Vos fichiers envoyés ne sont jamais conservés"
+    "socialProof": "Utilisé par des équipes dans plus de 30 pays",
+    "trustLine": "Gratuit · Aucune inscription requise · Vos fichiers envoyés ne sont jamais conservés",
+    "startHereHeading": "Commencez ici",
+    "startHereSubheading": "Les outils les plus utilisés — un bon point de départ."
   },
   "header": {
     "login": "Se connecter",
     "settings": "Paramètres",
     "language": "Langue",
-    "theme": "Thème"
+    "theme": "Thème",
+    "myAccount": "Mon compte"
   },
   "tools": {
     "noTools": "Aucun outil dans cette catégorie.",
@@ -23,7 +27,14 @@
     "suggestTool": "Suggérer un outil",
     "suggestToolDescription": "Vous avez une idée ? Dites-le nous !",
     "backToTools": "Retour aux outils",
-    "toolUiComingSoon": "Interface de l'outil bientôt disponible."
+    "toolUiComingSoon": "Interface de l'outil bientôt disponible.",
+    "relatedHeading": "Vous pourriez aussi avoir besoin de",
+    "sizeLimitAnon": "Limite de 10 Mo — inscription gratuite pour 25 Mo",
+    "sizeLimitAuth": "Jusqu'à 25 Mo par fichier",
+    "historyCtaTitle": "Enregistrez ce résultat dans votre historique",
+    "historyCtaBody": "Inscrivez-vous gratuitement pour retélécharger vos fichiers pendant 7 jours.",
+    "historyCtaAction": "Créer un compte gratuit",
+    "historyCtaDismiss": "Pas maintenant"
   },
   "footer": {
     "home": "Accueil",
@@ -32,18 +43,14 @@
     "contact": "Contact",
     "privacy": "Confidentialité",
     "terms": "Conditions",
-    "apiOnline": "API en ligne",
-    "apiOffline": "API hors ligne",
-    "checkingApi": "Vérification de l'API...",
-    "apiOnlineTooltip": "L'API répond normalement. Vos requêtes devraient fonctionner correctement.",
-    "apiOfflineTooltip": "Nous n'avons pas pu nous connecter à l'API. Certaines fonctionnalités peuvent être temporairement indisponibles.",
-    "checkingApiTooltip": "Nous vérifions la connexion à l'API en arrière-plan.",
+    "suggestTool": "Suggérer un outil",
     "copyright": "© XLSX World {year}",
     "tagline": "Simplifier les feuilles de calcul, un fichier à la fois."
   },
   "account": {
     "label": "Compte",
     "myAccount": "Mon compte",
+    "profile": "Profil",
     "logout": "Se déconnecter",
     "keepProfileUpdated": "Gardez les données de votre profil à jour.",
     "email": "Adresse e-mail",
@@ -56,12 +63,16 @@
     "loadingAccount": "Chargement du compte...",
     "viewHistory": "Voir l'historique",
     "viewHistorySubtitle": "Consultez vos jobs récents et retéléchargez les résultats pendant 7 jours.",
+    "editName": "Modifier le nom",
+    "saveNameLabel": "Enregistrer le nom",
+    "cancel": "Annuler",
     "usage": {
       "title": "Utilisation du jour",
       "planLabel": "Plan {plan}",
       "jobsToday": "jobs aujourd'hui",
       "progressLabel": "Utilisation quotidienne",
-      "sizeCap": "Taille max. du fichier : {mb} Mo"
+      "sizeCap": "Taille max. du fichier : {mb} Mo",
+      "resets": "Réinitialisation à minuit UTC"
     },
     "history": {
       "title": "Votre historique",
@@ -77,6 +88,48 @@
       "expired": "Expiré",
       "confirmDelete": "Supprimer ce job de votre historique ? Cette action est irréversible.",
       "empty": "Pas encore de jobs — essayez un outil puis revenez !"
+    },
+    "recentJobs": {
+      "title": "Jobs récents",
+      "viewAll": "Tout voir",
+      "empty": "Pas encore de jobs — utilisez un outil pour les voir ici.",
+      "download": "Télécharger",
+      "expired": "Expiré"
+    },
+    "preferences": {
+      "title": "Préférences",
+      "description": "Contrôlez l'apparence et la lecture de l'application.",
+      "language": "Langue",
+      "theme": "Thème",
+      "themeLight": "Clair",
+      "themeDark": "Sombre",
+      "themeSystem": "Système"
+    },
+    "security": {
+      "title": "Sécurité",
+      "emailLabel": "Adresse e-mail",
+      "changeEmail": "Modifier l'e-mail",
+      "changeEmailHint": "Contactez-nous pour changer votre e-mail.",
+      "passwordLabel": "Mot de passe",
+      "passwordMasked": "••••••••",
+      "changePassword": "Modifier le mot de passe",
+      "sendingReset": "Envoi du lien…",
+      "resetSent": "Lien envoyé — vérifiez votre boîte mail.",
+      "resetError": "Impossible d'envoyer le lien. Réessayez.",
+      "connectedWithGoogle": "Connecté avec Google"
+    },
+    "dangerZone": {
+      "title": "Zone dangereuse",
+      "description": "Actions permanentes qui ne peuvent pas être annulées.",
+      "deleteAccount": "Supprimer le compte",
+      "modalTitle": "Supprimer votre compte ?",
+      "modalBody": "Ceci supprimera définitivement votre compte et tous les résultats stockés. Cette action est irréversible.",
+      "confirmLabel": "Tapez votre e-mail pour confirmer",
+      "confirmPlaceholder": "vous@exemple.com",
+      "confirmButton": "Supprimer définitivement",
+      "emailMismatch": "L'e-mail ne correspond pas.",
+      "needsSupport": "La suppression du compte est gérée par notre équipe. Contactez-nous et nous supprimerons tout dans un délai de 7 jours.",
+      "contactUs": "Contacter le support"
     }
   },
   "quotaPill": {

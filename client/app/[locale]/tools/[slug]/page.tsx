@@ -42,6 +42,8 @@ import ValidateEmails from "./validate/ValidateEmails";
 import DetectBlanks from "./validate/DetectBlanks";
 import PasswordProtect from "./security/PasswordProtect";
 import RemovePassword from "./security/RemovePassword";
+import RelatedTools from "@/components/tools/RelatedTools";
+import HistoryNudge from "@/components/tools/HistoryNudge";
 
 const specialComponents: Record<string, React.ReactNode> = {
   "inspect-sheets": <InspectSheets />,
@@ -290,7 +292,10 @@ export default async function ToolPage({
             </section>
           </div>
         )}
+
+        <RelatedTools slug={slug} locale={locale} />
       </div>
+      <HistoryNudge />
     </>
   );
 }

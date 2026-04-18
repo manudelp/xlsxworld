@@ -37,6 +37,10 @@ export function downloadBlob(buffer: ArrayBuffer, fileName: string, mimeType: st
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
+
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("xlsx-tool:success"));
+  }
 }
 
 export function downloadXlsx(buffer: ArrayBuffer, fileName: string): void {

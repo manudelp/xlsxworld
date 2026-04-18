@@ -7,13 +7,17 @@
     "welcomeBanner": "Welcome. Your account is ready.",
     "heading": "Stop wrestling with Excel.",
     "subheading": "Convert, clean, split, merge and analyze spreadsheets in seconds — no software, no signup needed.",
-    "trustLine": "Free to use · No signup required · Uploads are never kept"
+    "socialProof": "Trusted by teams in 30+ countries",
+    "trustLine": "Free to use · No signup required · Uploads are never kept",
+    "startHereHeading": "Start here",
+    "startHereSubheading": "The most-used tools — a good place to begin."
   },
   "header": {
     "login": "Login",
     "settings": "Settings",
     "language": "Language",
-    "theme": "Theme"
+    "theme": "Theme",
+    "myAccount": "My Account"
   },
   "tools": {
     "noTools": "No tools in this category.",
@@ -23,7 +27,14 @@
     "suggestTool": "Suggest a Tool",
     "suggestToolDescription": "Have an idea? Let us know!",
     "backToTools": "Back to Tools",
-    "toolUiComingSoon": "Tool UI coming soon."
+    "toolUiComingSoon": "Tool UI coming soon.",
+    "relatedHeading": "You might also need",
+    "sizeLimitAnon": "10 MB limit — sign up free for 25 MB",
+    "sizeLimitAuth": "Up to 25 MB per file",
+    "historyCtaTitle": "Save this result to your history",
+    "historyCtaBody": "Sign up free to re-download your outputs for 7 days.",
+    "historyCtaAction": "Create a free account",
+    "historyCtaDismiss": "Not now"
   },
   "footer": {
     "home": "Home",
@@ -32,18 +43,14 @@
     "contact": "Contact",
     "privacy": "Privacy",
     "terms": "Terms",
-    "apiOnline": "API Online",
-    "apiOffline": "API Offline",
-    "checkingApi": "Checking API...",
-    "apiOnlineTooltip": "The API is responding normally. Your requests should work as expected.",
-    "apiOfflineTooltip": "We could not reach the API right now. Some features may be temporarily unavailable.",
-    "checkingApiTooltip": "We are checking the API connection in the background.",
+    "suggestTool": "Suggest a tool",
     "copyright": "© XLSX World {year}",
     "tagline": "Simplifying spreadsheets, one file at a time."
   },
   "account": {
     "label": "Account",
     "myAccount": "My account",
+    "profile": "Profile",
     "logout": "Logout",
     "keepProfileUpdated": "Keep your profile details up to date.",
     "email": "Email",
@@ -56,12 +63,16 @@
     "loadingAccount": "Loading account...",
     "viewHistory": "View history",
     "viewHistorySubtitle": "See your recent jobs and re-download outputs within 7 days.",
+    "editName": "Edit name",
+    "saveNameLabel": "Save name",
+    "cancel": "Cancel",
     "usage": {
       "title": "Today's usage",
       "planLabel": "{plan} plan",
       "jobsToday": "jobs today",
       "progressLabel": "Daily job usage",
-      "sizeCap": "Max file size: {mb} MB"
+      "sizeCap": "Max file size: {mb} MB",
+      "resets": "Resets at midnight UTC"
     },
     "history": {
       "title": "Your history",
@@ -77,6 +88,48 @@
       "expired": "Expired",
       "confirmDelete": "Delete this job from your history? This cannot be undone.",
       "empty": "No jobs yet — try a tool and come back!"
+    },
+    "recentJobs": {
+      "title": "Recent jobs",
+      "viewAll": "View all",
+      "empty": "No jobs yet — run a tool to see your history here.",
+      "download": "Download",
+      "expired": "Expired"
+    },
+    "preferences": {
+      "title": "Preferences",
+      "description": "Control how the app looks and reads for you.",
+      "language": "Language",
+      "theme": "Theme",
+      "themeLight": "Light",
+      "themeDark": "Dark",
+      "themeSystem": "System"
+    },
+    "security": {
+      "title": "Security",
+      "emailLabel": "Email address",
+      "changeEmail": "Change email",
+      "changeEmailHint": "Contact us to change your email.",
+      "passwordLabel": "Password",
+      "passwordMasked": "••••••••",
+      "changePassword": "Change password",
+      "sendingReset": "Sending reset link…",
+      "resetSent": "Reset link sent — check your inbox.",
+      "resetError": "Couldn't send the reset link. Try again in a moment.",
+      "connectedWithGoogle": "Connected with Google"
+    },
+    "dangerZone": {
+      "title": "Danger zone",
+      "description": "Permanent actions that can't be undone.",
+      "deleteAccount": "Delete account",
+      "modalTitle": "Delete your account?",
+      "modalBody": "This will permanently delete your account and all stored outputs. This cannot be undone.",
+      "confirmLabel": "Type your email to confirm",
+      "confirmPlaceholder": "you@example.com",
+      "confirmButton": "Permanently delete",
+      "emailMismatch": "Email doesn't match.",
+      "needsSupport": "Account deletion is handled by our team. Contact us and we'll remove everything within 7 days.",
+      "contactUs": "Contact support"
     }
   },
   "quotaPill": {

@@ -7,13 +7,17 @@
     "welcomeBanner": "Bem-vindo. Sua conta está pronta.",
     "heading": "Pare de lutar com o Excel.",
     "subheading": "Converta, limpe, divida, combine e analise planilhas em segundos — sem software, sem cadastro.",
-    "trustLine": "Grátis · Sem cadastro · Seus envios nunca são guardados"
+    "socialProof": "Usado por equipes em mais de 30 países",
+    "trustLine": "Grátis · Sem cadastro · Seus envios nunca são guardados",
+    "startHereHeading": "Comece por aqui",
+    "startHereSubheading": "As ferramentas mais usadas — um bom ponto de partida."
   },
   "header": {
     "login": "Entrar",
     "settings": "Configurações",
     "language": "Idioma",
-    "theme": "Tema"
+    "theme": "Tema",
+    "myAccount": "Minha conta"
   },
   "tools": {
     "noTools": "Nenhuma ferramenta nesta categoria.",
@@ -23,7 +27,14 @@
     "suggestTool": "Sugerir Ferramenta",
     "suggestToolDescription": "Tem uma ideia? Conte para nós!",
     "backToTools": "Voltar para ferramentas",
-    "toolUiComingSoon": "Interface da ferramenta em breve."
+    "toolUiComingSoon": "Interface da ferramenta em breve.",
+    "relatedHeading": "Você também pode precisar de",
+    "sizeLimitAnon": "Limite de 10 MB — cadastre-se grátis para 25 MB",
+    "sizeLimitAuth": "Até 25 MB por arquivo",
+    "historyCtaTitle": "Salve este resultado no seu histórico",
+    "historyCtaBody": "Cadastre-se grátis e baixe seus arquivos novamente por 7 dias.",
+    "historyCtaAction": "Criar uma conta grátis",
+    "historyCtaDismiss": "Agora não"
   },
   "footer": {
     "home": "Início",
@@ -32,18 +43,14 @@
     "contact": "Contato",
     "privacy": "Privacidade",
     "terms": "Termos",
-    "apiOnline": "API online",
-    "apiOffline": "API offline",
-    "checkingApi": "Verificando API...",
-    "apiOnlineTooltip": "A API está respondendo normalmente. Suas requisições devem funcionar corretamente.",
-    "apiOfflineTooltip": "Não conseguimos conectar à API. Algumas funções podem estar temporariamente indisponíveis.",
-    "checkingApiTooltip": "Estamos verificando a conexão com a API em segundo plano.",
+    "suggestTool": "Sugerir uma ferramenta",
     "copyright": "© XLSX World {year}",
     "tagline": "Simplificando planilhas, um arquivo de cada vez."
   },
   "account": {
     "label": "Conta",
     "myAccount": "Minha conta",
+    "profile": "Perfil",
     "logout": "Sair",
     "keepProfileUpdated": "Mantenha os dados do seu perfil atualizados.",
     "email": "E-mail",
@@ -56,12 +63,16 @@
     "loadingAccount": "Carregando conta...",
     "viewHistory": "Ver histórico",
     "viewHistorySubtitle": "Veja seus trabalhos recentes e baixe os resultados novamente por 7 dias.",
+    "editName": "Editar nome",
+    "saveNameLabel": "Salvar nome",
+    "cancel": "Cancelar",
     "usage": {
       "title": "Uso de hoje",
       "planLabel": "Plano {plan}",
       "jobsToday": "trabalhos hoje",
       "progressLabel": "Uso diário de trabalhos",
-      "sizeCap": "Tamanho máx. do arquivo: {mb} MB"
+      "sizeCap": "Tamanho máx. do arquivo: {mb} MB",
+      "resets": "Redefine à meia-noite UTC"
     },
     "history": {
       "title": "Seu histórico",
@@ -77,6 +88,48 @@
       "expired": "Expirado",
       "confirmDelete": "Excluir este trabalho do histórico? Esta ação não pode ser desfeita.",
       "empty": "Nenhum trabalho ainda — experimente uma ferramenta e volte!"
+    },
+    "recentJobs": {
+      "title": "Trabalhos recentes",
+      "viewAll": "Ver todos",
+      "empty": "Nenhum trabalho ainda — use uma ferramenta para vê-los aqui.",
+      "download": "Baixar",
+      "expired": "Expirado"
+    },
+    "preferences": {
+      "title": "Preferências",
+      "description": "Controle como o app se parece e se lê para você.",
+      "language": "Idioma",
+      "theme": "Tema",
+      "themeLight": "Claro",
+      "themeDark": "Escuro",
+      "themeSystem": "Sistema"
+    },
+    "security": {
+      "title": "Segurança",
+      "emailLabel": "E-mail",
+      "changeEmail": "Alterar e-mail",
+      "changeEmailHint": "Contate-nos para alterar seu e-mail.",
+      "passwordLabel": "Senha",
+      "passwordMasked": "••••••••",
+      "changePassword": "Alterar senha",
+      "sendingReset": "Enviando link…",
+      "resetSent": "Link enviado — confira seu e-mail.",
+      "resetError": "Não foi possível enviar o link. Tente novamente.",
+      "connectedWithGoogle": "Conectado com Google"
+    },
+    "dangerZone": {
+      "title": "Zona de perigo",
+      "description": "Ações permanentes que não podem ser desfeitas.",
+      "deleteAccount": "Excluir conta",
+      "modalTitle": "Excluir sua conta?",
+      "modalBody": "Isso excluirá permanentemente sua conta e todos os resultados armazenados. Esta ação não pode ser desfeita.",
+      "confirmLabel": "Digite seu e-mail para confirmar",
+      "confirmPlaceholder": "voce@exemplo.com",
+      "confirmButton": "Excluir permanentemente",
+      "emailMismatch": "O e-mail não corresponde.",
+      "needsSupport": "A exclusão de conta é tratada pela nossa equipe. Contate-nos e removeremos tudo em até 7 dias.",
+      "contactUs": "Contatar suporte"
     }
   },
   "quotaPill": {

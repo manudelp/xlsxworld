@@ -7,13 +7,17 @@
     "welcomeBanner": "Bienvenido. Tu cuenta está lista.",
     "heading": "Deja de pelear con Excel.",
     "subheading": "Convierte, limpia, divide, combina y analiza hojas de cálculo en segundos — sin software, sin registro.",
-    "trustLine": "Gratis · Sin registro · Nunca guardamos tus archivos subidos"
+    "socialProof": "Usado por equipos en más de 30 países",
+    "trustLine": "Gratis · Sin registro · Nunca guardamos tus archivos subidos",
+    "startHereHeading": "Empieza por aquí",
+    "startHereSubheading": "Las herramientas más usadas — un buen punto de partida."
   },
   "header": {
     "login": "Iniciar sesión",
     "settings": "Ajustes",
     "language": "Idioma",
-    "theme": "Tema"
+    "theme": "Tema",
+    "myAccount": "Mi cuenta"
   },
   "tools": {
     "noTools": "No hay herramientas en esta categoría.",
@@ -23,7 +27,14 @@
     "suggestTool": "Sugerir Herramienta",
     "suggestToolDescription": "¿Tienes una idea? ¡Cuéntanos!",
     "backToTools": "Volver a herramientas",
-    "toolUiComingSoon": "Interfaz de herramienta próximamente."
+    "toolUiComingSoon": "Interfaz de herramienta próximamente.",
+    "relatedHeading": "También te puede interesar",
+    "sizeLimitAnon": "Límite de 10 MB — regístrate gratis para 25 MB",
+    "sizeLimitAuth": "Hasta 25 MB por archivo",
+    "historyCtaTitle": "Guarda este resultado en tu historial",
+    "historyCtaBody": "Regístrate gratis y vuelve a descargar tus archivos durante 7 días.",
+    "historyCtaAction": "Crear una cuenta gratis",
+    "historyCtaDismiss": "Ahora no"
   },
   "footer": {
     "home": "Inicio",
@@ -32,18 +43,14 @@
     "contact": "Contacto",
     "privacy": "Privacidad",
     "terms": "Términos",
-    "apiOnline": "API en línea",
-    "apiOffline": "API fuera de línea",
-    "checkingApi": "Verificando API...",
-    "apiOnlineTooltip": "La API responde con normalidad. Tus solicitudes deberían funcionar correctamente.",
-    "apiOfflineTooltip": "No pudimos conectar con la API. Algunas funciones pueden no estar disponibles temporalmente.",
-    "checkingApiTooltip": "Estamos verificando la conexión con la API en segundo plano.",
+    "suggestTool": "Sugerir una herramienta",
     "copyright": "© XLSX World {year}",
     "tagline": "Simplificando hojas de cálculo, un archivo a la vez."
   },
   "account": {
     "label": "Cuenta",
     "myAccount": "Mi cuenta",
+    "profile": "Perfil",
     "logout": "Cerrar sesión",
     "keepProfileUpdated": "Mantén los datos de tu perfil actualizados.",
     "email": "Correo electrónico",
@@ -56,12 +63,16 @@
     "loadingAccount": "Cargando cuenta...",
     "viewHistory": "Ver historial",
     "viewHistorySubtitle": "Consulta tus trabajos recientes y vuelve a descargar los resultados durante 7 días.",
+    "editName": "Editar nombre",
+    "saveNameLabel": "Guardar nombre",
+    "cancel": "Cancelar",
     "usage": {
       "title": "Uso de hoy",
       "planLabel": "Plan {plan}",
       "jobsToday": "trabajos hoy",
       "progressLabel": "Uso diario de trabajos",
-      "sizeCap": "Tamaño máx. de archivo: {mb} MB"
+      "sizeCap": "Tamaño máx. de archivo: {mb} MB",
+      "resets": "Se reinicia a medianoche UTC"
     },
     "history": {
       "title": "Tu historial",
@@ -77,6 +88,48 @@
       "expired": "Caducado",
       "confirmDelete": "¿Eliminar este trabajo del historial? No se puede deshacer.",
       "empty": "Aún no hay trabajos — prueba una herramienta y vuelve."
+    },
+    "recentJobs": {
+      "title": "Trabajos recientes",
+      "viewAll": "Ver todos",
+      "empty": "Aún no hay trabajos — usa una herramienta para verlos aquí.",
+      "download": "Descargar",
+      "expired": "Caducado"
+    },
+    "preferences": {
+      "title": "Preferencias",
+      "description": "Controla cómo se ve y se lee la app para ti.",
+      "language": "Idioma",
+      "theme": "Tema",
+      "themeLight": "Claro",
+      "themeDark": "Oscuro",
+      "themeSystem": "Sistema"
+    },
+    "security": {
+      "title": "Seguridad",
+      "emailLabel": "Correo electrónico",
+      "changeEmail": "Cambiar correo",
+      "changeEmailHint": "Contáctanos para cambiar tu correo.",
+      "passwordLabel": "Contraseña",
+      "passwordMasked": "••••••••",
+      "changePassword": "Cambiar contraseña",
+      "sendingReset": "Enviando enlace…",
+      "resetSent": "Enlace enviado — revisa tu correo.",
+      "resetError": "No se pudo enviar el enlace. Inténtalo de nuevo.",
+      "connectedWithGoogle": "Conectado con Google"
+    },
+    "dangerZone": {
+      "title": "Zona de peligro",
+      "description": "Acciones permanentes que no se pueden deshacer.",
+      "deleteAccount": "Eliminar cuenta",
+      "modalTitle": "¿Eliminar tu cuenta?",
+      "modalBody": "Esto eliminará permanentemente tu cuenta y todos los resultados guardados. No se puede deshacer.",
+      "confirmLabel": "Escribe tu correo para confirmar",
+      "confirmPlaceholder": "tucorreo@ejemplo.com",
+      "confirmButton": "Eliminar permanentemente",
+      "emailMismatch": "El correo no coincide.",
+      "needsSupport": "La eliminación de la cuenta la gestiona nuestro equipo. Contáctanos y lo eliminaremos todo en un plazo de 7 días.",
+      "contactUs": "Contactar con soporte"
     }
   },
   "quotaPill": {

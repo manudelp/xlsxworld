@@ -4,6 +4,7 @@ import { useState, type CSSProperties } from "react";
 import { useTranslations } from "next-intl";
 
 import { useAuth } from "@/components/auth/AuthProvider";
+import { Link } from "@/i18n/navigation";
 import {
   CLIENT_MAX_UPLOAD_MB_ANON,
   CLIENT_MAX_UPLOAD_MB_AUTHENTICATED,
@@ -46,6 +47,7 @@ export default function FileUploadDropzone({
   unsupportedFileError,
 }: FileUploadDropzoneProps) {
   const t = useTranslations("common");
+  const tTools = useTranslations("tools");
   const { isAuthenticated, isLoading } = useAuth();
   const [dragOver, setDragOver] = useState(false);
   const [hover, setHover] = useState(false);
@@ -57,6 +59,7 @@ export default function FileUploadDropzone({
       ? CLIENT_MAX_UPLOAD_MB_AUTHENTICATED
       : CLIENT_MAX_UPLOAD_MB_ANON;
   const defaultMaxSizeLabel = t("maxFileSizePerFile", { sizeMb });
+  const showSignupHint = !isLoading && !isAuthenticated && !maxSizeLabel;
 
   const extensions = extractExtensions(accept);
 
@@ -143,7 +146,17 @@ export default function FileUploadDropzone({
           {message}
         </span>
         <span className="text-xs mt-1" style={{ color: "var(--muted-2)" }}>
-          {maxSizeLabel ?? defaultMaxSizeLabel}
+          {showSignupHint ? (
+            <Link
+              href="/signup"
+              onClick={(e) => e.stopPropagation()}
+              className="hover:text-[color:var(--primary)] hover:underline"
+            >
+              {tTools("sizeLimitAnon")}
+            </Link>
+          ) : (
+            (maxSizeLabel ?? defaultMaxSizeLabel)
+          )}
         </span>
         {rejectionError && (
           <span className="text-xs mt-1 font-medium" style={{ color: "var(--danger)" }}>
