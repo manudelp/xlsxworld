@@ -147,9 +147,7 @@ function TaskToolCard({
       >
         {/* Icon + Title row */}
         <div className="flex items-start gap-3">
-          <span className="text-2xl leading-none" aria-hidden="true">
-            {tt.tool.icon}
-          </span>
+          <tt.tool.icon className="h-6 w-6 shrink-0" aria-hidden="true" style={{ color: "var(--primary)" }} />
           <div className="min-w-0 flex-1">
             <h3 className="text-[15px] font-semibold leading-snug">
               {t(`tools.${tt.slug}.title`)}

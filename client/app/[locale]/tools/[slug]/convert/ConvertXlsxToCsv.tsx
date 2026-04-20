@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import React, { useCallback, useMemo, useState } from "react";
+import { toast } from "sonner";
 import {
   uploadForPreview,
   WorkbookPreview,
@@ -293,6 +294,7 @@ export default function ConvertXlsxToCsv() {
                       a.click();
                       a.remove();
                       URL.revokeObjectURL(url);
+                      toast.success(t("conversionComplete"));
                     } catch (e) {
                       setError(e instanceof Error ? e.message : t("exportFailed"));
                     } finally {
@@ -321,6 +323,7 @@ export default function ConvertXlsxToCsv() {
                       a.click();
                       a.remove();
                       URL.revokeObjectURL(url);
+                      toast.success(t("conversionComplete"));
                     } catch (e) {
                       setError(e instanceof Error ? e.message : t("exportFailed"));
                     } finally {
@@ -349,6 +352,7 @@ export default function ConvertXlsxToCsv() {
                       a.click();
                       a.remove();
                       URL.revokeObjectURL(url);
+                      toast.success(t("conversionComplete"));
                     } catch (e) {
                       setError(e instanceof Error ? e.message : t("exportFailed"));
                     } finally {

@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import React, { useCallback, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { Archive, Layers3 } from "lucide-react";
 import { splitWorkbook } from "@/lib/tools/split";
 import { EXCEL_ACCEPT, VISUAL_ELEMENTS_WARNING } from "../clean/shared";
@@ -88,6 +89,7 @@ export default function SplitWorkbook() {
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
+      toast.success(t("splitComplete"));
     } catch (e) {
       setError(e instanceof Error ? e.message : t("splitFailed"));
     } finally {

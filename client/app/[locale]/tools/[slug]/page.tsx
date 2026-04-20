@@ -191,9 +191,7 @@ export default async function ToolPage({
           </Link>
           <div className="order-2 sm:order-1">
             <h1 className="text-2xl sm:text-3xl font-semibold mb-2 flex items-center gap-3">
-              <span className="text-3xl sm:text-4xl" aria-hidden>
-                {tool.icon}
-              </span>{" "}
+              <tool.icon className="h-8 w-8 sm:h-9 sm:w-9 shrink-0" aria-hidden style={{ color: "var(--primary)" }} />
               {td("heading")}
             </h1>
             <p className="mb-8 max-w-2xl" style={{ color: "var(--muted)" }}>

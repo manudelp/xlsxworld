@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { toolItems } from "@/components/tools/toolsData";
 import { Link } from "@/i18n/navigation";
@@ -79,6 +80,7 @@ export default function AuthPage() {
     try {
       if (mode === "login") {
         await login({ email: email.trim(), password, remember: rememberMe });
+        toast.success(t("loginSuccess"));
         router.replace(nextPath);
       } else {
         await signup({
@@ -87,6 +89,7 @@ export default function AuthPage() {
           displayName: displayName.trim() || undefined,
           remember: rememberMe,
         });
+        toast.success(t("accountCreated"));
         router.replace("/?welcome=1");
       }
       router.refresh();
@@ -166,7 +169,7 @@ export default function AuthPage() {
                       color: "#fff",
                     }}
                   >
-                    <span>{tool.icon}</span>
+                    <tool.icon className="h-3.5 w-3.5" aria-hidden="true" />
                     {tTools(`${slug}.title`)}
                   </span>
                 );

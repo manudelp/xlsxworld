@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { forgotPassword } from "@/lib/auth/client";
 import { Link } from "@/i18n/navigation";
 
@@ -22,6 +23,7 @@ export default function ForgotPasswordPage() {
     try {
       await forgotPassword(email.trim());
       setSent(true);
+      toast.success(t("sent"));
     } catch (error) {
       setErrorMessage(
         error instanceof Error ? error.message : t("genericError"),

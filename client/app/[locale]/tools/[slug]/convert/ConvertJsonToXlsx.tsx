@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import React, { useCallback, useState } from "react";
+import { toast } from "sonner";
 import { jsonToXlsx } from "@/lib/tools/convert";
 import FileUploadDropzone from "@/components/common/FileUploadDropzone";
 
@@ -10,12 +11,10 @@ export default function ConvertJsonToXlsx() {
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
   const [includeHeaders, setIncludeHeaders] = useState(true);
 
   const onFile = useCallback((selected: File) => {
     setError(null);
-    setSuccess(false);
     setFile(selected);
   }, []);
 
@@ -42,7 +41,7 @@ export default function ConvertJsonToXlsx() {
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
-      setSuccess(true);
+      toast.success(t("conversionComplete"));
     } catch (e) {
       setError(e instanceof Error ? e.message : t("conversionFailed"));
     } finally {
@@ -92,7 +91,6 @@ export default function ConvertJsonToXlsx() {
       )}
 
       {error && <div className="tool-error">{error}</div>}
-      {success && <div className="tool-success">✓ {t("conversionComplete") ?? "File converted successfully"}</div>}
 
       {file && (
         <button

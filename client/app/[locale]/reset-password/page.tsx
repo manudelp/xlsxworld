@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { resetPassword } from "@/lib/auth/client";
 import { api } from "@/lib/api";
 import { Link } from "@/i18n/navigation";
@@ -135,6 +136,7 @@ export default function ResetPasswordPage() {
     try {
       await resetPassword(accessToken, password);
       setDone(true);
+      toast.success(t("success"));
     } catch (error) {
       setErrorMessage(
         error instanceof Error ? error.message : t("genericError"),

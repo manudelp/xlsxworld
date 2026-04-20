@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 import { ChevronDown, ChevronUp, GripVertical } from "lucide-react";
 import { appendWorkbooks } from "@/lib/tools/merge";
 import { EXCEL_ACCEPT, VISUAL_ELEMENTS_WARNING } from "../clean/shared";
@@ -295,6 +296,7 @@ export default function AppendWorkbooks() {
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
+      toast.success(t("mergeComplete"));
     } catch (e) {
       setError(e instanceof Error ? e.message : t("appendFailed"));
     } finally {

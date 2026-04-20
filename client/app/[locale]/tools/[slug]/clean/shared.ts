@@ -1,3 +1,5 @@
+import { toast } from "sonner";
+
 import type { ToolFileResult } from "@/lib/api";
 import type { WorkbookPreview } from "@/lib/tools/inspect";
 
@@ -37,6 +39,7 @@ export function downloadBlob(buffer: ArrayBuffer, fileName: string, mimeType: st
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
+  toast.success("File downloaded successfully");
 
   if (typeof window !== "undefined") {
     window.dispatchEvent(new CustomEvent("xlsx-tool:success"));

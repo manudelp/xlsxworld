@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 import Image from "next/image";
 import { Turnstile } from "@marsidev/react-turnstile";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 import { api } from "@/lib/api";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -67,12 +68,15 @@ export default function ContactForm() {
 
       setStatus("sent");
       setStatusMessage(payload?.detail || t("sent"));
+      toast.success(payload?.detail || t("sent"));
       setName("");
       setEmail("");
       setMessage("");
     } catch (error) {
       setStatus("error");
-      setStatusMessage(error instanceof Error ? error.message : t("error"));
+      const msg = error instanceof Error ? error.message : t("error");
+      setStatusMessage(msg);
+      toast.error(msg);
     }
   }
 

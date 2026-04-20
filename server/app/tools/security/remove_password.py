@@ -45,7 +45,19 @@ async def remove_password(
             detail="Remove password requires an .xlsx or .xlsm file.",
         )
 
-    loaded = load_workbook_for_edit(raw, file.filename)
+    try:
+        loaded = load_workbook_for_edit(raw, file.filename)
+    except HTTPException as exc:
+        if exc.status_code == 400:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "Cannot open this file. If it requires a password to open, "
+                    "this tool can only remove sheet-level protection — not "
+                    "workbook-level encryption."
+                ),
+            ) from exc
+        raise
     wb = loaded.workbook
 
     for ws in wb.worksheets:

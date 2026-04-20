@@ -29,7 +29,7 @@ export default async function RelatedTools({ slug, locale }: RelatedToolsProps) 
       return {
         slug: item.slug,
         href: item.href,
-        icon: item.icon,
+        Icon: item.icon,
         heading: td("heading"),
         description: td("description"),
       };
@@ -57,9 +57,7 @@ export default async function RelatedTools({ slug, locale }: RelatedToolsProps) 
               href={entry.href as "/"}
               className="tool-card-link block h-full p-4"
             >
-              <div className="text-3xl mb-2" aria-hidden>
-                {entry.icon}
-              </div>
+              <entry.Icon className="h-7 w-7 mb-2" aria-hidden style={{ color: "var(--primary)" }} />
               <h3 className="text-base font-semibold mb-1">{entry.heading}</h3>
               <p
                 className="text-sm"

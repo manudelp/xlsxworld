@@ -37,13 +37,13 @@ class AnalyticsMiddleware(BaseHTTPMiddleware):
         try:
             response = await call_next(request)
             status_code = response.status_code
-            route = request.scope.get("route")
-            route_name = getattr(route, "name", None)
             return response
         except Exception as exc:
             error_type = exc.__class__.__name__
             raise
         finally:
+            route = request.scope.get("route")
+            route_name = getattr(route, "name", None)
             if not self._should_skip_tracking(path, request.method, route_name):
                 if status_code >= 400 and error_type is None:
                     error_type = f"HTTP_{status_code}"
@@ -63,7 +63,7 @@ class AnalyticsMiddleware(BaseHTTPMiddleware):
                     )
                 )
 
-                if is_tool_request and not self._is_pagination_request(path, request.method):
+                if is_tool_request and not self._is_non_tool_request(path, request.method):
                     tool_slug = path.split("/api/v1/tools/", 1)[1].strip("/") or None
                     tool_name = route_name or tool_slug or path
                     tool_category = tool_slug.split("/", 1)[0] if tool_slug and "/" in tool_slug else tool_slug
@@ -109,15 +109,15 @@ class AnalyticsMiddleware(BaseHTTPMiddleware):
         return route_name == "me" and method.upper() == "GET"
 
     @staticmethod
-    def _is_pagination_request(path: str, method: str) -> bool:
-        """Return True for tool sub-routes that serve paginated data.
+    def _is_non_tool_request(path: str, method: str) -> bool:
+        """Return True for endpoints under /api/v1/tools/ that are NOT actual tools.
 
-        These are part of an already-counted job and must NOT be recorded
-        as separate tool_usage events.
+        These must NOT be recorded as tool_usage events.
         """
         if method.upper() != "GET":
             return False
-        return path.rstrip("/") == "/api/v1/tools/inspect/sheet"
+        stripped = path.rstrip("/")
+        return stripped in {"/api/v1/tools/inspect/sheet", "/api/v1/tools/popular"}
 
     async def _resolve_principal(self, request: Request) -> AuthenticatedPrincipal | None:
         authorization = request.headers.get("authorization")

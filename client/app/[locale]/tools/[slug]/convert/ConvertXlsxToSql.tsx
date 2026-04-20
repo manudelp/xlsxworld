@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import React, { useCallback, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { uploadForPreview, WorkbookPreview } from "@/lib/tools/inspect";
 import { xlsxToSql } from "@/lib/tools/convert";
 import FileUploadDropzone from "@/components/common/FileUploadDropzone";
@@ -76,6 +77,7 @@ export default function ConvertXlsxToSql() {
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
+      toast.success(t("conversionComplete"));
     } catch (e) {
       setError(e instanceof Error ? e.message : t("exportFailed"));
     } finally {

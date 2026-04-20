@@ -1,11 +1,12 @@
 import React from "react";
 import { useTranslations } from "next-intl";
+import type { LucideIcon } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 
 interface ToolProps {
   href: string;
   slug: string;
-  icon: React.ReactNode | string;
+  icon: LucideIcon;
   category?: string;
   commingSoon?: boolean;
   isNew?: boolean;
@@ -14,7 +15,7 @@ interface ToolProps {
 export default function Tool({
   href,
   slug,
-  icon,
+  icon: Icon,
   category = "organize",
   commingSoon = false,
   isNew = false,
@@ -45,9 +46,7 @@ export default function Tool({
         tabIndex={commingSoon ? -1 : undefined}
         aria-disabled={commingSoon ? "true" : undefined}
       >
-        <div className="mb-2 text-5xl" aria-hidden={typeof icon === "string"}>
-          {typeof icon === "string" ? <span>{icon}</span> : icon}
-        </div>
+        <Icon className="h-9 w-9 mb-2" aria-hidden style={{ color: "var(--primary)" }} />
         <h3 className="text-lg font-semibold mb-1 flex items-center gap-2">
           {heading}
         </h3>
