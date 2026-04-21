@@ -71,6 +71,9 @@ export interface AdminUserRow {
   created_at: string | null;
   last_seen_at: string | null;
   total_tool_uses: number;
+  stored_jobs: number;
+  jobs_today: number;
+  daily_limit: number;
 }
 
 export interface AdminUsersList {

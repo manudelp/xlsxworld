@@ -146,9 +146,96 @@ export default function Header() {
       {/* Desktop controls */}
       <div className="hidden md:flex items-center gap-2">
         {isLoading ? (
-          <span className="inline-flex items-center rounded-md bg-muted px-3 py-2 text-sm font-medium text-primary-foreground opacity-50 cursor-wait">
-            <span className="animate-pulse">{t("header.login")}</span>
-          </span>
+          <>
+            <div className="relative" ref={guestMenuRef}>
+              <button
+                type="button"
+                onClick={() => setGuestMenuOpen((v) => !v)}
+                className="inline-flex items-center gap-1 rounded-md border px-2.5 py-2 text-sm"
+                style={{
+                  borderColor: "var(--border)",
+                  backgroundColor: "var(--surface)",
+                  color: "var(--foreground)",
+                }}
+                aria-haspopup="menu"
+                aria-expanded={guestMenuOpen}
+                aria-label={t("header.language")}
+              >
+                <Globe className="h-4 w-4" />
+                <ChevronDown
+                  className={`h-3.5 w-3.5 transition-transform duration-150 ease-out ${
+                    guestMenuOpen ? "rotate-180" : "rotate-0"
+                  }`}
+                />
+              </button>
+
+              <div
+                className={`absolute right-0 mt-2 w-56 origin-top-right rounded-md border p-2 shadow-lg transition-all duration-150 ease-out ${
+                  guestMenuOpen
+                    ? "pointer-events-auto translate-y-0 scale-100 opacity-100"
+                    : "pointer-events-none -translate-y-1 scale-95 opacity-0"
+                }`}
+                style={{
+                  borderColor: "var(--border)",
+                  backgroundColor: "var(--surface-2)",
+                }}
+                role="menu"
+                aria-hidden={!guestMenuOpen}
+              >
+                <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-[color:var(--foreground)]/70">
+                  {t("header.language")}
+                </div>
+                {locales.map(({ code, label }) => (
+                  <button
+                    key={code}
+                    type="button"
+                    role="menuitem"
+                    tabIndex={guestMenuOpen ? 0 : -1}
+                    onClick={() => handleLocaleChange(code)}
+                    className="flex w-full items-center gap-2 rounded px-3 py-2 text-sm"
+                    style={{
+                      color: "var(--foreground)",
+                      backgroundColor:
+                        currentLocale.code === code
+                          ? "var(--primary-soft)"
+                          : "",
+                    }}
+                  >
+                    <LocaleFlag
+                      code={code}
+                      className="h-3.5 w-5 shrink-0 rounded-[2px]"
+                    />
+                    {label}
+                  </button>
+                ))}
+                <div className="my-2 h-px bg-[color:var(--border)]" />
+                <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-[color:var(--foreground)]/70">
+                  {t("header.theme")}
+                </div>
+                {themeOptions.map(({ value, icon: Icon }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    role="menuitem"
+                    tabIndex={guestMenuOpen ? 0 : -1}
+                    onClick={() => setTheme(value)}
+                    className="flex w-full items-center gap-2 rounded px-3 py-2 text-sm"
+                    style={{
+                      color: "var(--foreground)",
+                      backgroundColor:
+                        theme === value ? "var(--primary-soft)" : "",
+                    }}
+                  >
+                    <Icon className="h-4 w-4" />
+                    {tTheme(value)}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <span className="inline-flex items-center rounded-md px-3 py-2">
+              <span className="h-4 w-12 rounded animate-pulse" style={{ backgroundColor: "var(--border)" }} />
+            </span>
+          </>
         ) : isAuthenticated ? (
           <>
             <QuotaPill />

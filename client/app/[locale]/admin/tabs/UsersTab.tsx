@@ -292,7 +292,7 @@ function UserTable({
 
       {/* Desktop/tablet table */}
       <div className="hidden overflow-x-auto sm:block">
-        <table className="w-full text-sm" style={{ backgroundColor: "var(--surface-2)" }}>
+        <table className="w-full min-w-[900px] text-sm whitespace-nowrap" style={{ backgroundColor: "var(--surface-2)" }}>
           <thead>
             <tr style={{ backgroundColor: "var(--surface)" }}>
               {[
@@ -303,6 +303,8 @@ function UserTable({
                 t("joined"),
                 t("lastSeen"),
                 t("toolUses"),
+                t("quotaToday"),
+                t("storedFiles"),
                 t("actions"),
               ].map((h) => (
                 <th
@@ -356,6 +358,12 @@ function UserTable({
                   style={{ color: "var(--foreground)" }}
                 >
                   {u.total_tool_uses > 0 ? u.total_tool_uses : "—"}
+                </td>
+                <td className="px-4 py-3" style={{ color: "var(--muted-2)" }}>
+                  {u.jobs_today}/{u.daily_limit}
+                </td>
+                <td className="px-4 py-3" style={{ color: "var(--muted-2)" }}>
+                  {u.stored_jobs > 0 ? u.stored_jobs : "—"}
                 </td>
                 <td className="px-4 py-3">
                   <ResetQuotaButton user={u} t={t} />

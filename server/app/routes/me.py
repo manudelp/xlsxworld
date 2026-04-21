@@ -15,7 +15,7 @@ from app.core.limits import effective_limits
 from app.core.quota_guard import quota_service_dep
 from app.core.security import AuthenticatedPrincipal, get_current_user
 from app.db.models import ToolJob
-from app.schemas.jobs import JobDownloadResponse, JobItem, JobsListResponse
+from app.schemas.jobs import JobItem, JobsListResponse
 from app.schemas.usage import UsageResponse
 from app.services.jobs_service import (
     JobNotFoundError,
@@ -25,8 +25,6 @@ from app.services.jobs_service import (
 from app.services.quota_service import QuotaService, today_utc
 
 router = APIRouter(prefix="/api/v1/me", tags=["me"])
-
-DOWNLOAD_URL_TTL_SECONDS = 15 * 60
 
 
 def _to_item(job: ToolJob, *, now: datetime) -> JobItem:
@@ -68,12 +66,12 @@ async def list_jobs(
     return JobsListResponse(items=[_to_item(r, now=now) for r in rows])
 
 
-@router.get("/jobs/{job_id}/download", response_model=JobDownloadResponse)
+@router.get("/jobs/{job_id}/download")
 async def download_job(
     job_id: uuid.UUID,
     principal: AuthenticatedPrincipal = Depends(get_current_user),
     service: JobsService = Depends(get_jobs_service),
-) -> JobDownloadResponse:
+) -> Response:
     try:
         job = await service.get_for_user(principal.user_id, job_id)
     except JobNotFoundError:
@@ -83,11 +81,13 @@ async def download_job(
     if job.storage_path is None or job.expires_at < now:
         raise HTTPException(status_code=410, detail="This job has expired")
 
-    url = await service.create_download_url(
-        job.storage_path, expires_in_seconds=DOWNLOAD_URL_TTL_SECONDS
-    )
-    return JobDownloadResponse(
-        url=url, expires_in_seconds=DOWNLOAD_URL_TTL_SECONDS
+    plaintext = await service.download_and_decrypt(job)
+    return Response(
+        content=plaintext,
+        media_type=job.mime_type,
+        headers={
+            "Content-Disposition": f'attachment; filename="{job.output_filename}"',
+        },
     )
 
 

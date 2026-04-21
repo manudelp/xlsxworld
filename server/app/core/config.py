@@ -35,6 +35,7 @@ class Settings(BaseSettings):
     supabase_publishable_key: str | None = Field(default=None, alias="SUPABASE_PUBLISHABLE_KEY")
     supabase_secret_key: str | None = Field(default=None, alias="SUPABASE_SECRET_KEY")
     supabase_storage_bucket: str = Field(default="tool-outputs", alias="SUPABASE_STORAGE_BUCKET")
+    file_encryption_key: str | None = Field(default=None, alias="FILE_ENCRYPTION_KEY")
 
     @property
     def async_database_url(self) -> str:

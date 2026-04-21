@@ -18,7 +18,7 @@ export async function generateMetadata({
   };
 }
 
-const LAST_UPDATED = new Date(Date.UTC(2026, 3, 17));
+const LAST_UPDATED = new Date(Date.UTC(2026, 3, 20));
 
 export default async function PrivacyPage({
   params,
@@ -37,6 +37,7 @@ function PrivacyContent() {
     year: "numeric",
     month: "long",
     day: "numeric",
+    timeZone: "UTC",
   });
 
   return (

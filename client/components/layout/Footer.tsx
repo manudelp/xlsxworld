@@ -75,6 +75,9 @@ export default function Footer() {
               <Link href="/contact" className="text-white/70 hover:text-white">
                 {t("contact")}
               </Link>
+              <Link href="/about" className="text-white/70 hover:text-white">
+                {t("about")}
+              </Link>
               <Link href="/privacy" className="text-white/70 hover:text-white">
                 {t("privacy")}
               </Link>

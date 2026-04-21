@@ -3,12 +3,14 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import case, cast, func, outerjoin, select, text, Float, Integer
+from sqlalchemy import case, cast, func, outerjoin, select, text, Float, Integer, String
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.limits import effective_limits, FREE_DAILY_JOBS, Tier
 from app.core.security import AuthenticatedPrincipal, get_current_user
 from app.core.quota_guard import quota_service_dep
 from app.db.models.analytics import MetricEvent, UserActivityDaily
+from app.db.models.jobs import ToolJob
 from app.db.models.users import AppUser, UserRole
 from app.db.session import get_db_session
 from app.services.quota_service import QuotaService, today_utc
@@ -343,6 +345,31 @@ async def users_list(
         .subquery()
     )
 
+    # Subquery: active stored jobs per user
+    stored_jobs = (
+        select(
+            ToolJob.user_id.label("uid"),
+            func.count().label("stored_count"),
+        )
+        .where(ToolJob.storage_path.is_not(None))
+        .where(ToolJob.expires_at > func.now())
+        .group_by(ToolJob.user_id)
+        .subquery()
+    )
+
+    # Subquery: today's quota usage per user
+    today = today_utc()
+    from app.db.models.quota import ToolRequestCounter
+    quota_today = (
+        select(
+            ToolRequestCounter.key.label("key"),
+            ToolRequestCounter.count.label("today_count"),
+        )
+        .where(ToolRequestCounter.day_utc == today)
+        .where(ToolRequestCounter.key.like("user:%"))
+        .subquery()
+    )
+
     filters = []
     if search:
         needle = f"%{search.strip().lower()}%"
@@ -369,8 +396,12 @@ async def users_list(
             AppUser.created_at,
             AppUser.last_seen_at,
             func.coalesce(tool_counts.c.tool_uses, 0).label("total_tool_uses"),
+            func.coalesce(stored_jobs.c.stored_count, 0).label("stored_jobs"),
+            func.coalesce(quota_today.c.today_count, 0).label("jobs_today"),
         )
         .outerjoin(tool_counts, AppUser.id == tool_counts.c.uid)
+        .outerjoin(stored_jobs, AppUser.id == stored_jobs.c.uid)
+        .outerjoin(quota_today, func.concat("user:", AppUser.id.cast(String)) == quota_today.c.key)
         .order_by(AppUser.created_at.desc())
         .offset((page - 1) * page_size)
         .limit(page_size)
@@ -394,6 +425,9 @@ async def users_list(
                 "created_at": r.created_at.isoformat() if r.created_at else None,
                 "last_seen_at": r.last_seen_at.isoformat() if r.last_seen_at else None,
                 "total_tool_uses": r.total_tool_uses,
+                "stored_jobs": r.stored_jobs,
+                "jobs_today": r.jobs_today,
+                "daily_limit": FREE_DAILY_JOBS,
             }
             for r in rows
         ],

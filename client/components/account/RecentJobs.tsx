@@ -37,11 +37,19 @@ export default function RecentJobs() {
 
   if (failed) return null;
 
-  async function handleDownload(jobId: string) {
+  async function handleDownload(jobId: string, filename: string) {
     setDownloadingId(jobId);
     try {
-      const { url } = await getJobDownloadUrl(jobId);
-      window.open(url, "_blank", "noopener");
+      const buffer = await getJobDownloadUrl(jobId);
+      const blob = new Blob([buffer]);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
     } catch {
       // silent — user can retry from the full history page
     } finally {
@@ -143,7 +151,7 @@ export default function RecentJobs() {
                 ) : (
                   <button
                     type="button"
-                    onClick={() => void handleDownload(job.id)}
+                    onClick={() => void handleDownload(job.id, job.output_filename)}
                     disabled={downloadingId === job.id}
                     aria-label={t("download")}
                     className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md border transition hover:opacity-80 disabled:opacity-50"

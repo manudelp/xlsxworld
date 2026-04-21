@@ -83,6 +83,15 @@ class StorageService:
             signed_path = "/storage/v1" + signed_path
         return f"{self._public_root}{signed_path}"
 
+    async def download(self, object_path: str) -> bytes:
+        """Download raw bytes from ``<bucket>/<object_path>``."""
+
+        url = f"{self._base_url}/object/{self._bucket}/{object_path}"
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            response = await client.get(url, headers=self._headers)
+        self._raise_for_status(response, "download")
+        return response.content
+
     async def delete(self, object_path: str) -> None:
         """Hard-delete a stored object. Succeeds silently on 404."""
 

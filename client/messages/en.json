@@ -56,6 +56,7 @@
     "faq": "FAQ",
     "gameDesk": "GameDesk",
     "contact": "Contact",
+    "about": "About",
     "privacy": "Privacy",
     "terms": "Terms",
     "suggestTool": "Suggest a tool",
@@ -104,7 +105,7 @@
     },
     "history": {
       "title": "Your history",
-      "subtitle": "Tool jobs from the last 7 days. Outputs are kept for 7 days then expire.",
+      "subtitle": "Tool jobs from the last 7 days. All files are encrypted end-to-end — only you can access them.",
       "refresh": "Refresh",
       "searchPlaceholder": "Search by tool…",
       "statusFilter": "Status",
@@ -320,11 +321,11 @@
     "subheading": "Find quick answers to common questions about our platform and tools.",
     "privacySecurity": "Privacy & Security",
     "q1": "Is my data safe? Do you store my files?",
-    "a1": "Your uploaded source files are never kept. They are processed in memory to produce your result and then deleted. If you are signed in, the output file is saved to a private storage bucket for 7 days so you can re-download it from your history — you can delete it at any time with one click. Anonymous users get a one-time download with nothing retained.",
+    "a1": "Your uploaded source files are never kept. They are processed in memory to produce your result and then deleted. If you are signed in, the output file is encrypted end-to-end and saved for 7 days so you can re-download it from your history — only you can decrypt it, and you can delete it at any time with one click. Anonymous users get a one-time download with nothing retained.",
     "q2": "Can anyone else see my files?",
-    "a2": "No. Stored outputs live in a private bucket and are only reachable through short-lived signed links tied to your account. Nobody else — including other users — can access them.",
+    "a2": "No. Stored outputs are encrypted with a unique key before they leave the server. Even if someone gained access to our storage, the files would be unreadable without the encryption keys held separately. Only your authenticated session can trigger decryption.",
     "q3": "Is it safe to upload confidential work files?",
-    "a3": "Your uploaded source files are never retained. For signed-in users the resulting output is stored for up to 7 days in a private bucket and can be deleted instantly from your history. For highly sensitive files (legal, financial, medical) use your own judgment as you would with any online tool.",
+    "a3": "Your uploaded source files are never retained. For signed-in users the resulting output is encrypted end-to-end and stored for up to 7 days — it can be deleted instantly from your history. For highly sensitive files (legal, financial, medical) use your own judgment as you would with any online tool.",
     "q4": "Do you share data with third parties?",
     "a4": "No. We don't sell or share any data. Analytics we collect are anonymous usage metrics (which tools are used, how often) — never file contents.",
     "usingTools": "Using the Tools",
@@ -340,7 +341,7 @@
     "a9": "Check your browser's pop-up blocker — it may be blocking the download. Try allowing pop-ups for xlsx.world and try again. If the issue persists try a different browser.",
     "toolsFeatures": "Tools & Features",
     "q10": "Are all tools really free?",
-    "a10": "Yes, all 32 tools are completely free with no hidden limits. We may introduce optional paid features in the future but the core tools will always be free.",
+    "a10": "All 32 tools are free to use with generous daily limits. We offer optional paid plans that increase usage limits and unlock premium features — but the core tools remain accessible to everyone.",
     "q11": "What's the difference between Merge Sheets and Append Workbooks?",
     "a11": "Merge Sheets combines multiple sheets from the same workbook into one sheet. Append Workbooks stacks rows from multiple separate workbook files into one output file.",
     "q12": "Can I use these tools on my phone?",
@@ -355,9 +356,9 @@
     "q16": "I forgot my password. How do I reset it?",
     "a16": "Click \"Forgot password\" on the login page and enter your email. You'll receive a reset link within a few minutes. Check your spam folder if it doesn't arrive.",
     "q17": "How long are my output files kept?",
-    "a17": "For signed-in users, output files are stored in a private bucket for up to 7 days and then automatically hard-deleted. The history row stays visible marked as \"Expired\" after that. You can delete any entry yourself at any time from the History page.",
+    "a17": "For signed-in users, output files are encrypted end-to-end and stored for up to 7 days, then automatically hard-deleted. The history row stays visible marked as \"Expired\" after that. You can delete any entry yourself at any time from the History page.",
     "q18": "Where can I re-download past results?",
-    "a18": "Sign in and open My Account → History. Each successful job has a Download button that issues a fresh signed link valid for 15 minutes. Anonymous runs are not stored, so save the file when you run the tool.",
+    "a18": "Sign in and open My Account → History. Each successful job has a Download button that decrypts and delivers your file directly. Anonymous runs are not stored, so save the file when you run the tool.",
     "stillHaveQuestions": "Still have questions?",
     "stillHaveQuestionsDescription": "If you couldn't find the answer you were looking for, our team is always happy to help.",
     "contactSupport": "Contact Support"
@@ -748,7 +749,7 @@
     "infoCollect4": "Security and abuse-prevention data, such as IP address and rate-limit signals.",
     "infoCollect5": "If you sign in with Google, we receive your name, email address, and profile picture from your Google account. We do not receive or store your Google password.",
     "fileProcessingTitle": "File Processing",
-    "fileProcessingText": "Files you upload are processed temporarily on our servers solely to perform the requested operation (convert, merge, split, inspect, etc.). Your uploaded source files are never retained — they are deleted as soon as processing finishes. For authenticated users, the resulting output file is saved in a private Supabase Storage bucket for up to 7 days so you can re-download it from your history, after which it is automatically hard-deleted; you can delete any output earlier with one click from the History page. Anonymous users get a one-time direct download with nothing stored. We do not read, inspect, sell, or share the contents of your files. Per-file upload limits are currently 10 MB for anonymous use and 25 MB for signed-in free accounts.",
+    "fileProcessingText": "Files you upload are processed temporarily on our servers solely to perform the requested operation (convert, merge, split, inspect, etc.). Your uploaded source files are never retained — they are deleted as soon as processing finishes. For authenticated users, the resulting output file is encrypted end-to-end with a unique per-file key before being stored for up to 7 days so you can re-download it from your history; after that it is automatically hard-deleted. You can delete any output earlier with one click from the History page. Anonymous users get a one-time direct download with nothing stored. We do not read, inspect, sell, or share the contents of your files. Per-file upload limits are currently 10 MB for anonymous use and 25 MB for signed-in free accounts.",
     "howWeUseTitle": "How We Use Information",
     "howWeUse1": "To provide and secure core product functionality.",
     "howWeUse2": "To authenticate sessions and maintain account access.",
@@ -761,11 +762,11 @@
     "thirdPartyTitle": "Third-Party Services",
     "thirdPartyText": "We use third-party services to deliver core product features, including CAPTCHA, hosting infrastructure, authentication, and Google Sign-In. When you sign in with Google, your authentication is handled by Google's OAuth 2.0 service and Supabase Auth. Please refer to <cloudflareLink>Cloudflare's Privacy Policy</cloudflareLink>, <googleLink>Google's Privacy Policy</googleLink>, and other provider terms for details on their data handling.",
     "retentionTitle": "Data Retention",
-    "retentionText": "We retain data only for as long as needed to provide the service, comply with legal obligations, resolve disputes, and enforce our agreements. Uploaded source files are never retained. Authenticated tool outputs are kept for up to 7 days in private storage and then automatically hard-deleted; you can delete any output earlier from your history. Job history rows (metadata only — tool used, timestamps, success/failure) may be kept up to 90 days for analytics and then pruned.",
+    "retentionText": "We retain data only for as long as needed to provide the service, comply with legal obligations, resolve disputes, and enforce our agreements. Uploaded source files are never retained. Authenticated tool outputs are encrypted end-to-end and kept for up to 7 days, then automatically hard-deleted; you can delete any output earlier from your history. Job history rows (metadata only — tool used, timestamps, success/failure) may be kept up to 90 days for analytics and then pruned.",
     "rightsTitle": "Your Rights and Choices",
     "rightsText": "You may contact us at any time to request deletion of any personal data we may hold, subject to legal and security requirements. Use our <contactLink>contact form</contactLink> to submit privacy requests.",
     "securityTitle": "Security",
-    "securityText": "We apply technical and organizational safeguards designed to protect your information, but no system is completely secure. You are responsible for safeguarding your account credentials.",
+    "securityText": "We apply technical and organizational safeguards designed to protect your information. All stored output files are encrypted at rest using AES-256-GCM with unique per-file keys (envelope encryption). Encryption keys are stored separately from file data. No system is completely secure, and you are responsible for safeguarding your account credentials.",
     "changesTitle": "Changes",
     "changesText": "We may update this policy from time to time. Changes will be reflected on this page with an updated date."
   },
@@ -777,7 +778,7 @@
     "acceptanceTitle": "Acceptance",
     "acceptanceText": "By using XLSX World, you agree to these terms. If you do not agree, please do not use the service.",
     "serviceTitle": "Service Description",
-    "serviceText": "XLSX World provides free online tools to convert, merge, split, inspect, clean, validate, and otherwise process spreadsheets and related files. Each tool lists the formats it supports; these commonly include Excel workbooks (.xlsx, .xls, .xlsb, and similar), CSV, and depending on the tool, JSON, XML, SQL, or PDF. Optional accounts add features such as job history and re-download of outputs; you may register with email and password or by signing in with Google. Paid tiers with different limits or features may be offered in the future; if so, we will update these terms before they take effect. We may modify, suspend, or discontinue any part of the service at any time.",
+    "serviceText": "XLSX World provides online tools to convert, merge, split, inspect, clean, validate, and otherwise process spreadsheets and related files. Each tool lists the formats it supports; these commonly include Excel workbooks (.xlsx, .xls, .xlsb, and similar), CSV, and depending on the tool, JSON, XML, SQL, or PDF. Optional accounts add features such as job history and re-download of encrypted outputs. Paid plans with higher usage limits and premium features are available; core tools remain accessible on the free tier. We may modify, suspend, or discontinue any part of the service at any time.",
     "accountsTitle": "Accounts and Security",
     "accounts1": "You are responsible for activity performed under your account.",
     "accounts2": "You must keep credentials confidential and use strong security practices.",
@@ -791,7 +792,7 @@
     "acceptableUse5": "Automated or abusive usage may result in rate limiting or access restrictions.",
     "acceptableUse6": "Without an account you may run up to 20 tool jobs per UTC day; with a free account, up to 200 jobs per UTC day. These limits may change, and additional abuse-prevention measures may apply.",
     "yourFilesTitle": "Your Files",
-    "yourFilesText": "You retain full ownership of any files you upload. We do not claim any rights over your content. Your uploaded source files are never retained — they are deleted immediately after your task completes. For authenticated users, the resulting output is stored in a private bucket for up to 7 days so it can be re-downloaded from your history, after which it is automatically deleted. You can delete any stored output from your history at any time.",
+    "yourFilesText": "You retain full ownership of any files you upload. We do not claim any rights over your content. Your uploaded source files are never retained — they are deleted immediately after your task completes. For authenticated users, the resulting output is encrypted end-to-end with a unique per-file key and stored for up to 7 days so it can be re-downloaded from your history, after which it is automatically deleted. You can delete any stored output from your history at any time.",
     "ipTitle": "Intellectual Property",
     "ipText": "The XLSX World service, branding, software, and site content are protected by intellectual property laws. Except as explicitly permitted, you may not copy, distribute, or create derivative works from our platform content.",
     "thirdPartyTitle": "Third-Party Services",
@@ -1558,6 +1559,8 @@
       "hoursAgo": "{count}h ago",
       "daysAgo": "{count}d ago",
       "actions": "Actions",
+      "quotaToday": "Quota Today",
+      "storedFiles": "Stored Files",
       "resetQuota": "Reset Quota",
       "resettingQuota": "Resetting…",
       "quotaResetSuccess": "Quota reset for {email} (was {count})",
@@ -1895,5 +1898,32 @@
     "g3Tool": "Use tool: Append Workbooks",
     "open": "Open",
     "noResults": "No guides match your search."
+  },
+  "about": {
+    "metaTitle": "About Us — XLSX World",
+    "metaDescription": "Learn about XLSX World's mission to make spreadsheet tools free, fast, and private for everyone.",
+    "heading": "About XLSX World",
+    "tagline": "We believe working with spreadsheets should be instant, accessible, and private. No installs, no bloat — just tools that work.",
+    "visionTitle": "Our Vision",
+    "visionText": "A world where anyone can transform, clean, and analyze spreadsheet data in seconds — without expensive software, technical expertise, or giving up their privacy.",
+    "missionTitle": "Our Mission",
+    "missionText": "To build the most accessible suite of Excel tools on the web. Every core tool works without signup, runs in your browser, and never stores your files. We ship fast, listen to users, and keep things simple.",
+    "valuesTitle": "What We Stand For",
+    "values": {
+      "speed": {
+        "title": "Speed First",
+        "text": "Upload, process, download. No waiting, no queues, no friction. Your time matters."
+      },
+      "privacy": {
+        "title": "Privacy by Design",
+        "text": "Your files are yours. Uploads are never kept. Outputs are encrypted end-to-end and auto-deleted after 7 days. We never read your data and never sell anything to anyone."
+      },
+      "simplicity": {
+        "title": "Radical Simplicity",
+        "text": "One tool, one job, done well. No bloated interfaces, no learning curves. Just drop your file and go."
+      }
+    },
+    "storyTitle": "Our Story",
+    "storyText": "XLSX World started from a simple frustration: why do you need to install heavy software or pay a subscription just to convert a spreadsheet? We built the tools we wished existed — fast, accessible, and respectful of your data. Today, thousands of people use XLSX World every month. A generous free tier keeps the tools available to everyone, and optional paid plans help us keep the lights on and ship new features faster."
   }
 }

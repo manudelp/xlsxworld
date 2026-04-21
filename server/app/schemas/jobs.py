@@ -30,6 +30,3 @@ class JobsListResponse(BaseModel):
     items: list[JobItem]
 
 
-class JobDownloadResponse(BaseModel):
-    url: str
-    expires_in_seconds: int

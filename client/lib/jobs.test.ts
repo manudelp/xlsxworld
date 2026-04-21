@@ -49,16 +49,13 @@ describe("jobs lib", () => {
   });
 
   it("getJobDownloadUrl hits the per-job endpoint", async () => {
-    api.auth.get.mockResolvedValue({
-      url: "https://example.com/signed",
-      expires_in_seconds: 900,
-    });
+    const mockBuffer = new ArrayBuffer(8);
+    api.auth.get.mockResolvedValue(mockBuffer);
 
     const result = await getJobDownloadUrl("abc");
 
     expect(api.auth.get).toHaveBeenCalledWith("/api/v1/me/jobs/abc/download");
-    expect(result.url).toBe("https://example.com/signed");
-    expect(result.expires_in_seconds).toBe(900);
+    expect(result).toBe(mockBuffer);
   });
 
   it("deleteJob calls DELETE", async () => {

@@ -81,12 +81,20 @@ export default function HistoryClient() {
     load();
   }, [authLoading, isAuthenticated, load]);
 
-  async function handleDownload(jobId: string) {
+  async function handleDownload(jobId: string, filename: string) {
     setDownloadingId(jobId);
     setError(null);
     try {
-      const { url } = await getJobDownloadUrl(jobId);
-      window.open(url, "_blank", "noopener");
+      const buffer = await getJobDownloadUrl(jobId);
+      const blob = new Blob([buffer]);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -311,7 +319,7 @@ export default function HistoryClient() {
                   ) : (
                     <button
                       type="button"
-                      onClick={() => handleDownload(item.id)}
+                      onClick={() => handleDownload(item.id, item.output_filename)}
                       disabled={downloadingId === item.id}
                       className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium transition hover:opacity-80 disabled:opacity-50"
                       style={{

@@ -27,10 +27,6 @@ export interface JobsListResponse {
   items: JobItem[];
 }
 
-export interface JobDownloadResponse {
-  url: string;
-  expires_in_seconds: number;
-}
 
 export interface JobsFilters {
   limit?: number;
@@ -61,8 +57,8 @@ export function fetchJobs(
 
 export function getJobDownloadUrl(
   jobId: string,
-): Promise<JobDownloadResponse> {
-  return api.auth.get<JobDownloadResponse>(
+): Promise<ArrayBuffer> {
+  return api.auth.get<ArrayBuffer>(
     `/api/v1/me/jobs/${encodeURIComponent(jobId)}/download`,
   );
 }

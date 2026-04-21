@@ -555,13 +555,17 @@ export default function AuthPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+                className="relative inline-flex w-full items-center justify-center rounded-md px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-95 disabled:cursor-not-allowed"
                 style={{ backgroundColor: "var(--primary)" }}
               >
-                {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
-                {isSubmitting
-                  ? t(mode === "login" ? "loggingIn" : "creatingAccount")
-                  : t(mode === "login" ? "logIn" : "createAccount")}
+                <span className={`inline-flex items-center gap-2 transition-opacity ${isSubmitting ? "opacity-0" : "opacity-100"}`}>
+                  {t(mode === "login" ? "logIn" : "createAccount")}
+                </span>
+                {isSubmitting && (
+                  <span className="absolute inset-0 flex items-center justify-center">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  </span>
+                )}
               </button>
 
               <p

@@ -66,6 +66,15 @@ export default function AdminDashboard() {
   const searchParams = useSearchParams();
 
   const activeTab = parseTabParam(searchParams.get("tab"));
+  const [pendingTab, setPendingTab] = useState<Tab | null>(null);
+  const visibleTab = pendingTab ?? activeTab;
+
+  // Clear pending state once the URL catches up
+  useEffect(() => {
+    if (pendingTab && activeTab === pendingTab) {
+      setPendingTab(null);
+    }
+  }, [activeTab, pendingTab]);
 
   const tabRefs = useRef<Record<Tab, HTMLButtonElement | null>>({
     overview: null,
@@ -77,12 +86,13 @@ export default function AdminDashboard() {
 
   const setActiveTab = useCallback(
     (next: Tab) => {
-      if (next === activeTab) return;
+      if (next === visibleTab) return;
+      setPendingTab(next);
       const params = new URLSearchParams(searchParams.toString());
       params.set("tab", next);
       router.replace(`${pathname}?${params.toString()}`, { scroll: false });
     },
-    [activeTab, pathname, router, searchParams],
+    [visibleTab, pathname, router, searchParams],
   );
 
   const [overviewData, setOverviewData] = useState<AdminOverview | null>(null);
@@ -192,7 +202,7 @@ export default function AdminDashboard() {
   );
 
   const handleTabKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
-    const currentIndex = TAB_KEYS.indexOf(activeTab);
+    const currentIndex = TAB_KEYS.indexOf(visibleTab);
     let nextIndex: number | null = null;
     if (event.key === "ArrowRight") nextIndex = (currentIndex + 1) % TAB_KEYS.length;
     else if (event.key === "ArrowLeft")
@@ -264,18 +274,18 @@ export default function AdminDashboard() {
             }}
             type="button"
             role="tab"
-            aria-selected={activeTab === key}
-            tabIndex={activeTab === key ? 0 : -1}
+            aria-selected={visibleTab === key}
+            tabIndex={visibleTab === key ? 0 : -1}
             onClick={() => setActiveTab(key)}
             onKeyDown={handleTabKeyDown}
             className="shrink-0 rounded-md px-3 py-2 text-xs font-medium transition-colors sm:px-4 sm:text-sm"
             style={{
               backgroundColor:
-                activeTab === key
+                visibleTab === key
                   ? "var(--tag-selected-bg)"
                   : "transparent",
               color:
-                activeTab === key
+                visibleTab === key
                   ? "var(--tag-selected-text)"
                   : "var(--muted-2)",
             }}
@@ -311,10 +321,10 @@ export default function AdminDashboard() {
           </button>
         </div>
       ) : loading ? (
-        <LoadingSkeleton tab={activeTab} />
+        <LoadingSkeleton tab={visibleTab} />
       ) : (
         <div style={{ opacity: refreshing ? 0.6 : 1, transition: "opacity 150ms" }}>
-          {activeTab === "overview" && overviewData && (
+          {visibleTab === "overview" && overviewData && (
             <OverviewTab
               data={overviewData}
               kpiTrends={kpiTrends ?? []}
@@ -322,20 +332,20 @@ export default function AdminDashboard() {
               onPeriodChange={handlePeriodChange}
             />
           )}
-          {activeTab === "tools" && toolsData && (
+          {visibleTab === "tools" && toolsData && (
             <ToolsTab data={toolsData} />
           )}
-          {activeTab === "users" && usersData && (
+          {visibleTab === "users" && usersData && (
             <UsersTab
               data={usersData}
               refreshToken={refreshTokens.users}
               onListLoaded={() => markTabUpdated("users")}
             />
           )}
-          {activeTab === "performance" && perfData && (
+          {visibleTab === "performance" && perfData && (
             <PerformanceTab data={perfData} />
           )}
-          {activeTab === "activity" && (
+          {visibleTab === "activity" && (
             <ActivityTab
               refreshToken={refreshTokens.activity}
               onLoaded={() => markTabUpdated("activity")}

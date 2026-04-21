@@ -29,20 +29,6 @@ def health():
     return {"status": "ok"}
 
 
-# Map analytics tool_slug values to the client-side toolsData slugs.
-_SLUG_ALIASES: dict[str, str] = {
-    "inspect/sheet": "inspect-sheets",
-    "inspect/preview": "inspect-sheets",
-}
-
-
-def _normalise_slug(raw: str) -> str:
-    if raw in _SLUG_ALIASES:
-        return _SLUG_ALIASES[raw]
-    # "format/freeze-header" → "freeze-header"
-    return raw.rsplit("/", 1)[-1]
-
-
 @router.get(
     "/api/v1/tools/popular",
     summary="Popular Tools",
@@ -64,20 +50,13 @@ async def popular_tools(
     )
 
     seen: set[str] = set()
-    ordered: list[tuple[str, int]] = []
+    ordered: list[str] = []
     for row in result.all():
         if not row.tool_slug:
             continue
-        slug = _normalise_slug(row.tool_slug)
-        if slug in seen:
-            # Merge counts for aliases (e.g. inspect/sheet + inspect/preview)
-            for i, (s, c) in enumerate(ordered):
-                if s == slug:
-                    ordered[i] = (s, c + row.cnt)
-                    break
-        else:
+        slug = row.tool_slug.rsplit("/", 1)[-1]
+        if slug not in seen:
             seen.add(slug)
-            ordered.append((slug, row.cnt))
+            ordered.append(slug)
 
-    ordered.sort(key=lambda x: x[1], reverse=True)
-    return [slug for slug, _ in ordered[:limit]]
+    return ordered[:limit]

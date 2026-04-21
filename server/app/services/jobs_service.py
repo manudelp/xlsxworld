@@ -26,6 +26,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import ToolJob
 from app.db.session import get_db_session
+from app.services.file_encryption import decrypt_file, encrypt_file
 from app.services.storage_service import StorageService, StorageServiceError
 
 log = logging.getLogger(__name__)
@@ -78,8 +79,9 @@ class JobsService:
         path = _object_path(user_id, job_id, output_filename)
 
         try:
+            ciphertext, encryption_blob = encrypt_file(output_bytes)
             await self._storage.upload(
-                object_path=path, content=output_bytes, mime_type=mime_type
+                object_path=path, content=ciphertext, mime_type="application/octet-stream"
             )
         except Exception as exc:  # noqa: BLE001 — recording must never raise
             log.warning("jobs.record: storage upload failed: %s", exc)
@@ -95,6 +97,7 @@ class JobsService:
                 original_filename=original_filename,
                 output_filename=output_filename,
                 storage_path=path,
+                encryption_blob=encryption_blob,
                 mime_type=mime_type,
                 output_size_bytes=len(output_bytes),
                 success=success,
@@ -150,19 +153,16 @@ class JobsService:
         result = await self._db.execute(stmt)
         return list(result.scalars().all())
 
-    async def create_download_url(
-        self, storage_path: str, *, expires_in_seconds: int
-    ) -> str:
-        """Ask Storage for a signed URL for an owned object.
+    async def download_and_decrypt(self, job: ToolJob) -> bytes:
+        """Fetch encrypted file from storage and decrypt it."""
 
-        Ownership and expiry must have been verified by the caller; this
-        method is a thin pass-through so routes never need to reach
-        into ``self._storage`` directly.
-        """
+        if not job.storage_path:
+            raise JobsServiceError("Job has no stored file")
+        if not job.encryption_blob:
+            raise JobsServiceError("Job is missing encryption metadata")
 
-        return await self._storage.create_signed_url(
-            storage_path, expires_in_seconds=expires_in_seconds
-        )
+        ciphertext = await self._storage.download(job.storage_path)
+        return decrypt_file(ciphertext, job.encryption_blob)
 
     async def get_for_user(
         self, user_id: uuid.UUID, job_id: uuid.UUID

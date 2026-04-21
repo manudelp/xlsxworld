@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, String, Text
+from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, LargeBinary, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -29,6 +29,7 @@ class ToolJob(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     original_filename: Mapped[str | None] = mapped_column(Text, nullable=True)
     output_filename: Mapped[str] = mapped_column(Text, nullable=False)
     storage_path: Mapped[str | None] = mapped_column(Text, nullable=True)
+    encryption_blob: Mapped[bytes | None] = mapped_column(LargeBinary, nullable=True)
     mime_type: Mapped[str] = mapped_column(String(180), nullable=False)
     output_size_bytes: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     success: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)

@@ -153,16 +153,14 @@ async def test_list_jobs_requires_authentication(
 
 
 @pytest.mark.asyncio
-async def test_download_returns_signed_url(
+async def test_download_returns_file_content(
     client: AsyncClient,
     user_id: uuid.UUID,
     service: AsyncMock,
 ) -> None:
     job = _job_row(user_id=user_id, storage_path=f"{user_id}/job.xlsx")
     service.get_for_user = AsyncMock(return_value=job)
-    service.create_download_url = AsyncMock(
-        return_value="https://example.com/signed?token=abc"
-    )
+    service.download_and_decrypt = AsyncMock(return_value=b"decrypted-content")
 
     response = await client.get(
         f"/api/v1/me/jobs/{job.id}/download",
@@ -170,14 +168,11 @@ async def test_download_returns_signed_url(
     )
 
     assert response.status_code == 200
-    body = response.json()
-    assert body["url"] == "https://example.com/signed?token=abc"
-    assert body["expires_in_seconds"] == 15 * 60
+    assert response.content == b"decrypted-content"
+    assert "attachment" in response.headers.get("content-disposition", "")
 
     service.get_for_user.assert_awaited_once_with(user_id, job.id)
-    service.create_download_url.assert_awaited_once_with(
-        f"{user_id}/job.xlsx", expires_in_seconds=15 * 60
-    )
+    service.download_and_decrypt.assert_awaited_once_with(job)
 
 
 @pytest.mark.asyncio

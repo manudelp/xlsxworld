@@ -55,6 +55,7 @@
     "faq": "Perguntas frequentes",
     "gameDesk": "GameDesk",
     "contact": "Contato",
+    "about": "Sobre",
     "privacy": "Privacidade",
     "terms": "Termos",
     "suggestTool": "Sugerir uma ferramenta",
@@ -104,7 +105,7 @@
     },
     "history": {
       "title": "Seu histórico",
-      "subtitle": "Trabalhos dos últimos 7 dias. Os resultados são mantidos por 7 dias e depois expiram.",
+      "subtitle": "Trabalhos dos últimos 7 dias. Todos os arquivos são criptografados de ponta a ponta — só você pode acessá-los.",
       "refresh": "Atualizar",
       "searchPlaceholder": "Buscar por ferramenta…",
       "statusFilter": "Status",
@@ -320,11 +321,11 @@
     "subheading": "Encontre respostas rápidas para perguntas comuns sobre nossa plataforma e ferramentas.",
     "privacySecurity": "Privacidade e segurança",
     "q1": "Meus dados estão seguros? Vocês armazenam meus arquivos?",
-    "a1": "Os arquivos de origem que você envia nunca são guardados. Eles são processados em memória para gerar seu resultado e depois excluídos. Se você estiver autenticado, o arquivo de saída é salvo em um bucket privado por 7 dias para que possa baixá-lo novamente do seu histórico — você pode excluí-lo a qualquer momento com um clique. Usuários anônimos recebem um download único e nada é retido.",
+    "a1": "Os arquivos de origem que você envia nunca são guardados. Eles são processados em memória para gerar seu resultado e depois excluídos. Se você estiver autenticado, o arquivo de saída é criptografado de ponta a ponta e salvo por 7 dias para que possa baixá-lo novamente do seu histórico — só você pode descriptografá-lo, e você pode excluí-lo a qualquer momento com um clique. Usuários anônimos recebem um download único e nada é retido.",
     "q2": "Alguém mais pode ver meus arquivos?",
-    "a2": "Não. As saídas armazenadas ficam em um bucket privado e só são acessíveis via links assinados de curta duração vinculados à sua conta. Ninguém mais — incluindo outros usuários — pode acessá-las.",
+    "a2": "Não. As saídas armazenadas são criptografadas com uma chave única antes de sair do servidor. Mesmo que alguém obtivesse acesso ao nosso armazenamento, os arquivos seriam ilegíveis sem as chaves de criptografia armazenadas separadamente. Apenas sua sessão autenticada pode acionar a descriptografia.",
     "q3": "É seguro enviar arquivos de trabalho confidenciais?",
-    "a3": "Os arquivos de origem que você envia não são retidos. Para usuários autenticados, o arquivo de saída é armazenado por até 7 dias em um bucket privado e pode ser excluído instantaneamente pelo seu histórico. Para arquivos altamente sensíveis (jurídicos, financeiros, médicos) use seu próprio julgamento como faria com qualquer ferramenta online.",
+    "a3": "Os arquivos de origem que você envia não são retidos. Para usuários autenticados, o arquivo de saída é criptografado de ponta a ponta e armazenado por até 7 dias — pode ser excluído instantaneamente pelo seu histórico. Para arquivos altamente sensíveis (jurídicos, financeiros, médicos) use seu próprio julgamento como faria com qualquer ferramenta online.",
     "q4": "Vocês compartilham dados com terceiros?",
     "a4": "Não. Não vendemos nem compartilhamos nenhum dado. As análises que coletamos são métricas de uso anônimas (quais ferramentas são usadas, com que frequência) — nunca conteúdo de arquivos.",
     "usingTools": "Uso das ferramentas",
@@ -340,7 +341,7 @@
     "a9": "Verifique o bloqueador de pop-ups do seu navegador — ele pode estar bloqueando o download. Tente permitir pop-ups para xlsx.world e tente novamente. Se o problema persistir, tente outro navegador.",
     "toolsFeatures": "Ferramentas e funcionalidades",
     "q10": "Todas as ferramentas são realmente gratuitas?",
-    "a10": "Sim, todas as 32 ferramentas são completamente gratuitas sem limites ocultos. Podemos introduzir funcionalidades pagas opcionais no futuro, mas as ferramentas principais sempre serão gratuitas.",
+    "a10": "Todas as 32 ferramentas são de uso livre com generosos limites diários. Oferecemos planos pagos opcionais que aumentam os limites de uso e desbloqueiam funcionalidades premium — mas as ferramentas principais permanecem acessíveis para todos.",
     "q11": "Qual é a diferença entre Combinar Planilhas e Anexar Pastas de Trabalho?",
     "a11": "Combinar Planilhas une várias planilhas da mesma pasta de trabalho em uma única planilha. Anexar Pastas de Trabalho empilha linhas de vários arquivos de pasta de trabalho separados em um único arquivo de saída.",
     "q12": "Posso usar essas ferramentas no meu celular?",
@@ -355,9 +356,9 @@
     "q16": "Esqueci minha senha. Como redefino?",
     "a16": "Clique em \"Esqueceu a senha?\" na página de login e insira seu e-mail. Você receberá um link de redefinição em poucos minutos. Verifique sua pasta de spam se não chegar.",
     "q17": "Por quanto tempo meus arquivos de saída são mantidos?",
-    "a17": "Para usuários autenticados, os arquivos de saída são armazenados em um bucket privado por até 7 dias e depois excluídos automaticamente de forma definitiva. A linha do histórico continua visível marcada como \"Expirado\" depois disso. Você pode excluir qualquer entrada a qualquer momento pela página de Histórico.",
+    "a17": "Para usuários autenticados, os arquivos de saída são criptografados de ponta a ponta e armazenados por até 7 dias, depois excluídos automaticamente de forma definitiva. A linha do histórico continua visível marcada como \"Expirado\" depois disso. Você pode excluir qualquer entrada a qualquer momento pela página de Histórico.",
     "q18": "Onde posso baixar novamente resultados anteriores?",
-    "a18": "Entre na sua conta e abra Minha conta → Histórico. Cada trabalho bem-sucedido tem um botão Baixar que gera um link assinado fresco válido por 15 minutos. Execuções anônimas não são armazenadas, então salve o arquivo ao rodar a ferramenta.",
+    "a18": "Entre na sua conta e abra Minha conta → Histórico. Cada trabalho bem-sucedido tem um botão Baixar que descriptografa e entrega seu arquivo diretamente. Execuções anônimas não são armazenadas, então salve o arquivo ao rodar a ferramenta.",
     "stillHaveQuestions": "Ainda tem dúvidas?",
     "stillHaveQuestionsDescription": "Se não encontrou a resposta que procurava, nossa equipe está sempre feliz em ajudar.",
     "contactSupport": "Contatar suporte"
@@ -748,7 +749,7 @@
     "infoCollect4": "Dados de segurança e prevenção de abuso, como endereço IP e sinais de limitação de taxa.",
     "infoCollect5": "Se você entrar com o Google, recebemos seu nome, endereço de e-mail e foto de perfil da sua conta Google. Não recebemos nem armazenamos sua senha do Google.",
     "fileProcessingTitle": "Processamento de arquivos",
-    "fileProcessingText": "Os arquivos que você envia são processados temporariamente em nossos servidores apenas para realizar a operação solicitada (converter, combinar, dividir, inspecionar, etc.). Os arquivos de origem que você envia nunca são retidos — são excluídos assim que o processamento termina. Para usuários autenticados, o arquivo de saída é salvo em um bucket privado do Supabase Storage por até 7 dias para que você possa baixá-lo novamente do seu histórico, após o que é automaticamente excluído de forma definitiva; você pode excluir qualquer saída antes com um clique pela página de Histórico. Usuários anônimos recebem um download direto único e nada é armazenado. Não lemos, inspecionamos, vendemos nem compartilhamos o conteúdo dos seus arquivos. Os limites atuais por arquivo são 10 MB em uso anónimo e 25 MB para contas gratuitas com sessão iniciada.",
+    "fileProcessingText": "Os arquivos que você envia são processados temporariamente em nossos servidores apenas para realizar a operação solicitada (converter, combinar, dividir, inspecionar, etc.). Os arquivos de origem que você envia nunca são retidos — são excluídos assim que o processamento termina. Para usuários autenticados, o arquivo de saída é criptografado de ponta a ponta com uma chave única por arquivo antes de ser armazenado por até 7 dias para que você possa baixá-lo novamente do seu histórico; após o que é automaticamente excluído de forma definitiva. Você pode excluir qualquer saída antes com um clique pela página de Histórico. Usuários anônimos recebem um download direto único e nada é armazenado. Não lemos, inspecionamos, vendemos nem compartilhamos o conteúdo dos seus arquivos. Os limites atuais por arquivo são 10 MB em uso anónimo e 25 MB para contas gratuitas com sessão iniciada.",
     "howWeUseTitle": "Como usamos as informações",
     "howWeUse1": "Para fornecer e proteger as funcionalidades principais do produto.",
     "howWeUse2": "Para autenticar sessões e manter o acesso à conta.",
@@ -761,11 +762,11 @@
     "thirdPartyTitle": "Serviços de terceiros",
     "thirdPartyText": "Usamos serviços de terceiros para oferecer funcionalidades principais do produto, incluindo CAPTCHA, infraestrutura de hospedagem, autenticação e login com o Google. Quando você entra com o Google, sua autenticação é gerenciada pelo serviço OAuth 2.0 do Google e Supabase Auth. Consulte a <cloudflareLink>Política de Privacidade da Cloudflare</cloudflareLink>, a <googleLink>Política de Privacidade do Google</googleLink> e os termos de outros provedores para detalhes sobre como eles tratam os dados.",
     "retentionTitle": "Retenção de dados",
-    "retentionText": "Retemos dados apenas pelo tempo necessário para fornecer o serviço, cumprir obrigações legais, resolver disputas e fazer cumprir nossos acordos. Os arquivos de origem que você envia nunca são retidos. As saídas de ferramentas de usuários autenticados são mantidas por até 7 dias em armazenamento privado e depois excluídas automaticamente de forma definitiva; você pode excluir qualquer saída antes pelo seu histórico. As linhas do histórico (apenas metadados — ferramenta usada, marcações de tempo, sucesso/erro) podem ser mantidas por até 90 dias para análise e depois purgadas.",
+    "retentionText": "Retemos dados apenas pelo tempo necessário para fornecer o serviço, cumprir obrigações legais, resolver disputas e fazer cumprir nossos acordos. Os arquivos de origem que você envia nunca são retidos. As saídas de ferramentas de usuários autenticados são criptografadas de ponta a ponta e mantidas por até 7 dias, depois excluídas automaticamente de forma definitiva; você pode excluir qualquer saída antes pelo seu histórico. As linhas do histórico (apenas metadados — ferramenta usada, marcações de tempo, sucesso/erro) podem ser mantidas por até 90 dias para análise e depois purgadas.",
     "rightsTitle": "Seus direitos e opções",
     "rightsText": "Você pode nos contatar a qualquer momento para solicitar a exclusão de quaisquer dados pessoais que possamos ter, sujeito a requisitos legais e de segurança. Use nosso <contactLink>formulário de contato</contactLink> para enviar solicitações de privacidade.",
     "securityTitle": "Segurança",
-    "securityText": "Aplicamos salvaguardas técnicas e organizacionais projetadas para proteger suas informações, mas nenhum sistema é completamente seguro. Você é responsável por proteger as credenciais da sua conta.",
+    "securityText": "Aplicamos salvaguardas técnicas e organizacionais projetadas para proteger suas informações. Todos os arquivos de saída armazenados são criptografados em repouso com AES-256-GCM com chaves únicas por arquivo (criptografia de envelope). As chaves de criptografia são armazenadas separadamente dos dados de arquivo. Nenhum sistema é completamente seguro, e você é responsável por proteger as credenciais da sua conta.",
     "changesTitle": "Alterações",
     "changesText": "Podemos atualizar esta política de tempos em tempos. As alterações serão refletidas nesta página com uma data atualizada."
   },
@@ -777,7 +778,7 @@
     "acceptanceTitle": "Aceitação",
     "acceptanceText": "Ao usar o XLSX World, você aceita estes termos. Se não concordar, por favor não use o serviço.",
     "serviceTitle": "Descrição do serviço",
-    "serviceText": "O XLSX World oferece ferramentas online gratuitas para converter, combinar, dividir, inspecionar, limpar, validar e processar de outras formas planilhas e ficheiros relacionados. Cada ferramenta indica os formatos suportados; em geral incluem livros Excel (.xlsx, .xls, .xlsb e semelhantes), CSV e, conforme a ferramenta, JSON, XML, SQL ou PDF. Contas opcionais acrescentam funcionalidades como histórico de tarefas e nova descarga de resultados; pode registar-se com e-mail e palavra-passe ou com o Google. No futuro poderão existir planos pagos com outros limites ou funcionalidades; nesse caso atualizaremos estes termos antes de entrarem em vigor. Podemos modificar, suspender ou descontinuar qualquer parte do serviço a qualquer momento.",
+    "serviceText": "O XLSX World oferece ferramentas online para converter, combinar, dividir, inspecionar, limpar, validar e processar de outras formas planilhas e ficheiros relacionados. Cada ferramenta indica os formatos suportados; em geral incluem livros Excel (.xlsx, .xls, .xlsb e semelhantes), CSV e, conforme a ferramenta, JSON, XML, SQL ou PDF. Contas opcionais acrescentam funcionalidades como histórico de tarefas e nova descarga de resultados criptografados. Planos pagos com maiores limites de uso e funcionalidades premium estão disponíveis; as ferramentas principais permanecem acessíveis no plano gratuito. Podemos modificar, suspender ou descontinuar qualquer parte do serviço a qualquer momento.",
     "accountsTitle": "Contas e segurança",
     "accounts1": "Você é responsável pela atividade realizada na sua conta.",
     "accounts2": "Você deve manter suas credenciais confidenciais e usar boas práticas de segurança.",
@@ -791,7 +792,7 @@
     "acceptableUse5": "O uso automatizado ou abusivo pode resultar em limitação de taxa ou restrições de acesso.",
     "acceptableUse6": "Sem conta, pode executar até 20 tarefas de ferramenta por dia UTC; com uma conta gratuita, até 200 por dia UTC. Estes limites podem ser alterados e podem aplicar-se medidas adicionais de prevenção de abuso.",
     "yourFilesTitle": "Seus arquivos",
-    "yourFilesText": "Você mantém total propriedade de qualquer arquivo que enviar. Não reivindicamos nenhum direito sobre seu conteúdo. Os arquivos de origem que você envia nunca são retidos — são excluídos imediatamente após a conclusão da sua tarefa. Para usuários autenticados, o resultado é armazenado em um bucket privado por até 7 dias para que possa ser baixado novamente do seu histórico, após o que é automaticamente excluído. Você pode excluir qualquer saída armazenada do seu histórico a qualquer momento.",
+    "yourFilesText": "Você mantém total propriedade de qualquer arquivo que enviar. Não reivindicamos nenhum direito sobre seu conteúdo. Os arquivos de origem que você envia nunca são retidos — são excluídos imediatamente após a conclusão da sua tarefa. Para usuários autenticados, o resultado é criptografado de ponta a ponta com uma chave única por arquivo e armazenado por até 7 dias para que possa ser baixado novamente do seu histórico, após o que é automaticamente excluído. Você pode excluir qualquer saída armazenada do seu histórico a qualquer momento.",
     "ipTitle": "Propriedade intelectual",
     "ipText": "O serviço, marca, software e conteúdo do site do XLSX World são protegidos por leis de propriedade intelectual. Exceto quando expressamente permitido, você não pode copiar, distribuir ou criar obras derivadas do conteúdo da nossa plataforma.",
     "thirdPartyTitle": "Serviços de terceiros",
@@ -1558,6 +1559,8 @@
       "hoursAgo": "há {count}h",
       "daysAgo": "há {count}d",
       "actions": "Ações",
+      "quotaToday": "Cota Hoje",
+      "storedFiles": "Arquivos",
       "resetQuota": "Redefinir cota",
       "resettingQuota": "Redefinindo…",
       "quotaResetSuccess": "Cota redefinida para {email} (era {count})",
@@ -1895,5 +1898,32 @@
     "g3Tool": "Usar ferramenta: Append Workbooks",
     "open": "Abrir",
     "noResults": "Nenhum guia corresponde à sua busca."
+  },
+  "about": {
+    "metaTitle": "Sobre Nós — XLSX World",
+    "metaDescription": "Conheça a missão do XLSX World: ferramentas de planilhas gratuitas, rápidas e privadas para todos.",
+    "heading": "Sobre o XLSX World",
+    "tagline": "Acreditamos que trabalhar com planilhas deve ser instantâneo, acessível e privado. Sem instalações, sem complicações — apenas ferramentas que funcionam.",
+    "visionTitle": "Nossa Visão",
+    "visionText": "Um mundo onde qualquer pessoa pode transformar, limpar e analisar dados de planilhas em segundos — sem software caro, conhecimento técnico ou sacrifício de privacidade.",
+    "missionTitle": "Nossa Missão",
+    "missionText": "Construir a suíte de ferramentas Excel mais acessível da web. Cada ferramenta principal funciona sem cadastro, roda no seu navegador e nunca armazena seus arquivos. Entregamos rápido, ouvimos os usuários e mantemos as coisas simples.",
+    "valuesTitle": "No Que Acreditamos",
+    "values": {
+      "speed": {
+        "title": "Velocidade em Primeiro",
+        "text": "Envie, processe, baixe. Sem espera, sem filas, sem atrito. Seu tempo importa."
+      },
+      "privacy": {
+        "title": "Privacidade por Design",
+        "text": "Seus arquivos são seus. Os uploads nunca são guardados. Os resultados são criptografados de ponta a ponta e excluídos automaticamente após 7 dias. Nunca lemos seus dados e nunca vendemos nada a ninguém."
+      },
+      "simplicity": {
+        "title": "Simplicidade Radical",
+        "text": "Uma ferramenta, um trabalho, bem feito. Sem interfaces inchadas, sem curvas de aprendizado. Solte seu arquivo e pronto."
+      }
+    },
+    "storyTitle": "Nossa História",
+    "storyText": "O XLSX World nasceu de uma frustração simples: por que você precisa instalar software pesado ou pagar uma assinatura só para converter uma planilha? Construímos as ferramentas que gostaríamos que existissem — rápidas, acessíveis e respeitosas com seus dados. Hoje, milhares de pessoas usam o XLSX World todo mês. Um generoso plano gratuito mantém as ferramentas disponíveis para todos, e os planos pagos opcionais nos ajudam a manter o serviço e lançar novas funcionalidades mais rápido."
   }
 }

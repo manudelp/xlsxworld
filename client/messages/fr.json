@@ -55,6 +55,7 @@
     "faq": "FAQ",
     "gameDesk": "GameDesk",
     "contact": "Contact",
+    "about": "À Propos",
     "privacy": "Confidentialité",
     "terms": "Conditions",
     "suggestTool": "Suggérer un outil",
@@ -104,7 +105,7 @@
     },
     "history": {
       "title": "Votre historique",
-      "subtitle": "Jobs des 7 derniers jours. Les résultats sont conservés 7 jours puis expirent.",
+      "subtitle": "Jobs des 7 derniers jours. Tous les fichiers sont chiffrés de bout en bout — vous seul pouvez y accéder.",
       "refresh": "Actualiser",
       "searchPlaceholder": "Rechercher un outil…",
       "statusFilter": "Statut",
@@ -340,7 +341,7 @@
     "a9": "Vérifiez le bloqueur de fenêtres contextuelles de votre navigateur — il bloque peut-être le téléchargement. Essayez d’autoriser les fenêtres contextuelles pour xlsx.world et réessayez. Si le problème persiste, essayez un autre navigateur.",
     "toolsFeatures": "Outils et fonctionnalités",
     "q10": "Tous les outils sont-ils vraiment gratuits ?",
-    "a10": "Oui, les 32 outils sont entièrement gratuits sans limites cachées. Nous pourrions introduire des fonctionnalités payantes optionnelles à l’avenir, mais les outils principaux resteront toujours gratuits.",
+    "a10": "Les 32 outils sont utilisables librement avec de généreuses limites quotidiennes. Nous proposons des plans payants optionnels qui augmentent les limites d'utilisation et débloquent des fonctionnalités premium — mais les outils principaux restent accessibles à tous.",
     "q11": "Quelle est la différence entre Fusionner les feuilles et Ajouter des classeurs ?",
     "a11": "Fusionner les feuilles combine plusieurs feuilles du même classeur en une seule feuille. Ajouter des classeurs empile les lignes de plusieurs fichiers de classeurs séparés dans un seul fichier de sortie.",
     "q12": "Puis-je utiliser ces outils sur mon téléphone ?",
@@ -355,9 +356,9 @@
     "q16": "J’ai oublié mon mot de passe. Comment le réinitialiser ?",
     "a16": "Cliquez sur \"Mot de passe oublié\" sur la page de connexion et entrez votre e-mail. Vous recevrez un lien de réinitialisation en quelques minutes. Vérifiez votre dossier spam s’il n’arrive pas.",
     "q17": "Combien de temps mes fichiers de sortie sont-ils conservés ?",
-    "a17": "Pour les utilisateurs connectés, les fichiers de sortie sont stockés dans un bucket privé jusqu'à 7 jours puis automatiquement supprimés définitivement. La ligne d'historique reste visible avec le statut « Expiré » après cela. Vous pouvez supprimer vous-même toute entrée à tout moment depuis la page Historique.",
+    "a17": "Pour les utilisateurs connectés, les fichiers de sortie sont chiffrés de bout en bout et stockés jusqu'à 7 jours, puis automatiquement supprimés définitivement. La ligne d'historique reste visible avec le statut « Expiré » après cela. Vous pouvez supprimer vous-même toute entrée à tout moment depuis la page Historique.",
     "q18": "Où puis-je retélécharger mes anciens résultats ?",
-    "a18": "Connectez-vous et ouvrez Mon compte → Historique. Chaque job réussi possède un bouton Télécharger qui génère un lien signé frais valable 15 minutes. Les exécutions anonymes ne sont pas stockées, pensez donc à enregistrer le fichier lorsque vous exécutez l'outil.",
+    "a18": "Connectez-vous et ouvrez Mon compte → Historique. Chaque job réussi possède un bouton Télécharger qui déchiffre et livre votre fichier directement. Les exécutions anonymes ne sont pas stockées, pensez donc à enregistrer le fichier lorsque vous exécutez l'outil.",
     "stillHaveQuestions": "Vous avez encore des questions ?",
     "stillHaveQuestionsDescription": "Si vous n'avez pas trouvé la réponse que vous cherchiez, notre équipe est toujours heureuse de vous aider.",
     "contactSupport": "Contacter le support"
@@ -748,7 +749,7 @@
     "infoCollect4": "Données de sécurité et de prévention des abus, telles que l'adresse IP et les signaux de limitation de débit.",
     "infoCollect5": "Si vous vous connectez avec Google, nous recevons votre nom, adresse e-mail et photo de profil de votre compte Google. Nous ne recevons ni ne stockons votre mot de passe Google.",
     "fileProcessingTitle": "Traitement des fichiers",
-    "fileProcessingText": "Les fichiers que vous envoyez sont traités temporairement sur nos serveurs uniquement pour effectuer l'opération demandée (convertir, fusionner, diviser, inspecter, etc.). Les fichiers source que vous envoyez ne sont jamais conservés — ils sont supprimés dès la fin du traitement. Pour les utilisateurs authentifiés, le fichier de sortie est enregistré dans un bucket privé Supabase Storage jusqu'à 7 jours pour que vous puissiez le retélécharger depuis votre historique, après quoi il est automatiquement supprimé définitivement ; vous pouvez supprimer toute sortie plus tôt en un clic depuis la page Historique. Les utilisateurs anonymes obtiennent un téléchargement direct unique et rien n'est stocké. Nous ne lisons pas, n'inspectons pas, ne vendons pas et ne partageons pas le contenu de vos fichiers. Les plafonds actuels par fichier sont de 10 Mo en navigation anonyme et de 25 Mo pour les comptes gratuits connectés.",
+    "fileProcessingText": "Les fichiers que vous envoyez sont traités temporairement sur nos serveurs uniquement pour effectuer l'opération demandée (convertir, fusionner, diviser, inspecter, etc.). Les fichiers source que vous envoyez ne sont jamais conservés — ils sont supprimés dès la fin du traitement. Pour les utilisateurs authentifiés, le fichier de sortie est chiffré de bout en bout avec une clé unique par fichier avant d'être stocké jusqu'à 7 jours pour que vous puissiez le retélécharger depuis votre historique ; après quoi il est automatiquement supprimé définitivement. Vous pouvez supprimer toute sortie plus tôt en un clic depuis la page Historique. Les utilisateurs anonymes obtiennent un téléchargement direct unique et rien n'est stocké. Nous ne lisons pas, n'inspectons pas, ne vendons pas et ne partageons pas le contenu de vos fichiers. Les plafonds actuels par fichier sont de 10 Mo en navigation anonyme et de 25 Mo pour les comptes gratuits connectés.",
     "howWeUseTitle": "Comment nous utilisons les informations",
     "howWeUse1": "Pour fournir et sécuriser les fonctionnalités principales du produit.",
     "howWeUse2": "Pour authentifier les sessions et maintenir l'accès au compte.",
@@ -761,11 +762,11 @@
     "thirdPartyTitle": "Services tiers",
     "thirdPartyText": "Nous utilisons des services tiers pour offrir des fonctionnalités principales du produit, notamment CAPTCHA, l'infrastructure d'hébergement, l'authentification et la connexion avec Google. Lorsque vous vous connectez avec Google, votre authentification est gérée par le service OAuth 2.0 de Google et Supabase Auth. Consultez la <cloudflareLink>Politique de confidentialité de Cloudflare</cloudflareLink>, la <googleLink>Politique de confidentialité de Google</googleLink> et les conditions des autres fournisseurs pour des détails sur leur gestion des données.",
     "retentionTitle": "Conservation des données",
-    "retentionText": "Nous conservons les données uniquement le temps nécessaire pour fournir le service, respecter les obligations légales, résoudre les litiges et faire respecter nos accords. Les fichiers source que vous envoyez ne sont jamais conservés. Les sorties d'outils des utilisateurs authentifiés sont conservées jusqu'à 7 jours dans un stockage privé puis automatiquement supprimées définitivement ; vous pouvez supprimer toute sortie plus tôt depuis votre historique. Les lignes d'historique (métadonnées uniquement — outil utilisé, horodatages, succès/échec) peuvent être conservées jusqu'à 90 jours pour l'analytique puis purgées.",
+    "retentionText": "Nous conservons les données uniquement le temps nécessaire pour fournir le service, respecter les obligations légales, résoudre les litiges et faire respecter nos accords. Les fichiers source que vous envoyez ne sont jamais conservés. Les sorties d'outils des utilisateurs authentifiés sont chiffrées de bout en bout et conservées jusqu'à 7 jours, puis automatiquement supprimées définitivement ; vous pouvez supprimer toute sortie plus tôt depuis votre historique. Les lignes d'historique (métadonnées uniquement — outil utilisé, horodatages, succès/échec) peuvent être conservées jusqu'à 90 jours pour l'analytique puis purgées.",
     "rightsTitle": "Vos droits et options",
     "rightsText": "Vous pouvez nous contacter à tout moment pour demander la suppression de toute donnée personnelle que nous pourrions détenir, sous réserve des exigences légales et de sécurité. Utilisez notre <contactLink>formulaire de contact</contactLink> pour soumettre des demandes de confidentialité.",
     "securityTitle": "Sécurité",
-    "securityText": "Nous appliquons des mesures de protection techniques et organisationnelles conçues pour protéger vos informations, mais aucun système n'est totalement sécurisé. Vous êtes responsable de la protection des identifiants de votre compte.",
+    "securityText": "Nous appliquons des mesures de protection techniques et organisationnelles conçues pour protéger vos informations. Tous les fichiers de sortie stockés sont chiffrés au repos avec AES-256-GCM avec des clés uniques par fichier (chiffrement d'enveloppe). Les clés de chiffrement sont stockées séparément des données de fichier. Aucun système n'est totalement sécurisé, et vous êtes responsable de la protection des identifiants de votre compte.",
     "changesTitle": "Modifications",
     "changesText": "Nous pouvons mettre à jour cette politique de temps en temps. Les modifications seront reflétées sur cette page avec une date de mise à jour."
   },
@@ -777,7 +778,7 @@
     "acceptanceTitle": "Acceptation",
     "acceptanceText": "En utilisant XLSX World, vous acceptez ces conditions. Si vous n'êtes pas d'accord, veuillez ne pas utiliser le service.",
     "serviceTitle": "Description du service",
-    "serviceText": "XLSX World fournit des outils en ligne gratuits pour convertir, fusionner, diviser, inspecter, nettoyer, valider et traiter autrement des classeurs et fichiers connexes. Chaque outil indique les formats pris en charge ; il s'agit le plus souvent de classeurs Excel (.xlsx, .xls, .xlsb et équivalents), de CSV et, selon l'outil, de JSON, XML, SQL ou PDF. Un compte facultatif ajoute des fonctions telles que l'historique des tâches et le retéléchargement des résultats ; vous pouvez vous inscrire par e-mail et mot de passe ou via Google. Des offres payantes avec d'autres limites ou fonctionnalités pourront être proposées ; le cas échéant, nous mettrons ces conditions à jour avant leur entrée en vigueur. Nous pouvons modifier, suspendre ou interrompre toute partie du service à tout moment.",
+    "serviceText": "XLSX World fournit des outils en ligne pour convertir, fusionner, diviser, inspecter, nettoyer, valider et traiter autrement des classeurs et fichiers connexes. Chaque outil indique les formats pris en charge ; il s'agit le plus souvent de classeurs Excel (.xlsx, .xls, .xlsb et équivalents), de CSV et, selon l'outil, de JSON, XML, SQL ou PDF. Un compte facultatif ajoute des fonctions telles que l'historique des tâches et le retéléchargement des résultats chiffrés. Des plans payants avec des limites d'utilisation plus élevées et des fonctionnalités premium sont disponibles ; les outils principaux restent accessibles sur le plan gratuit. Nous pouvons modifier, suspendre ou interrompre toute partie du service à tout moment.",
     "accountsTitle": "Comptes et sécurité",
     "accounts1": "Vous êtes responsable de toute activité effectuée sous votre compte.",
     "accounts2": "Vous devez garder vos identifiants confidentiels et utiliser des pratiques de sécurité solides.",
@@ -791,7 +792,7 @@
     "acceptableUse5": "Une utilisation automatisée ou abusive peut entraîner une limitation de débit ou des restrictions d'accès.",
     "acceptableUse6": "Sans compte, vous pouvez lancer jusqu'à 20 exécutions d'outil par jour UTC ; avec un compte gratuit, jusqu'à 200 par jour UTC. Ces limites peuvent évoluer et des mesures supplémentaires de prévention des abus peuvent s'appliquer.",
     "yourFilesTitle": "Vos fichiers",
-    "yourFilesText": "Vous conservez l'entière propriété de tout fichier que vous envoyez. Nous ne revendiquons aucun droit sur votre contenu. Les fichiers source que vous envoyez ne sont jamais conservés — ils sont supprimés immédiatement après l'accomplissement de votre tâche. Pour les utilisateurs authentifiés, le résultat est stocké dans un bucket privé jusqu'à 7 jours pour pouvoir être retéléchargé depuis votre historique, après quoi il est automatiquement supprimé. Vous pouvez supprimer toute sortie stockée depuis votre historique à tout moment.",
+    "yourFilesText": "Vous conservez l'entière propriété de tout fichier que vous envoyez. Nous ne revendiquons aucun droit sur votre contenu. Les fichiers source que vous envoyez ne sont jamais conservés — ils sont supprimés immédiatement après l'accomplissement de votre tâche. Pour les utilisateurs authentifiés, le résultat est chiffré de bout en bout avec une clé unique par fichier et stocké jusqu'à 7 jours pour pouvoir être retéléchargé depuis votre historique, après quoi il est automatiquement supprimé. Vous pouvez supprimer toute sortie stockée depuis votre historique à tout moment.",
     "ipTitle": "Propriété intellectuelle",
     "ipText": "Le service, la marque, les logiciels et le contenu du site de XLSX World sont protégés par les lois sur la propriété intellectuelle. Sauf autorisation explicite, vous ne pouvez pas copier, distribuer ou créer des œuvres dérivées à partir du contenu de notre plateforme.",
     "thirdPartyTitle": "Services tiers",
@@ -1558,6 +1559,8 @@
       "hoursAgo": "il y a {count}h",
       "daysAgo": "il y a {count}j",
       "actions": "Actions",
+      "quotaToday": "Quota Aujourd'hui",
+      "storedFiles": "Fichiers",
       "resetQuota": "Réinitialiser le quota",
       "resettingQuota": "Réinitialisation…",
       "quotaResetSuccess": "Quota réinitialisé pour {email} (était {count})",
@@ -1895,5 +1898,32 @@
     "g3Tool": "Utiliser l'outil : Append Workbooks",
     "open": "Ouvrir",
     "noResults": "Aucun guide ne correspond à votre recherche."
+  },
+  "about": {
+    "metaTitle": "À Propos — XLSX World",
+    "metaDescription": "Découvrez la mission de XLSX World : des outils de tableur gratuits, rapides et privés pour tous.",
+    "heading": "À Propos de XLSX World",
+    "tagline": "Nous croyons que travailler avec des tableurs doit être instantané, accessible et privé. Pas d'installation, pas de complications — juste des outils qui fonctionnent.",
+    "visionTitle": "Notre Vision",
+    "visionText": "Un monde où chacun peut transformer, nettoyer et analyser des données de tableur en quelques secondes — sans logiciel coûteux, expertise technique ou sacrifice de vie privée.",
+    "missionTitle": "Notre Mission",
+    "missionText": "Construire la suite d'outils Excel la plus accessible du web. Chaque outil principal fonctionne sans inscription, s'exécute dans votre navigateur et ne stocke jamais vos fichiers. Nous livrons vite, écoutons les utilisateurs et gardons les choses simples.",
+    "valuesTitle": "Nos Valeurs",
+    "values": {
+      "speed": {
+        "title": "La Vitesse d'Abord",
+        "text": "Téléversez, traitez, téléchargez. Pas d'attente, pas de file, pas de friction. Votre temps compte."
+      },
+      "privacy": {
+        "title": "Confidentialité par Conception",
+        "text": "Vos fichiers vous appartiennent. Les téléversements ne sont jamais conservés. Les résultats sont chiffrés de bout en bout et supprimés automatiquement après 7 jours. Nous ne lisons jamais vos données et ne vendons rien à personne."
+      },
+      "simplicity": {
+        "title": "Simplicité Radicale",
+        "text": "Un outil, un travail, bien fait. Pas d'interfaces surchargées, pas de courbe d'apprentissage. Déposez votre fichier et c'est parti."
+      }
+    },
+    "storyTitle": "Notre Histoire",
+    "storyText": "XLSX World est né d'une frustration simple : pourquoi faut-il installer un logiciel lourd ou payer un abonnement juste pour convertir un tableur ? Nous avons construit les outils que nous aurions voulu avoir — rapides, accessibles et respectueux de vos données. Aujourd'hui, des milliers de personnes utilisent XLSX World chaque mois. Un généreux plan gratuit garde les outils accessibles à tous, et les plans payants optionnels nous aident à maintenir le service et à livrer de nouvelles fonctionnalités plus rapidement."
   }
 }
